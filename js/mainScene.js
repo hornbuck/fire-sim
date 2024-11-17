@@ -4,11 +4,14 @@ import { createHUD, preloadHUD } from './ui.js'; // Import functions from your u
 class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene'); // Identifier for this scene
+        console.log("MainScene Constructor Called");
     }
 
     preload() {
         // Preload HUD assets from ui.js
+        console.log("MainScene Preload Starting");
         preloadHUD(this);
+        console.log("MainScene Preload Finished");
     }
 
     create() {
@@ -23,10 +26,7 @@ class MainScene extends Phaser.Scene {
 
         // Create the HUD using the createHUD function from ui.js
         createHUD(this);
-    }
-
-    update() {
-        // Add logic to update the scene (e.g., animations, game state changes)
+        console.log("MainScene Create Finished");
     }
 }
 
