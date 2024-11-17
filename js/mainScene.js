@@ -9,9 +9,6 @@ class MainScene extends Phaser.Scene {
     preload() {
         // Preload HUD assets from ui.js
         preloadHUD(this);
-
-        // Preload other game assets (examples)
-        this.load.image('exampleTile', 'Assets/exampleTile.png'); // Example asset
     }
 
     create() {
