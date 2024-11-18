@@ -1,13 +1,11 @@
 {
-  "name": " ",
+  "name": "sim-firefighter",
   "version": "0.0.1",
-  "description": "",
+  "description": "A browser-based 2D simulation game for wildfire management, built with Phaser 3.",
   "private": true,
-  "keywords": [
-    ""
-  ],
-  "license": "",
-  "author": "",
+  "keywords": ["simulation", "Phaser", "wildfire", "game-development"],
+  "license": "MIT",
+  "author": "Your Team Name or Your Name",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack serve --open --config webpack.config.dev.js",
@@ -20,5 +18,8 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
     "webpack-merge": "^5.10.0"
+  },
+  "dependencies": {
+    "phaser": "^3.87.0"
   }
 }
