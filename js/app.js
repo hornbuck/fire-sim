@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+//import Phaser from 'phaser';
 import MainScene from './mainScene.js';
 
 // Log to confirm app.js is running
