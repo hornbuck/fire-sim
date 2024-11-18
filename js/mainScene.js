@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+//import Phaser from 'phaser';
 import { createHUD, preloadHUD } from './ui.js'; // Import functions from your ui.js
 
 class MainScene extends Phaser.Scene {
@@ -11,6 +11,8 @@ class MainScene extends Phaser.Scene {
         // Preload HUD assets from ui.js
         console.log("MainScene Preload Starting");
         preloadHUD(this);
+        // Preload game map
+        this.load.image('map-level-1', 'Assets/SampleMap.png');
         console.log("MainScene Preload Finished");
     }
 
@@ -22,7 +24,10 @@ class MainScene extends Phaser.Scene {
         });
 
         // Example game object: a simple rectangle
-        this.add.rectangle(400, 300, 100, 100, 0x3498db); // Example placeholder game object
+        //this.add.rectangle(400, 300, 100, 100, 0x3498db); // Example placeholder game object
+
+        // Example game map: AI image
+        this.add.image(350, 300,  'map-level-1').setScale(0.7);
 
         // Create the HUD using the createHUD function from ui.js
         createHUD(this);
