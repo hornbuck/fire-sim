@@ -1,0 +1,34 @@
+import Map from "./map.js";
+import Weather from "./weather.js";
+import FireSpread from "./fireSpread.js";
+
+console.log("=== Fire Spread Simulation Test ===");
+
+// Create a map and weather object
+const map = new Map(10, 10); // A 10x10 grid map
+const weather = new Weather(15, "north", 40, 30); // Mild weather conditions
+
+// Log initial map state
+console.log("Initial Map:");
+map.printMap();
+
+// Initialize fire spread simulation
+const fireSpread = new FireSpread(map, weather);
+
+// Ignite a starting tile
+const startX = Math.floor(Math.random() * map.width);
+const startY = Math.floor(Math.random() * map.height);
+map.grid[startY][startX].burnStatus = "burning";
+console.log(`\nStarting fire at (${startX}, ${startY})\n`);
+
+// Run fire spread simulation for a fixed number of steps
+const steps = 10;
+for (let step = 1; step <= steps; step++) {
+    console.log(`--- Step ${step} ---`);
+    fireSpread.simulateFireStep();
+    map.printMap();
+}
+
+
+
+console.log("=== Simulation Complete ===");
