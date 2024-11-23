@@ -43,12 +43,12 @@ export function createHUD(scene) {
 
 export function preloadHUD(scene) {
     console.log("preloadHUD called");
-    scene.load.image('waterIcon', 'Assets/water-2.png');
-    scene.load.image('fireIcon', 'Assets/fire_suppression.png');
-    scene.load.image('water', 'Assets/water.png');
-    scene.load.image('fire', 'Assets/fire.png');
-    scene.load.image('hotshot', 'Assets/hotshot.png');
-    scene.load.image('tanker', 'Assets/tanker.png');
-    scene.load.image('helicopter', 'Assets/helicopter.png');
+    scene.load.image('waterIcon', 'assets/images/water-2.png');
+    scene.load.image('fireIcon', 'assets/images/fire_suppression.png');
+    scene.load.image('water', 'assets/images/terrain/water.png');
+    scene.load.image('fire', 'assets/images/fire.png');
+    scene.load.image('hotshot', 'assets/images/hotshot.png');
+    scene.load.image('tanker', 'assets/images/tanker.png');
+    scene.load.image('helicopter', 'assets/images/helicopter.png');
 }
 

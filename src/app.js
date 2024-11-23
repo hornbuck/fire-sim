@@ -1,5 +1,5 @@
 //import Phaser from 'phaser';
-import MainScene from './mainScene.js';
+import MainScene from './scenes/MainScene';
 
 // Log to confirm app.js is running
 console.log("Phaser Game Initializing...");

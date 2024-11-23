@@ -1,5 +1,5 @@
 //import Phaser from 'phaser';
-import { createHUD, preloadHUD } from './ui.js'; // Import functions from your ui.js
+import { createHUD, preloadHUD } from 'src/components/ui.js'; // Import functions from your ui.js
 
 class MainScene extends Phaser.Scene {
     constructor() {
@@ -12,7 +12,7 @@ class MainScene extends Phaser.Scene {
         console.log("MainScene Preload Starting");
         preloadHUD(this);
         // Preload game map
-        this.load.image('map-level-1', 'Assets/SampleMap.png');
+        this.load.image('map-level-1', 'assets/images/SampleMap.png');
         console.log("MainScene Preload Finished");
     }
 
