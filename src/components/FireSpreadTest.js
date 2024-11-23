@@ -6,7 +6,7 @@ console.log("=== Fire Spread Simulation Test ===");
 
 // Create a map and weather object
 const map = new Map(10, 10); // A 10x10 grid map
-const weather = new Weather(15, "north", 40, 30); // Mild weather conditions
+const weather = new Weather(15, 'north', 40, 30); // Mild weather conditions
 
 // Log initial map state
 console.log("Initial Map:");
