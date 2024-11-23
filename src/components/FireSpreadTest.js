@@ -1,6 +1,6 @@
-import Map from "./map.js";
-import Weather from "./weather.js";
-import FireSpread from "./fireSpread.js";
+import Map from "./MapGenerator.js";
+import Weather from "./Weather.js";
+import FireSpread from "./FireSpread.js";
 
 console.log("=== Fire Spread Simulation Test ===");
 
@@ -26,7 +26,7 @@ const steps = 10;
 for (let step = 1; step <= steps; step++) {
     console.log(`--- Step ${step} ---`);
     fireSpread.simulateFireStep();
-    map.printMap();
+    map.printBurnStatusMap();
 }
 
 
