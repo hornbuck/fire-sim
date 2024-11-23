@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A browser-based 2D simulation game for wildfire management, built with Phaser 3.",
   "private": true,
+  "type": "module",
   "keywords": ["simulation", "Phaser", "wildfire", "game-development"],
   "license": "MIT",
   "author": "Your Team Name or Your Name",
