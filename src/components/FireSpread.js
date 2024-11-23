@@ -32,7 +32,8 @@ export default class FireSpread {
         const neighbors = this.getNeighbors(tile.x, tile.y);
         for (const neighbor of neighbors) {
             const neighborTile = grid[neighbor.y][neighbor.x];
-            if (neighborTile.burnStatus === "unburned") {
+            if (neighborTile.burnStatus === "unburned" && neighborTile.flammability > 0) {
+                // Only attempt to ignite if the tile is flammable
                 const ignitionChance = this.calculateIgnitionChance(neighborTile);
                 if (ignitionChance > 85) { // Ignite if chance is high enough
                     neighborTile.burnStatus = "burning";
