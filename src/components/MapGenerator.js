@@ -14,7 +14,7 @@ export default class Map {
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
-                const terrain = this.getRandomTerrain(); // Random terrain type
+                const terrain = this.getRandomTerrain(); // Placeholder for terrain generation
                 row.push(new TerrainTile(x, y, terrain)); // Create new tile with x, y, and terrain
             }
             grid.push(row);
@@ -22,24 +22,31 @@ export default class Map {
         return grid;
     }
 
-    // Assign random terrain type
-    // To be updated - useful for fire spread development
+    // Placeholder: Randomly assign terrain type
     getRandomTerrain() {
         const terrains = ["grass", "shrub", "tree", "water"];
         return terrains[Math.floor(Math.random() * terrains.length)];
     }
 
-    // Print the terrain of each tile in a grid format
+    // Debugging: Print terrain for each tile
     printMap() {
         this.grid.forEach(row => {
             console.log(row.map(tile => tile.terrain).join(' | ')); // Print terrain for each tile, joined by '|'
         });
     }
 
-    // Print only the burn status of each tile in the map
+    // Debugging: Print burn status for each tile
     printBurnStatusMap() {
         this.grid.forEach(row => {
             console.log(row.map(tile => tile.burnStatus).join(' | ')); // Only print burn status for each tile
         });
+    }
+
+    // Utility: Retrieve a specific tile
+    getTile(x, y) {
+        if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+            return this.grid[x][y];
+        }
+        return null; // Out of bounds
     }
 }
