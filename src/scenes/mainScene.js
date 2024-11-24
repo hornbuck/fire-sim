@@ -1,5 +1,5 @@
 //import Phaser from 'phaser';
-import { createHUD, preloadHUD } from 'src/components/ui.js'; // Import functions from your ui.js
+import { createHUD, preloadHUD } from '../components/ui.js'; // Import functions from your ui.js
 
 class MainScene extends Phaser.Scene {
     constructor() {
