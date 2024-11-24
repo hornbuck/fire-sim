@@ -1,4 +1,4 @@
-export default class FireSpread {
+class FireSpread {
     constructor(map, weather) {
         this.map = map; // The map object
         this.weather = weather; // Weather object
@@ -82,3 +82,5 @@ export default class FireSpread {
         return Math.max(0, influence); // Ensure no negative influence
     }
 }
+
+export default FireSpread;
