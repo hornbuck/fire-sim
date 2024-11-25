@@ -1,31 +1,39 @@
 // MapGenerator.js
 import TerrainTile from './TerrainTile.js';
+import PerlinNoise from '../utils/PerlinNoise.js'
 
 export default class Map {
     constructor(width, height) {
         this.width = width; // Number of tiles horizontally
         this.height = height; // Number of tiles vertically
+        this.perlin = new PerlinNoise(); // Initialize PerlinNoise
         this.grid = this.generateMap(); // 2D array of tiles
     }
 
-    // Generate the grid with tiles
+    // Generate the map using the noise grid
     generateMap() {
         const grid = [];
+        const noiseGrid = this.perlin.generateNoiseGrid(this.width, this.height); // Pre-generate noise values
+
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
-                const terrain = this.getRandomTerrain(); // Placeholder for terrain generation
-                row.push(new TerrainTile(x, y, terrain)); // Create new tile with x, y, and terrain
+                const noiseValue = noiseGrid[y][x]; // Retrieve precomputed noise value
+                const terrain = this.getTerrainFromNoise(noiseValue); // Map noise value to terrain
+                row.push(new TerrainTile(x, y, terrain)); // Create a tile with the terrain
             }
             grid.push(row);
         }
+
         return grid;
     }
 
-    // Placeholder: Randomly assign terrain type
-    getRandomTerrain() {
-        const terrains = ["grass", "shrub", "tree", "water"];
-        return terrains[Math.floor(Math.random() * terrains.length)];
+    // Map noise values to terrain types
+    getTerrainFromNoise(value) {
+        if (value < -0.3) return 'water';
+        if (value < 0.1) return 'grass';
+        if (value < 0.5) return 'shrub';
+        return 'tree';
     }
 
     // Debugging: Print terrain for each tile
