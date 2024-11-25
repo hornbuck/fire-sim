@@ -4,8 +4,8 @@ import PerlinNoise from '../src/utils/PerlinNoise.js';
 
 describe('PerlinNoise', () => {
     it('should generate a grid with correct dimensions', () => {
-        const width = 5;
-        const height = 5;
+        const width = 10;
+        const height = 10;
         const perlin = new PerlinNoise(width, height);
 
         expect(perlin.noiseGrid.length).toBe(height);
