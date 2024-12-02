@@ -18,6 +18,3 @@ const config = {
 
 // Create the game instance locally
 new Phaser.Game(config);
-
-
-new Phaser.Game(config);

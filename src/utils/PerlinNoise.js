@@ -1,14 +1,29 @@
-import PerlinNoise3D from 'perlin-noise-3d'
-
+import { noise } from './perlin.js';
 
 export default class PerlinNoise {
     constructor(width, height, scale = 10, seed = Math.random()) {
         this.width = width;
         this.height = height;
         this.scale = scale;
-        this.perlin = new PerlinNoise3D(); // Initialize the Perlin noise generator
-        this.perlin.noiseSeed(seed); // Apply the seed for deterministic noise
+
+        // Convert seed to a number if it's not already
+        const numericSeed = typeof seed === 'string' ? this.stringToNumber(seed) : seed;
+
+        // Seed the noise generator
+        noise.seed(numericSeed);
+
+        // Generate the noise grid
         this.noiseGrid = this.generateNoiseGrid();
+    }
+
+    stringToNumber(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash |= 0; // Convert to 32-bit integer
+        }
+        return Math.abs(hash) / 1000; // Scale hash to a usable seed range
     }
 
     /**
@@ -20,7 +35,7 @@ export default class PerlinNoise {
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
-                const value = this.perlin.get( x / this.scale, y / this.scale, 0); // Generate 2D noise
+                const value = noise.perlin2(x / this.scale, y / this.scale);
                 row.push(value);
             }
             grid.push(row);
