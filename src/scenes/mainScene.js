@@ -15,9 +15,9 @@ class MainScene extends Phaser.Scene {
 
         // Preload terrain assets
         this.load.image('water', 'assets/images/terrain/water.png');
-        this.load.image('grass', 'Assets/64x64 Map Tiles/flowers.png');
-        this.load.image('shrub', 'Assets/64x64 Map Tiles/Shrubs/shrubs-on-sand.png');
-        this.load.image('tree', 'Assets/64x64 Map Tiles/Trees/trees-on-light-dirt.png');
+        this.load.image('grass', 'assets/64x64-Map-Tiles/flowers.png');
+        this.load.image('shrub', 'assets/64x64-Map-Tiles/Shrubs/shrubs-on-sand.png');
+        this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
     }
 
     create() {

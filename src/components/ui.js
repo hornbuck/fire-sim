@@ -20,6 +20,18 @@ export function createHUD(scene) {
         align: 'center',
     }).setOrigin(0.5, 0.5);
 
+    //--> Make water icon clickable
+    waterIcon.setInteractive();
+    waterIcon.on(
+        "pointerdown",
+        function (pointer, localX, localY, event) {
+            console.log("Clicked on the water icon!");
+        },
+        this
+    );
+    //-- Debugging to see click hit range for water icon
+    scene.input.enableDebug(waterIcon);
+
     // Group 2: Fire Suppression
     const fireIcon = scene.add.image(750, sidebarCenter, 'fireIcon').setScale(0.04).setOrigin(0.5, 0.5);
     const fireText = scene.add.text(750, sidebarCenter + iconTextOffset + fireTextExtraOffset, 'Fire\nSuppression: 0', {
