@@ -1,12 +1,17 @@
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-module.exports = {
+// Recreate __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default {
   entry: {
-    app: './js/app.js',
+    app: './src/app.js',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
+    filename: 'js/app.js',
     clean: true,
-    filename: './js/app.js',
   },
 };

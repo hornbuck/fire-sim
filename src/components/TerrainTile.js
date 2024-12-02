@@ -1,4 +1,3 @@
-// TerrainTile.js
 export default class TerrainTile {
     constructor(x, y, terrain) {
         this.x = x; // Tile's X coordinate in the grid
