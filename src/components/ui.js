@@ -25,12 +25,10 @@ export function createHUD(scene) {
     waterIcon.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
-            console.log("Clicked on the water icon!");
+            scene.input.setDefaultCursor('url(assets/cursors/water.png), pointer');
         },
         this
     );
-    //-- Debugging to see click hit range for water icon
-    scene.input.enableDebug(waterIcon);
 
     // Group 2: Fire Suppression
     const fireIcon = scene.add.image(750, sidebarCenter, 'fireIcon').setScale(0.04).setOrigin(0.5, 0.5);
