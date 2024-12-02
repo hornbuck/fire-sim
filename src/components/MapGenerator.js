@@ -29,9 +29,9 @@ export default class Map {
     // Map noise values to terrain types
     getTerrainFromNoise(value) {
         if (value < -0.5) return 'water';
-        if (value < 0) return 'grass';
-        if (value < 0.5) return 'shrub';
-        return 'tree';
+        if (value < 0) return 'tree';
+        if (value < 0.5) return 'grass';
+        return 'shrub';
     }
 
     // Debugging: Print terrain for each tile

@@ -15,9 +15,9 @@ class MainScene extends Phaser.Scene {
 
         // Preload terrain assets
         this.load.image('water', 'assets/images/terrain/water.png');
-        this.load.image('grass', 'assets/images/terrain/grass.png');
-        this.load.image('shrub', 'assets/images/terrain/shrub.png');
-        this.load.image('tree', 'assets/images/terrain/tree.png');
+        this.load.image('grass', 'Assets/64x64 Map Tiles/flowers.png');
+        this.load.image('shrub', 'Assets/64x64 Map Tiles/Shrubs/shrubs-on-sand.png');
+        this.load.image('tree', 'Assets/64x64 Map Tiles/Trees/trees-on-light-dirt.png');
     }
 
     create() {
@@ -65,7 +65,7 @@ class MainScene extends Phaser.Scene {
                     startX + x * tileSize,
                     startY + y * tileSize,
                     tile.terrain
-                ).setOrigin(0);
+                ).setOrigin(0).setScale(0.5,0.5);
 
                 // Make the tile interactive
                 sprite.setInteractive();
