@@ -1,4 +1,3 @@
-// MapGenerator.js
 import TerrainTile from './TerrainTile.js';
 import PerlinNoise from '../utils/PerlinNoise.js'
 

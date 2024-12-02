@@ -26,7 +26,7 @@ class MainScene extends Phaser.Scene {
         // Add a title or welcome text
         this.add.text(10, 10, 'Sim Firefighter Game', {
             font: '20px Arial',
-            fill: '#FFFFFF'
+            color: '#FFFFFF'
         });
 
         // Create the HUD using the createHUD function from ui.js
@@ -35,7 +35,7 @@ class MainScene extends Phaser.Scene {
         // Generate and render the procedural map
         const mapWidth = 10; // Placeholder size
         const mapHeight = 10; // Placeholder size
-        const tileSize = 16; // Size of each tile
+        const tileSize = 32; // Size of each tile
 
         // Initialize the Map
         this.map = new Map(mapWidth, mapHeight);
@@ -54,8 +54,8 @@ class MainScene extends Phaser.Scene {
     // Render the map tiles
     renderMap(map, tileSize) {
         // Calculate starting x and y to center the map
-        const startX = (this.camera.main.width - map.width * tileSize) / 2;
-        const startY = (this.camera.main.height - map.height * tileSize) / 2;
+        const startX = (this.cameras.main.width - map.width * tileSize) / 2;
+        const startY = (this.cameras.main.height - map.height * tileSize) / 2;
 
         // Loop through the map grid and render each tile
         map.grid.forEach((row, y) => {
