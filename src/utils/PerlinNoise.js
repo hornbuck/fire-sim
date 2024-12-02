@@ -1,12 +1,11 @@
-import { Noise } from 'noisejs';
-
+import SimplexNoise from 'simplex-noise';
 
 export default class PerlinNoise {
-    constructor(width, height, scale = 10) {
+    constructor(width, height, scale = 10, seed = Math.random()) {
         this.width = width;
         this.height = height;
         this.scale = scale;
-        this.noise = new Noise(Math.random()); // Seeded noise generator
+        this.noise = new SimplexNoise(seed.toString()); // Seeded Simplex noise generator
         this.noiseGrid = this.generateNoiseGrid();
     }
 
@@ -19,7 +18,7 @@ export default class PerlinNoise {
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
-                const value = this.noise.perlin2( x / this.scale, y / this.scale);
+                const value = this.noise.noise2D( x / this.scale, y / this.scale);
                 row.push(value);
             }
             grid.push(row);
