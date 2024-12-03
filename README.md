@@ -34,14 +34,22 @@ Designed as an educational tool, Sim Firefighter highlights the complexities of 
 
 ## **Features**
 
-### **Current (v0.0.1)**
+### **Current (v0.0.2)**
 
 - **Basic Map Layout**:
-    - A grid-based map with placeholder tiles representing different terrains (e.g., dry grass, forest, and open land).
+    - A grid-based map generated procedurally using Perlin noise, featuring placeholder tiles representing different terrains (e.g., dry grass, forest, and open land).
 - **Static Resource Icons**:
     - Placeholder icons for firefighting resources, statically displayed on map tiles.
 - **Basic UI (HUD/Sidebar)**:
     - Sidebar displays placeholder resource information (e.g., "Water: 0/5").
+    - Clicking of "water" icon has been implementated
+- **Detailed Sprites**
+    - Dynamic fire sprite with special effects
+    - Sprites for different tile types
+- **GitHub Pages**
+    - Launched on GitHub pages
+  
+
 
 ### **Planned (Future Updates)**
 
