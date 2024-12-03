@@ -1,7 +1,7 @@
 //import necessary modules and functions
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js'; // Import functions from your ui.js
-
+import { lightFire } from "../components/FireSpread.js";
 class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene'); // Identifier for this scene
@@ -69,6 +69,11 @@ class MainScene extends Phaser.Scene {
 
                 // Make the tile interactive
                 sprite.setInteractive();
+
+                // Light flammable terrain on fire
+                if (tile.terrain === "shrub") {
+                    lightFire(this, sprite);
+                }
 
                 // Add click interaction for each tile
                 sprite.on('pointerdown', () => {

@@ -1,3 +1,5 @@
+// Global stream to track which technique is currently active
+export let technique = "";
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -26,6 +28,8 @@ export function createHUD(scene) {
         "pointerdown",
         function (pointer, localX, localY, event) {
             scene.input.setDefaultCursor('url(assets/cursors/water.png), pointer');
+            scene.input.enableDebug(waterIcon); //replace with an 'activated' graphic later
+            technique = "WATER";
         },
         this
     );
@@ -60,5 +64,11 @@ export function preloadHUD(scene) {
     scene.load.image('hotshot', 'assets/images/hotshot.png');
     scene.load.image('tanker', 'assets/images/tanker.png');
     scene.load.image('helicopter', 'assets/images/helicopter.png');
+
+    // Load fire spritesheet
+    scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
 }
 
