@@ -1,3 +1,30 @@
+import { technique } from './ui.js'
+
+// Lights a blaze on a terrain tile and makes fire clickable
+export function lightFire(scene, sprite) {
+    scene.anims.create({
+        key: "fireAnimConfig",
+        frames: scene.anims.generateFrameNumbers('fire-blaze'),
+        frameRate: 10,
+        repeat: -1
+    });
+    let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze').setDepth(1).setScale(0.75,0.75);
+    fireSprite.play('fireAnimConfig');
+
+    // Make fire clickable to extinguish later
+    fireSprite.setInteractive();
+    fireSprite.on(
+        "pointerdown",
+        function (pointer, localX, localY, event) {
+            if (technique === 'WATER') {
+                fireSprite.destroy();
+            }
+        },
+        this
+    );
+}
+
+// Fire Spread Class
 class FireSpread {
     constructor(map, weather) {
         this.map = map; // The map object

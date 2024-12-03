@@ -1,3 +1,5 @@
+// Global stream to track which technique is currently active
+export let technique = "";
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -25,12 +27,12 @@ export function createHUD(scene) {
     waterIcon.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
-            console.log("Clicked on the water icon!");
+            scene.input.setDefaultCursor('url(assets/cursors/water.png), pointer');
+            scene.input.enableDebug(waterIcon); //replace with an 'activated' graphic later
+            technique = "WATER";
         },
         this
     );
-    //-- Debugging to see click hit range for water icon
-    scene.input.enableDebug(waterIcon);
 
     // Group 2: Fire Suppression
     const fireIcon = scene.add.image(750, sidebarCenter, 'fireIcon').setScale(0.04).setOrigin(0.5, 0.5);
@@ -62,5 +64,11 @@ export function preloadHUD(scene) {
     scene.load.image('hotshot', 'assets/images/hotshot.png');
     scene.load.image('tanker', 'assets/images/tanker.png');
     scene.load.image('helicopter', 'assets/images/helicopter.png');
+
+    // Load fire spritesheet
+    scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
 }
 
