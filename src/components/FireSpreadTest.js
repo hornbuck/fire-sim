@@ -5,7 +5,7 @@ import FireSpread from "./FireSpread.js";
 console.log("=== Fire Spread Simulation Test ===");
 
 // Create a map and weather object
-const map = new Map(100, 100); // A 10x10 grid map
+const map = new Map(10, 10); // A 10x10 grid map
 const weather = new Weather(15, 40, 30); // temperature: 15°F, humidity: 40%, windSpeed: 30 mph
 
 // Log initial map state
