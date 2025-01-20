@@ -41,6 +41,10 @@ export default class BSPPartition {
 
         // Calculate the split point within the rectangle
         const maxSplit = splitVertical ? rect.width : rect.height;
+        if (maxSplit <= this.minSize * 2) {
+            partitions.push(rect);
+            return partitions;
+        }
         const splitPoint = Math.floor(Math.random() * (maxSplit - this.minSize)) + this.minSize;
 
         // Create two new rectangles from the split
@@ -50,9 +54,11 @@ export default class BSPPartition {
 
         const rect2 = splitPoint
         ? { x: rect.x + splitPoint, y: rect.y, width: rect.width - splitPoint, height: rect.height }
-            : { x: rect.x, y: rect.y + splitPoint, width: rect.width, height: rect.height - splitPoint };
+        : { x: rect.x, y: rect.y + splitPoint, width: rect.width, height: rect.height - splitPoint };
 
-
+        // Validate new rectangles before recursive calls
+        if (rect1.width > 0 && rect1.height > 0) partitions.push(...this.partition(rect1));
+        if (rect2.width > 0 && rect2.height > 0) partitions.push(...this.partition(rect2));
 
         // Recursively partition the new rectangles
         partitions.push(...this.partition(rect1));
