@@ -60,8 +60,8 @@ export default class BSPPartition {
         ? { x: rect.x + splitPoint, y: rect.y, width: rect.width - splitPoint, height: rect.height }
         : { x: rect.x, y: rect.y + splitPoint, width: rect.width, height: rect.height - splitPoint };
 
-        // Validate new rectangles before recursive calls
-        if (rect1.width > this.minsize && rect1.height > this.minSize) {
+        // Validate rectangles before recursion
+        if (rect1.width > this.minSize && rect1.height > this.minSize) {
             partitions.push(...this.partition(rect1));
         }
         if (rect2.width > this.minSize && rect2.height > this.minSize) {
