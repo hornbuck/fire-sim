@@ -36,7 +36,7 @@ export default class Map {
         const partitions = this.bsp.partition({x: 0, y: 0, width: this.width, height: this.height});
 
         partitions.forEach(partition => {
-            for (let y = partition.y; y <partition.y + partition.height; y++) {
+            for (let y = partition.y; y < partition.y + partition.height; y++) {
                 const row = [];
                 for (let x = partition.x; x < partition.x + partition.width; x++) {
                     const noiseValue = this.perlin.getNoise(x, y);
@@ -46,7 +46,7 @@ export default class Map {
                 grid.push(row);
             }
         });
-
+    
         return grid;
     }
 
