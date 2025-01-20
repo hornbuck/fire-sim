@@ -34,6 +34,10 @@ export default class Map {
     generateMap() {
         const grid = [];
         const partitions = this.bsp.partition({x: 0, y: 0, width: this.width, height: this.height});
+        
+        if (partitions.length === 0) {
+            throw new Error('No partitions created.');
+        }
 
         partitions.forEach(partition => {
             for (let y = partition.y; y < partition.y + partition.height; y++) {
