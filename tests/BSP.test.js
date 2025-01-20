@@ -20,9 +20,9 @@ describe('BSP Partitioning', () => {
     const bsp = new BSPPartition(width, height, minSize);
     const partitions = bsp.partition({ x: 0, y: 0, width, height });
   
-    partitions.forEach(p1 => {
-      partitions.forEach(p2 => {
-        if (p1 !== p2) {
+    partitions.forEach((p1, i) => {
+      partitions.forEach((p2, j) => {
+        if (i !== j) {
           const noOverlap =
             p1.x + p1.width <= p2.x ||
             p2.x + p2.width <= p1.x ||
