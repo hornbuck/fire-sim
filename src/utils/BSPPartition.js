@@ -56,7 +56,7 @@ export default class BSPPartition {
         ? {x: rect.x, y: rect.y, width: splitPoint, height: rect.height}
         : {x: rect.x, y: rect.y, width: rect.width, height: splitPoint};
 
-        const rect2 = splitPoint
+        const rect2 = splitVertical
         ? { x: rect.x + splitPoint, y: rect.y, width: rect.width - splitPoint, height: rect.height }
         : { x: rect.x, y: rect.y + splitPoint, width: rect.width, height: rect.height - splitPoint };
 
