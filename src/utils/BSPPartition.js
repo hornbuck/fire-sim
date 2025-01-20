@@ -28,48 +28,47 @@ export default class BSPPartition {
      * @returns {Array<Object>} An array of partitioned rectangles.
      */
     partition(rect) {
-        // Log the current rectangle being partitioned
         console.log(`Partitioning rect: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}`);
-
+    
         const partitions = [];
-
-        // Base case: Stop partitioning if the rectangle's width or height is smaller than minSize
+    
+        // Base case: Stop if the rectangle is too small
         if (rect.width <= this.minSize || rect.height <= this.minSize) {
             partitions.push(rect);
             return partitions;
         }
-
-        // Randomly decide whether to split vertically or horizontally
+    
+        // Decide split direction
         const splitVertical = Math.random() > 0.5;
-
-        // Calculate the split point within the rectangle
+    
+        // Calculate split point
         const maxSplit = splitVertical ? rect.width : rect.height;
-        if (maxSplit <= this.minSize * 2) { // Ensure room for two valid partitions
+        if (maxSplit <= this.minSize * 2) {
             partitions.push(rect);
             return partitions;
         }
-
+    
         const splitPoint = Math.floor(Math.random() * (maxSplit - this.minSize)) + this.minSize;
-
-        // Create two new rectangles from the split
+    
+        // Create new rectangles
         const rect1 = splitVertical
-        ? {x: rect.x, y: rect.y, width: splitPoint, height: rect.height}
-        : {x: rect.x, y: rect.y, width: rect.width, height: splitPoint};
-
+            ? { x: rect.x, y: rect.y, width: splitPoint, height: rect.height }
+            : { x: rect.x, y: rect.y, width: rect.width, height: splitPoint };
+    
         const rect2 = splitVertical
-        ? { x: rect.x + splitPoint, y: rect.y, width: rect.width - splitPoint, height: rect.height }
-        : { x: rect.x, y: rect.y + splitPoint, width: rect.width, height: rect.height - splitPoint };
-
-        // Validate rectangles before recursion
-        if (rect1.width > this.minSize && rect1.height > this.minSize) {
+            ? { x: rect.x + splitPoint, y: rect.y, width: rect.width - splitPoint, height: rect.height }
+            : { x: rect.x, y: rect.y + splitPoint, width: rect.width, height: rect.height - splitPoint };
+    
+        // Validate and recurse
+        if (rect1.width > 0 && rect1.height > 0) {
             partitions.push(...this.partition(rect1));
         }
-        if (rect2.width > this.minSize && rect2.height > this.minSize) {
+        if (rect2.width > 0 && rect2.height > 0) {
             partitions.push(...this.partition(rect2));
         }
-
+    
         return partitions;
-    }
+    }    
 
     /**
      * Visualizes the partitions by logging the rectangle boundaries to the console.
