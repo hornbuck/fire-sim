@@ -28,6 +28,9 @@ export default class BSPPartition {
      * @returns {Array<Object>} An array of partitioned rectangles.
      */
     partition(rect) {
+        // Log the current rectangle being partitioned
+        console.log(`Partitioning rect: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}`);
+
         const partitions = [];
 
         // Base case: Stop partitioning if the rectangle's width or height is smaller than minSize
