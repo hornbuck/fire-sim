@@ -33,12 +33,13 @@ export default class Map {
      */
     generateMap() {
         const grid = [];
-        const partitions = this.bsp.partition({x: 0, y: 0, width: this.width, height: this.height});
-        
+        const partitions = this.bsp.partition({ x: 0, y: 0, width: this.width, height: this.height });
+    
         if (partitions.length === 0) {
+            console.error('BSPPartition failed to create any partitions. Check logic and input parameters.');
             throw new Error('No partitions created.');
         }
-
+    
         partitions.forEach(partition => {
             for (let y = partition.y; y < partition.y + partition.height; y++) {
                 const row = [];
@@ -52,7 +53,7 @@ export default class Map {
         });
     
         return grid;
-    }
+    }    
 
     /**
      * Maps Perlin Noise values to terrain types.
