@@ -16,6 +16,12 @@ export default class BSPPartition {
         this.width = width;
         this.height = height;
         this.minSize = minSize;
+
+        if (minSize >= width || minSize >= height) {
+            console.warn(
+                `minSize (${minSize}) is too large for dimensions (${width}x${height}). Adjust to ${this.minSize}.`
+            )
+        }
     }
 
     /**
