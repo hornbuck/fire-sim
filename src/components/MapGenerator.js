@@ -36,8 +36,8 @@ export default class Map {
         const partitions = this.bsp.partition({ x: 0, y: 0, width: this.width, height: this.height });
     
         if (partitions.length === 0) {
-            console.error('BSPPartition failed to create any partitions. Check logic and input parameters.');
-            throw new Error('No partitions created.');
+            console.error('BSPPartition failed to create any partitions. Falling back to single-partition grid.');
+            partitions.push({ x: 0, y: 0, width: this.width, height: this.height });
         }
     
         partitions.forEach(partition => {

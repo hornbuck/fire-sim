@@ -41,6 +41,7 @@ export default class BSPPartition {
         // Base case: Stop if the rectangle is too small
         if (rect.width <= this.minSize || rect.height <= this.minSize) {
             partitions.push(rect);
+            console.log("Reached minimum size. Stopping partitioning.");
             return partitions;
         }
     
