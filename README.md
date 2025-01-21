@@ -1,20 +1,27 @@
-# **Sim Firefighter**
+# **Wildfire Command (Sim Firefighter)**
 
-Sim Firefighter is a browser-based 2D simulation game designed to educate users on wildfire management strategies. Built with **Phaser 3**, the game provides an interactive experience modeling fire spread dynamics, environmental influences, and resource management. Players will engage with the challenges of wildfire suppression in a realistic, cell-based environment.
+Wildfire Command is a browser-based 2D simulation game designed to educate users on wildfire management strategies. Built with **Phaser 3**, the game provides an interactive experience modeling fire spread dynamics, environmental influences, and resource management. Players will engage with the challenges of wildfire suppression in a realistic, cell-based environment.
 
 ---
 
 ## **Table of Contents**
 
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Technical Design](#technical-design)
-4. [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-5. [Usage](#usage)
-6. [Roadmap](#roadmap)
-7. [License](#license)
+- [**Wildfire Command (Sim Firefighter)**](#wildfire-command-sim-firefighter)
+  - [**Table of Contents**](#table-of-contents)
+  - [**Overview**](#overview)
+    - [**Purpose**](#purpose)
+  - [**Features**](#features)
+    - [**Current (v0.0.3)**](#current-v003)
+    - [**Planned (Future Updates)**](#planned-future-updates)
+  - [**Technical Design**](#technical-design)
+    - [**Core Elements**](#core-elements)
+    - [**Development Tools**](#development-tools)
+  - [**Getting Started**](#getting-started)
+    - [**Prerequisites**](#prerequisites)
+    - [**Installation**](#installation)
+  - [**Usage**](#usage)
+  - [**v1.0 Vision**](#v10-vision)
+  - [**License**](#license)
 
 ---
 
@@ -22,7 +29,7 @@ Sim Firefighter is a browser-based 2D simulation game designed to educate users 
 
 ### **Purpose**
 
-Sim Firefighter aims to bridge the gap between traditional wildfire training methods and experiential learning. The game emphasizes:
+Wildfire Command aims to bridge the gap between traditional wildfire training methods and experiential learning. The game emphasizes:
 
 - Interactive simulation of wildfire behavior.
 - Strategic resource allocation and management.
@@ -34,10 +41,10 @@ Designed as an educational tool, Sim Firefighter highlights the complexities of 
 
 ## **Features**
 
-### **Current (v0.0.2)**
+### **Current (v0.0.3)**
 
 - **Basic Map Layout**:
-    - A grid-based map generated procedurally using Perlin noise, featuring placeholder tiles representing different terrains (e.g., dry grass, forest, and open land).
+    - A grid-based map generated procedurally using Perlin noise within Binary Space Partitions, featuring placeholder tiles representing different terrains (e.g., dry grass, forest, and open land).
 - **Static Resource Icons**:
     - Placeholder icons for firefighting resources, statically displayed on map tiles.
 - **Basic UI (HUD/Sidebar)**:
@@ -137,19 +144,7 @@ To run the project locally, ensure you have:
 
 ---
 
-## **Roadmap**
-
-### **v0.1 Goals**
-
-- Implement interactive resource deployment mechanics.
-- Add fire-spreading mechanics influenced by terrain type.
-
-### **v0.2 Goals**
-
-- Add dynamic weather systems that affect fire behavior.
-- Enhance the HUD to display real-time updates.
-
-### **v1.0 Vision**
+## **v1.0 Vision**
 
 - Complete fire management simulation with advanced resource mechanics.
 - Deploy a polished, educational game ready for public use.
@@ -159,3 +154,6 @@ To run the project locally, ensure you have:
 ## **License**
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
+[def]: #v10-vision
