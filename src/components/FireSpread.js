@@ -1,4 +1,4 @@
-import { technique } from './ui.js'
+import { technique } from './DeploymentClickEvents.js'
 
 // Lights a blaze on a terrain tile and makes fire clickable
 export function lightFire(scene, sprite) {
