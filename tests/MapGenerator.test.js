@@ -4,8 +4,9 @@ import Map from '../src/components/MapGenerator.js';
 
 describe('MapGenerator', () => {
     it('should create a grid with the correct dimensions', () => {
-        const width = 5;
-        const height = 5;
+        const width = 10;
+        const height = 10;
+        const minSize = 3;
         const map = new Map(width, height);
 
         expect(map.grid.length).toBe(height); // Check number of rows
