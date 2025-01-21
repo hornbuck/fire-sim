@@ -42,7 +42,8 @@ Designed as an educational tool, Sim Firefighter highlights the complexities of 
     - Placeholder icons for firefighting resources, statically displayed on map tiles.
 - **Basic UI (HUD/Sidebar)**:
     - Sidebar displays placeholder resource information (e.g., "Water: 0/5").
-    - Clicking of "water" icon has been implementated
+    - Clicking of each resource icon has been implementated
+    - New tooltips and cursor images when resources are activated
 - **Detailed Sprites**
     - Dynamic fire sprite with special effects
     - Sprites for different tile types
