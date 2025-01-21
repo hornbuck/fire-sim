@@ -9,7 +9,7 @@ export function createHUD(scene) {
     console.log("Sidebar created");
 
     // Spawn default cursor (firefighter glove)
-    scene.input.setDefaultCursor('url(Assets/cursors/glove.png), pointer');
+    scene.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
 
     // Vertical spacing and alignment
     const sidebarCenter = 300; // Sidebar is vertically centered at 300px
@@ -23,7 +23,7 @@ export function createHUD(scene) {
         align: 'center',
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(hose, "hose",'Assets/cursors/water.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(hose, "hose",'assets/cursors/water.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Create a tooltip for the fire hose
     let hose_tooltip = scene.add.sprite(660, 55, 'hose-tooltip');
@@ -44,7 +44,7 @@ export function createHUD(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(extinguisher, "extinguisher",'Assets/cursors/fire-extinguisher.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(extinguisher, "extinguisher",'assets/cursors/fire-extinguisher.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Group 3: Helicopter
     const helicopter = scene.add.image(750, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -55,7 +55,7 @@ export function createHUD(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(helicopter, "helicopter",'Assets/cursors/helicopter.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(helicopter, "helicopter",'assets/cursors/helicopter.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Group 4: Firetruck
     const firetruck = scene.add.image(750, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -66,7 +66,7 @@ export function createHUD(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(firetruck, "firetruck",'Assets/cursors/firetruck.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(firetruck, "firetruck",'assets/cursors/firetruck.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Group 5: Airtanker
     const airtanker = scene.add.image(750, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -77,7 +77,7 @@ export function createHUD(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(airtanker, "airtanker",'Assets/cursors/airtanker.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(airtanker, "airtanker",'assets/cursors/airtanker.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Group 6: Hotshot Crew
     const hotshotcrew = scene.add.image(750, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -88,7 +88,7 @@ export function createHUD(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(hotshotcrew, "hotshot-crew",'Assets/cursors/hotshot-crew.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(hotshotcrew, "hotshot-crew",'assets/cursors/hotshot-crew.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Group 7: Smokejumper
     const smokejumper = scene.add.image(750, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -99,7 +99,7 @@ export function createHUD(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    activate_resource(smokejumper, "smokejumper",'Assets/cursors/launch.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    activate_resource(smokejumper, "smokejumper",'assets/cursors/launch.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 }
 
 export function preloadHUD(scene) {
