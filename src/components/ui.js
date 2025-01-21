@@ -105,28 +105,28 @@ export function createHUD(scene) {
 export function preloadHUD(scene) {
     console.log("preloadHUD called");
     // Load Resource Tooltips
-    scene.load.image('hose-tooltip', 'Assets/resources/tooltips/fire-hose.png');
+    scene.load.image('hose-tooltip', 'assets/resources/tooltips/fire-hose.png');
 
     // Load Deactivated Resource Textures
-    scene.load.image('hose', 'Assets/resources/fire-hose.png');
-    scene.load.image('extinguisher', 'Assets/resources/fire-extinguisher.png');
-    scene.load.image('helicopter', 'Assets/resources/helicopter.png');
-    scene.load.image('firetruck', 'Assets/resources/firetruck.png');
-    scene.load.image('airtanker', 'Assets/resources/airtanker.png');
-    scene.load.image('hotshot-crew', 'Assets/resources/hotshot-crew.png');
-    scene.load.image('smokejumper', 'Assets/resources/smokejumpers.png');
+    scene.load.image('hose', 'assets/resources/fire-hose.png');
+    scene.load.image('extinguisher', 'assets/resources/fire-extinguisher.png');
+    scene.load.image('helicopter', 'assets/resources/helicopter.png');
+    scene.load.image('firetruck', 'assets/resources/firetruck.png');
+    scene.load.image('airtanker', 'assets/resources/airtanker.png');
+    scene.load.image('hotshot-crew', 'assets/resources/hotshot-crew.png');
+    scene.load.image('smokejumper', 'assets/resources/smokejumpers.png');
 
     // Load Activated Resource Textures
-    scene.load.image('active-hose', 'Assets/resources/activated/fire-hose.png');
-    scene.load.image('active-extinguisher', 'Assets/resources/activated/fire-extinguisher.png');
-    scene.load.image('active-helicopter', 'Assets/resources/activated/helicopter.png');
-    scene.load.image('active-firetruck', 'Assets/resources/activated/firetruck.png');
-    scene.load.image('active-airtanker', 'Assets/resources/activated/airtanker.png');
-    scene.load.image('active-hotshot-crew', 'Assets/resources/activated/hotshot-crew.png');
-    scene.load.image('active-smokejumper', 'Assets/resources/activated/smokejumpers.png');
+    scene.load.image('active-hose', 'assets/resources/activated/fire-hose.png');
+    scene.load.image('active-extinguisher', 'assets/resources/activated/fire-extinguisher.png');
+    scene.load.image('active-helicopter', 'assets/resources/activated/helicopter.png');
+    scene.load.image('active-firetruck', 'assets/resources/activated/firetruck.png');
+    scene.load.image('active-airtanker', 'assets/resources/activated/airtanker.png');
+    scene.load.image('active-hotshot-crew', 'assets/resources/activated/hotshot-crew.png');
+    scene.load.image('active-smokejumper', 'assets/resources/activated/smokejumpers.png');
 
     // Load fire spritesheet
-    scene.load.spritesheet('fire-blaze', 'Assets/64x64-Map-Tiles/animated-flame.png', {
+    scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
