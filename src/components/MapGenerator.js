@@ -32,26 +32,24 @@ export default class Map {
      * @returns {Array<Array<TerrainTile>>} A 2D grid of TerrainTile objects.
      */
     generateMap() {
-        const grid = [];
-        const partitions = this.bsp.partition({ x: 0, y: 0, width: this.width, height: this.height });
-    
+        const grid = Array.from({ length: this.height }, () => Array(this.width).fill(null));
+        const partitions = this.bsp.getPartitions(); // Retrieve partitions
+
         if (partitions.length === 0) {
             console.error('BSPPartition failed to create any partitions. Falling back to single-partition grid.');
             partitions.push({ x: 0, y: 0, width: this.width, height: this.height });
         }
-    
+
         partitions.forEach(partition => {
             for (let y = partition.y; y < partition.y + partition.height; y++) {
-                const row = [];
                 for (let x = partition.x; x < partition.x + partition.width; x++) {
                     const noiseValue = this.perlin.getNoise(x, y);
                     const terrain = this.getTerrainFromNoise(noiseValue);
-                    row.push(new TerrainTile(x, y, terrain));
+                    grid[y][x] = new TerrainTile(x, y, terrain);
                 }
-                grid.push(row);
             }
         });
-    
+
         return grid;
     }    
 
@@ -97,7 +95,7 @@ export default class Map {
      */
     getTile(x, y) {
         if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-            return this.grid[x][y];
+            return this.grid[y][x]; // Adjusted to access the correct row first
         }
         return null;
     }
