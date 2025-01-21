@@ -1,5 +1,6 @@
-import { technique } from './ui.js'
+feature/fire-spread
 import weather from "./Weather.js";
+import { technique } from './DeploymentClickEvents.js'
 
 /**
  * Lights a blaze on a terrain tile and makes fire clickable to extinguish later.
