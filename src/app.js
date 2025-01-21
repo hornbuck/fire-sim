@@ -4,6 +4,7 @@ import MainScene from './scenes/mainScene.js';
 // Log to confirm app.js is running
 console.log("Phaser Game Initializing...");
 
+// Phaser config
 const config = {
     type: Phaser.AUTO,
     width: 800,

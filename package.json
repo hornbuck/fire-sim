@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
+    "firebase": "^10.14.1",
+    "firebaseui": "^6.1.0",
     "perlin-noise-3d": "^0.5.4",
     "phaser": "^3.87.0",
     "workbox-webpack-plugin": "^7.3.0"
