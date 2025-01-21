@@ -1,16 +1,33 @@
-//import necessary modules and functions
+/**
+ * @file MainScene.js
+ * @description Defines the MainScene class, responsible for rendering and managing the main gameplay scene in the Sim Firefighter game.
+ * Includes HUD creation, procedural map generation, and interactive terrain rendering.
+ */
+
+// Import necessary modules and functions
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js'; // Import functions from your ui.js
 import { lightFire } from "../components/FireSpread.js";
+
+/**
+ * Represents the main gameplay scene in the Sim Firefighter game.
+ */
 class MainScene extends Phaser.Scene {
+    /**
+     * Constructs the MainScene class.
+     */
     constructor() {
         super('MainScene'); // Identifier for this scene
         console.log("MainScene Constructor Called");
     }
 
+    /**
+     * Preloads assets required for the scene, including HUD and terrain assets.
+     */
     preload() {
-        // Preload HUD assets from ui.js
         console.log("MainScene Preload Starting");
+
+        // Preload HUD assets
         preloadHUD(this);
 
         // Preload terrain assets
@@ -20,6 +37,9 @@ class MainScene extends Phaser.Scene {
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
     }
 
+    /**
+     * Sets up the scene, including HUD creation and procedural map generation.
+     */
     create() {
         console.log("MainScene Create Starting");
 
@@ -29,20 +49,23 @@ class MainScene extends Phaser.Scene {
             color: '#FFFFFF'
         });
 
-        // Create the HUD using the createHUD function from ui.js
+        // Create the HUD
         createHUD(this);
 
         // Generate and render the procedural map
-        const mapWidth = 10; // Placeholder size
-        const mapHeight = 10; // Placeholder size
+        const mapWidth = 100; // Updated size
+        const mapHeight = 100; // Updated size
+        const minSize = 15; // Minimum partition size for BSP
         const tileSize = 32; // Size of each tile
 
         // Initialize the Map
-        this.map = new Map(mapWidth, mapHeight);
+        this.map = new Map(mapWidth, mapHeight, minSize);
 
-        // Debugging: Print the terrain values in the console
-        console.log("Generated Map Terrain:");
-        this.map.printMap();
+        // Debugging: Log partition details
+        console.log("Map Partitions:");
+        this.map.bsp.getPartitions().forEach((partition, index) => {
+            console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
+        });
 
         // Render the Map
         this.renderMap(this.map, tileSize);
@@ -50,8 +73,11 @@ class MainScene extends Phaser.Scene {
         console.log("MainScene Create Finished");
     }
 
-
-    // Render the map tiles
+    /**
+     * Renders the map tiles onto the scene.
+     * @param {Map} map - The procedural map instance to render.
+     * @param {number} tileSize - The size of each tile in pixels.
+     */
     renderMap(map, tileSize) {
         // Calculate starting x and y to center the map
         const startX = (this.cameras.main.width - map.width * tileSize) / 2;
@@ -60,12 +86,15 @@ class MainScene extends Phaser.Scene {
         // Loop through the map grid and render each tile
         map.grid.forEach((row, y) => {
             row.forEach((tile, x) => {
+                // Determine terrain asset key
+                const terrainKey = this.textures.exists(tile.terrain) ? tile.terrain : 'defaultTerrain';
+
                 // Add sprite for each terrain type
                 const sprite = this.add.sprite(
                     startX + x * tileSize,
                     startY + y * tileSize,
-                    tile.terrain
-                ).setOrigin(0).setScale(0.5,0.5);
+                    terrainKey
+                ).setOrigin(0).setScale(0.5, 0.5);
 
                 // Make the tile interactive
                 sprite.setInteractive();
@@ -77,13 +106,15 @@ class MainScene extends Phaser.Scene {
 
                 // Add click interaction for each tile
                 sprite.on('pointerdown', () => {
-                    console.log(`Clicked on ${tile.terrain} at (${x}, ${y})`);
-
-                    // Add additional logic for clicking a tile here
+                    if (tile.terrain === "shrub") {
+                        console.log(`Lighting shrub on fire at (${x}, ${y})`);
+                    } else {
+                        console.log(`Clicked on ${tile.terrain} at (${x}, ${y}) - no action taken.`);
+                    }
                 });
             });
         });
-    };
+    }
 }
 
 export default MainScene;
