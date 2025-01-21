@@ -53,9 +53,9 @@ class MainScene extends Phaser.Scene {
         createHUD(this);
 
         // Generate and render the procedural map
-        const mapWidth = 100; // Updated size
-        const mapHeight = 100; // Updated size
-        const minSize = 15; // Minimum partition size for BSP
+        const mapWidth = 10; // Updated size
+        const mapHeight = 10; // Updated size
+        const minSize = 5; // Minimum partition size for BSP
         const tileSize = 32; // Size of each tile
 
         // Initialize the Map
