@@ -1,5 +1,5 @@
-// Global stream to track which technique is currently active
-export let technique = "";
+import {activate_resource} from "./DeploymentClickEvents.js";
+
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -8,65 +8,125 @@ export function createHUD(scene) {
     const sidebar = scene.add.rectangle(800 - sidebarWidth / 2, 300, sidebarWidth, 600, 0x2d3436);
     console.log("Sidebar created");
 
+    // Spawn default cursor (firefighter glove)
+    scene.input.setDefaultCursor('url(Assets/cursors/glove.png), pointer');
+
     // Vertical spacing and alignment
     const sidebarCenter = 300; // Sidebar is vertically centered at 300px
-    const iconSpacing = 90; // Space between icon groups
-    const iconTextOffset = 35; // Distance between icon and text
-    const fireTextExtraOffset = 10; // Additional lowering for fire text
+    const iconSize = 0.8; // Scale of each icon
 
-    // Group 1: Water
-    const waterIcon = scene.add.image(750, sidebarCenter - iconSpacing, 'waterIcon').setScale(0.04).setOrigin(0.5, 0.5);
-    const waterText = scene.add.text(750, sidebarCenter - iconSpacing + iconTextOffset, 'Water: 0/5', {
+    // Group 1: Fire Hose
+    let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setOrigin(0.5, 0.5);
+    const hoseText = scene.add.text(750, 90, "10/10", {
         font: '12px Arial',
         fill: '#ffffff',
         align: 'center',
     }).setOrigin(0.5, 0.5);
 
-    //--> Make water icon clickable
-    waterIcon.setInteractive();
-    waterIcon.on(
-        "pointerdown",
-        function (pointer, localX, localY, event) {
-            scene.input.setDefaultCursor('url(assets/cursors/water.png), pointer');
-            scene.input.enableDebug(waterIcon); //replace with an 'activated' graphic later
-            technique = "WATER";
-        },
-        this
-    );
+    activate_resource(hose, "hose",'Assets/cursors/water.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
-    // Group 2: Fire Suppression
-    const fireIcon = scene.add.image(750, sidebarCenter, 'fireIcon').setScale(0.04).setOrigin(0.5, 0.5);
-    const fireText = scene.add.text(750, sidebarCenter + iconTextOffset + fireTextExtraOffset, 'Fire\nSuppression: 0', {
-        font: '12px Arial',
+    // Create a tooltip for the fire hose
+    let hose_tooltip = scene.add.sprite(660, 55, 'hose-tooltip');
+    hose_tooltip.setVisible(false);
+    hose.on('pointerover', function() {
+        hose_tooltip.setVisible(true);
+    });
+    hose.on('pointerout', function() {
+        hose_tooltip.setVisible(false);
+    });
+
+    // Group 2: Fire Extinguisher
+    const extinguisher = scene.add.image(750, 130, 'extinguisher').setScale(iconSize).setOrigin(0.5, 0.5);
+    const extinguisherText = scene.add.text(750, 170, '5/5', {
+        font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
+
+    activate_resource(extinguisher, "extinguisher",'Assets/cursors/fire-extinguisher.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Group 3: Helicopter
-    const helicopterIcon = scene.add.image(750, sidebarCenter + iconSpacing + (iconSpacing/5), 'helicopter').setScale(0.8).setOrigin(0.5, 0.5);
-    const helicopterText = scene.add.text(750, sidebarCenter + (iconSpacing/5) + (iconTextOffset*3.7), 'Helicopters: 3/3', {
-        font: '12px Arial',
+    const helicopter = scene.add.image(750, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
+    const helicopterText = scene.add.text(750, 250, '3/3', {
+        font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5);
 
-    console.log("Fire text lowered by extra offset");
+    activate_resource(helicopter, "helicopter",'Assets/cursors/helicopter.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+
+    // Group 4: Firetruck
+    const firetruck = scene.add.image(750, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
+    const firetruckText = scene.add.text(750, 330, '3/3', {
+        font: '14px Arial',
+        fill: '#ffffff',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5);
+
+    activate_resource(firetruck, "firetruck",'Assets/cursors/firetruck.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+
+    // Group 5: Airtanker
+    const airtanker = scene.add.image(750, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
+    const airtankerText = scene.add.text(750, 410, '2/2', {
+        font: '14px Arial',
+        fill: '#ffffff',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5);
+
+    activate_resource(airtanker, "airtanker",'Assets/cursors/airtanker.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+
+    // Group 6: Hotshot Crew
+    const hotshotcrew = scene.add.image(750, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
+    const hotshotcrewText = scene.add.text(750, 490, '1/1', {
+        font: '14px Arial',
+        fill: '#ffffff',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5);
+
+    activate_resource(hotshotcrew, "hotshot-crew",'Assets/cursors/hotshot-crew.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+
+    // Group 7: Smokejumper
+    const smokejumper = scene.add.image(750, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
+    const smokejumperText = scene.add.text(750, 570, '5/5', {
+        font: '14px Arial',
+        fill: '#ffffff',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5);
+
+    activate_resource(smokejumper, "smokejumper",'Assets/cursors/launch.png', 'Assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 }
 
 export function preloadHUD(scene) {
     console.log("preloadHUD called");
-    scene.load.image('waterIcon', 'assets/images/water-2.png');
-    scene.load.image('fireIcon', 'assets/images/fire_suppression.png');
-    scene.load.image('water', 'assets/images/terrain/water.png');
-    scene.load.image('fire', 'assets/images/fire.png');
-    scene.load.image('hotshot', 'assets/images/hotshot.png');
-    scene.load.image('tanker', 'assets/images/tanker.png');
-    scene.load.image('helicopter', 'assets/images/helicopter.png');
+    // Load Resource Tooltips
+    scene.load.image('hose-tooltip', 'Assets/resources/tooltips/fire-hose.png');
+
+    // Load Deactivated Resource Textures
+    scene.load.image('hose', 'Assets/resources/fire-hose.png');
+    scene.load.image('extinguisher', 'Assets/resources/fire-extinguisher.png');
+    scene.load.image('helicopter', 'Assets/resources/helicopter.png');
+    scene.load.image('firetruck', 'Assets/resources/firetruck.png');
+    scene.load.image('airtanker', 'Assets/resources/airtanker.png');
+    scene.load.image('hotshot-crew', 'Assets/resources/hotshot-crew.png');
+    scene.load.image('smokejumper', 'Assets/resources/smokejumpers.png');
+
+    // Load Activated Resource Textures
+    scene.load.image('active-hose', 'Assets/resources/activated/fire-hose.png');
+    scene.load.image('active-extinguisher', 'Assets/resources/activated/fire-extinguisher.png');
+    scene.load.image('active-helicopter', 'Assets/resources/activated/helicopter.png');
+    scene.load.image('active-firetruck', 'Assets/resources/activated/firetruck.png');
+    scene.load.image('active-airtanker', 'Assets/resources/activated/airtanker.png');
+    scene.load.image('active-hotshot-crew', 'Assets/resources/activated/hotshot-crew.png');
+    scene.load.image('active-smokejumper', 'Assets/resources/activated/smokejumpers.png');
 
     // Load fire spritesheet
-    scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
+    scene.load.spritesheet('fire-blaze', 'Assets/64x64-Map-Tiles/animated-flame.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
