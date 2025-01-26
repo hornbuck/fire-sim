@@ -4,10 +4,10 @@
  * Includes HUD creation, procedural map generation, and interactive terrain rendering.
  */
 
-// Import necessary modules and functions
 import Map from '../components/MapGenerator.js';
-import { createHUD, preloadHUD } from '../components/ui.js'; // Import functions from your ui.js
-import { lightFire } from "../components/FireSpread.js";
+import { createHUD, preloadHUD } from '../components/ui.js';
+import FireSpread, { lightFire } from "../components/FireSpread.js";
+import Weather from "../components/Weather.js";
 
 /**
  * Represents the main gameplay scene in the Sim Firefighter game.
@@ -66,9 +66,18 @@ class MainScene extends Phaser.Scene {
         this.map.bsp.getPartitions().forEach((partition, index) => {
             console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
         });
+        const weather = new Weather(15, 40, 30); // temperature: 15°F, humidity: 40%, windSpeed: 30 mph
+
+        this.fireSpread = new FireSpread(this.map, weather);
 
         // Render the Map
         this.renderMap(this.map, tileSize);
+
+        // Start a fire at a 'random' tile
+        this.startFire();
+
+        // Initialize Fire Spread Logic
+        this.startFireSpreadSimulation();
 
         console.log("MainScene Create Finished");
     }
@@ -89,6 +98,8 @@ class MainScene extends Phaser.Scene {
                 // Determine terrain asset key
                 const terrainKey = this.textures.exists(tile.terrain) ? tile.terrain : 'defaultTerrain';
 
+                console.log(`Rendering tile at (${x}, ${y}) with terrain ${tile.terrain}, using sprite key: ${terrainKey}`);
+
                 // Add sprite for each terrain type
                 const sprite = this.add.sprite(
                     startX + x * tileSize,
@@ -96,25 +107,59 @@ class MainScene extends Phaser.Scene {
                     terrainKey
                 ).setOrigin(0).setScale(0.5, 0.5);
 
+                // Store sprite reference in the tile object
+                tile.sprite = sprite;
+
+                // Debugging: Log the sprite after it's created
+                console.log(`Created sprite for tile at (${x}, ${y}) with sprite reference:`, sprite);
+
                 // Make the tile interactive
                 sprite.setInteractive();
 
-                // Light flammable terrain on fire
-                if (tile.terrain === "shrub") {
-                    lightFire(this, sprite);
-                }
-
                 // Add click interaction for each tile
                 sprite.on('pointerdown', () => {
-                    if (tile.terrain === "shrub") {
-                        console.log(`Lighting shrub on fire at (${x}, ${y})`);
-                    } else {
-                        console.log(`Clicked on ${tile.terrain} at (${x}, ${y}) - no action taken.`);
-                    }
+                    console.log(`Clicked on ${tile.terrain} at (${x}, ${y})`);
                 });
             });
         });
     }
+
+    // Function to randomly start a fire on the map
+    startFire() {
+        // Randomly select a starting tile
+        const startX = Math.floor(Math.random() * this.map.width);
+        const startY = Math.floor(Math.random() * this.map.height);
+
+        // Set the selected tile's burnStatus to "burning"
+        this.map.grid[startY][startX].burnStatus = "burning";
+        console.log(`Starting fire at (${startX}, ${startY})`);
+
+    }
+
+    startFireSpreadSimulation() {
+        this.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                console.log("Simulating fire step...");
+                this.fireSpread.simulateFireStep();
+
+                // Iterate over the tiles after each simulation step and light the fire
+                for (let y = 0; y < this.map.height; y++) {
+                    for (let x = 0; x < this.map.width; x++) {
+                        const tile = this.map.grid[y][x];
+                        if (tile.burnStatus === "burning" && !tile.fireSprite) {
+                            const tileSprite = tile.sprite; // Get the sprite for the tile
+                            lightFire(this, tileSprite); // Call lightFire
+                            tile.fireSprite = true; // Mark that fire has been lit for this tile
+                        }
+                    }
+                }
+            },
+            repeat: 16  // Will run 10 times, then stop
+        });
+    }
+
+
 }
 
 export default MainScene;
