@@ -1,4 +1,3 @@
-import weather from "./Weather.js";
 import { technique } from './DeploymentClickEvents.js'
 
 /**
@@ -61,6 +60,7 @@ class FireSpread {
             for (let x = 0; x < this.map.width; x++) {
                 const tile = this.map.grid[y][x];
                 if (tile.burnStatus === "burning") {
+                    console.log(`Processing burning tile at (${x}, ${y})`);
                     spreadCount += this.processBurningTile(tile, newGrid, x, y);
                 }
             }
