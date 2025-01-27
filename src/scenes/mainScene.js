@@ -44,7 +44,7 @@ class MainScene extends Phaser.Scene {
         console.log("MainScene Create Starting");
 
         // Add a title or welcome text
-        this.add.text(10, 10, 'Sim Firefighter Game', {
+        this.add.text(10, 10, 'Wildfire Command', {
             font: '20px Arial',
             color: '#FFFFFF'
         });
