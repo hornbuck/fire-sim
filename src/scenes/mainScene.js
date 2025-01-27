@@ -8,8 +8,8 @@ import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
 import FireSpread, { lightFire } from "../components/FireSpread.js";
 import Weather from "../components/Weather.js";
-import {hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText} from "../components/ui.js";
-import {hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper} from "../components/DeploymentClickEvents.js";
+import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from "../components/ui.js";
+import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from "../components/DeploymentClickEvents.js";
 
 /**
  * Represents the main gameplay scene in the Sim Firefighter game.
