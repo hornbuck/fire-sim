@@ -1,5 +1,24 @@
 // Global stream to track which technique is currently active
 export let technique = "";
+export let activated_resource = "none";
+
+// These are all of the global limits for all the resources
+//* Number Limits
+export let hose = 10;
+export let extinguisher = 5;
+export let helicopter = 3;
+export let firetruck = 3;
+export let airtanker = 2;
+export let hotshotcrew = 1;
+export let smokejumper = 5;
+
+export function set_text(value, x, y, scene) {
+    return scene.add.text(x, y, value, {
+        font: '12px Arial',
+        fill: '#ffffff',
+        align: 'center',
+    }).setOrigin(0.5, 0.5);
+}
 
 // Signals to user that a resource is actively being used
 export function activate_resource (resource, resourceName, ONcursorURL, OFFcursorURL, techniqueNameON, techniqueNameOFF, scene) {
@@ -37,4 +56,57 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
     resource.on('pointerout', function() {
         tooltip.setVisible(false);
     });
+}
+// This function adjusts the countdown
+// TO-DO: Add deployment graphics/animations week of Jan 27
+export function use_resource (scene) {
+    if (activated_resource === "hose") {
+        if (hose > 0) {
+            hose -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
+    if (activated_resource === "extinguisher") {
+        if (extinguisher > 0) {
+            extinguisher -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
+    if (activated_resource === "helicopter") {
+        if (helicopter > 0) {
+            helicopter -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
+    if (activated_resource === "firetruck") {
+        if (firetruck > 0) {
+            firetruck -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
+    if (activated_resource === "airtanker") {
+        if (airtanker > 0) {
+            airtanker -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
+    if (activated_resource === "hotshot-crew") {
+        if (hotshotcrew > 0) {
+            hotshotcrew -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
+    if (activated_resource === "smokejumper") {
+        if (smokejumper > 0) {
+            smokejumper -= 1;
+        } else {
+            console.log("Sorry! You ran out!")
+        }
+    }
 }
