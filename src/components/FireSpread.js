@@ -5,7 +5,7 @@ import { technique } from './DeploymentClickEvents.js'
  * @param {Object} scene - The Phaser scene where the fire animation will play.
  * @param {Object} sprite - The sprite representing the terrain tile where the fire is ignited.
  */
-export function lightFire(scene, sprite) {
+export function lightFire(scene, sprite, flameGroup) {
     scene.anims.create({
         key: "fireAnimConfig",
         frames: scene.anims.generateFrameNumbers('fire-blaze'),
@@ -14,6 +14,9 @@ export function lightFire(scene, sprite) {
     });
     let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze').setDepth(1).setScale(0.75, 0.75);
     fireSprite.play('fireAnimConfig');
+
+    // Add fire sprite to the group
+    flameGroup.add(fireSprite);
 
     // Make fire clickable to extinguish later
     fireSprite.setInteractive();

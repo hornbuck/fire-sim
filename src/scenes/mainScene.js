@@ -111,6 +111,13 @@ class MainScene extends Phaser.Scene {
         // Clear the map group before rendering a new map
         this.mapGroup.clear(true, true);
 
+        // Clear flame icons before rendering a new map
+        if (this.flameGroup) {
+            this.flameGroup.clear(true, true);
+        } else {
+            this.flameGroup = this.add.group(); // Create flame group if it doesn't exist
+        }
+
         // Calculate starting x and y to center the map
         const startX = (this.cameras.main.width - map.width * tileSize) / 2;
         const startY = (this.cameras.main.height - map.height * tileSize) / 2;
@@ -145,6 +152,7 @@ class MainScene extends Phaser.Scene {
         });
     }
 
+  
     restartGame() {
         console.log("Restarting game...");
 
