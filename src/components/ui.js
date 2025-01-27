@@ -26,11 +26,7 @@ export function createHUD(scene) {
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setOrigin(0.5, 0.5);
-    hoseText = scene.add.text(750, 90, "10/10", {
-        font: '12px Arial',
-        fill: '#ffffff',
-        align: 'center',
-    }).setOrigin(0.5, 0.5);
+    hoseText = set_text(`10/10`, 750, 90, scene);
 
     activate_resource(hose, "hose",'assets/cursors/water.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
