@@ -13,18 +13,28 @@ export default class Map {
      * @param {number} width - The width of the map grid in tiles.
      * @param {number} height - The height of the map grid in tiles.
      * @param {number} minSize - The minimum size for BSP partitioning.
+     * @param {number|string} seed - The seed for the map.
      */
-    constructor(width, height, minSize) {
+    constructor(width, height, minSize, seed = Date.now()) {
         this.width = width;
         this.height = height;
         this.minSize = minSize;
-        this.perlin = new PerlinNoise(width, height); // Initialize PerlinNoise
+        this.perlin = new PerlinNoise(width, height);
         this.bsp = new BSPPartition(width, height, minSize);
 
         // Debug: Visualize the BSP partitions
         this.bsp.visualizePartitions();
 
         this.grid = this.generateMap(); // 2D array of tiles
+    }
+
+    /**
+     * Regenerate the map with a new seed.
+     * @param {number|string} newSeed - The new seed for map generation.
+     */
+    regenerateMap(newSeed) {
+        this.perlin.setSeed(newSeed);
+        this.grid = this.generateMap();
     }
 
     /**

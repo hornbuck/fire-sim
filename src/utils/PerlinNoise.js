@@ -50,7 +50,7 @@ export default class PerlinNoise {
     setSeed(newSeed) {
         const numericSeed = typeof newSeed === 'string' ? this.stringToNumber(newSeed) : newSeed;
         noise.seed(numericSeed);
-        this.noisGrid = this.generateNoiseGrid();
+        this.noiseGrid = this.generateNoiseGrid();
     }
 
     /**
