@@ -1,6 +1,7 @@
 // Global stream to track which technique is currently active
 export let technique = "";
 
+// Signals to user that a resource is actively being used
 export function activate_resource (resource, resourceName, ONcursorURL, OFFcursorURL, techniqueNameON, techniqueNameOFF, scene) {
     //--> Make fire hose clickable
     resource.setInteractive();
@@ -26,4 +27,14 @@ export function activate_resource (resource, resourceName, ONcursorURL, OFFcurso
         },
         this
     );
+}
+export function show_tooltip (resource, resourceName, x, y, scene) {
+    let tooltip = scene.add.sprite(x, y, resourceName);
+    tooltip.setVisible(false);
+    resource.on('pointerover', function() {
+        tooltip.setVisible(true);
+    });
+    resource.on('pointerout', function() {
+        tooltip.setVisible(false);
+    });
 }
