@@ -1,4 +1,4 @@
-import {activate_resource, show_tooltip} from "./DeploymentClickEvents.js";
+import {activate_resource, show_tooltip, set_text} from "./DeploymentClickEvents.js";
 
 // Initialize blank text objects for later resource rendering
 export let hoseText;
