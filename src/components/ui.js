@@ -1,4 +1,4 @@
-import {activate_resource} from "./DeploymentClickEvents.js";
+import {activate_resource, show_tooltip} from "./DeploymentClickEvents.js";
 
 export function createHUD(scene) {
     console.log("createHUD called");
@@ -26,14 +26,7 @@ export function createHUD(scene) {
     activate_resource(hose, "hose",'assets/cursors/water.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
     // Create a tooltip for the fire hose
-    let hose_tooltip = scene.add.sprite(660, 55, 'hose-tooltip');
-    hose_tooltip.setVisible(false);
-    hose.on('pointerover', function() {
-        hose_tooltip.setVisible(true);
-    });
-    hose.on('pointerout', function() {
-        hose_tooltip.setVisible(false);
-    });
+    show_tooltip(hose, 'hose-tooltip', 660, 55, scene);
 
     // Group 2: Fire Extinguisher
     const extinguisher = scene.add.image(750, 130, 'extinguisher').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -45,6 +38,7 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(extinguisher, "extinguisher",'assets/cursors/fire-extinguisher.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    show_tooltip(extinguisher, 'extinguisher-tooltip', 660, 135, scene);
 
     // Group 3: Helicopter
     const helicopter = scene.add.image(750, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -56,6 +50,7 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(helicopter, "helicopter",'assets/cursors/helicopter.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    show_tooltip(helicopter, 'helicopter-tooltip', 660, 215, scene);
 
     // Group 4: Firetruck
     const firetruck = scene.add.image(750, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -67,6 +62,7 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(firetruck, "firetruck",'assets/cursors/firetruck.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    show_tooltip(firetruck, 'firetruck-tooltip', 660, 295, scene);
 
     // Group 5: Airtanker
     const airtanker = scene.add.image(750, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -78,6 +74,7 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(airtanker, "airtanker",'assets/cursors/airtanker.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    show_tooltip(airtanker, 'airtanker-tooltip', 660, 375, scene);
 
     // Group 6: Hotshot Crew
     const hotshotcrew = scene.add.image(750, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -89,6 +86,7 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(hotshotcrew, "hotshot-crew",'assets/cursors/hotshot-crew.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    show_tooltip(hotshotcrew, 'hotshot-crew-tooltip', 660, 455, scene);
 
     // Group 7: Smokejumper
     const smokejumper = scene.add.image(750, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
@@ -100,12 +98,19 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(smokejumper, "smokejumper",'assets/cursors/launch.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    show_tooltip(smokejumper, 'smokejumper-tooltip', 660, 535, scene);
 }
 
 export function preloadHUD(scene) {
     console.log("preloadHUD called");
     // Load Resource Tooltips
     scene.load.image('hose-tooltip', 'assets/resources/tooltips/fire-hose.png');
+    scene.load.image('extinguisher-tooltip', 'assets/resources/tooltips/fire-extinguisher.png');
+    scene.load.image('helicopter-tooltip', 'assets/resources/tooltips/helicopter.png');
+    scene.load.image('firetruck-tooltip', 'assets/resources/tooltips/firetruck.png');
+    scene.load.image('airtanker-tooltip', 'assets/resources/tooltips/airtanker.png');
+    scene.load.image('hotshot-crew-tooltip', 'assets/resources/tooltips/hotshot-crew.png');
+    scene.load.image('smokejumper-tooltip', 'assets/resources/tooltips/smokejumpers.png');
 
     // Load Deactivated Resource Textures
     scene.load.image('hose', 'assets/resources/fire-hose.png');
