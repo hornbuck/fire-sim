@@ -126,11 +126,6 @@ class MainScene extends Phaser.Scene {
                 // Make the tile interactive
                 sprite.setInteractive();
 
-                // Light flammable terrain on fire
-                if (tile.terrain === "shrub") {
-                    lightFire(this, sprite, this.flameGroup);
-                }
-
                 // Add click interaction for each tile
                 sprite.on('pointerdown', () => {
                     if (tile.terrain === "shrub") {
