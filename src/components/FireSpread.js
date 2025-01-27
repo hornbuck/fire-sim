@@ -1,4 +1,3 @@
-import weather from "./Weather.js";
 import { technique } from './DeploymentClickEvents.js'
 
 /**
