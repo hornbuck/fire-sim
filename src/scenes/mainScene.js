@@ -181,6 +181,9 @@ class MainScene extends Phaser.Scene {
         // Redraw the map
         this.renderMap(this.map, this.tileSize);
         console.log("Game restarted with a new map.")
+
+        // Start the fire
+        this.startFire();
     }
 
 
