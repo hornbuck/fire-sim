@@ -4,6 +4,8 @@ import MainScene from './scenes/mainScene.js';
 // Log to confirm app.js is running
 console.log("Phaser Game Initializing...");
 
+// imports for auth
+
 // Phaser config
 const config = {
     type: Phaser.AUTO,
