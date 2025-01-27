@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+import weather from "./Weather.js";
+>>>>>>> a2b2ffb (Resource limits dynamically update every time the user clicks the map with an activated resource.)
 import { technique, use_resource } from './DeploymentClickEvents.js'
 
 /**
@@ -18,7 +22,7 @@ export function lightFire(scene, sprite, flameGroup) {
     // Add fire sprite to the group
     flameGroup.add(fireSprite);
 
-    // Make fire clickable to extinguish later
+    // Make fire clickable to extinguish using resources
     fireSprite.setInteractive();
     fireSprite.on(
         "pointerdown",
