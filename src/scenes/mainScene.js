@@ -46,7 +46,7 @@ class MainScene extends Phaser.Scene {
         console.log("MainScene Create Starting");
 
         // Add a title or welcome text
-        this.add.text(10, 10, 'Sim Firefighter Game', {
+        this.add.text(10, 10, 'Wildfire Command', {
             font: '20px Arial',
             color: '#FFFFFF'
         });
@@ -54,14 +54,19 @@ class MainScene extends Phaser.Scene {
         // Create the HUD
         createHUD(this);
 
-        // Generate and render the procedural map
-        const mapWidth = 10; // Updated size
-        const mapHeight = 10; // Updated size
-        const minSize = 5; // Minimum partition size for BSP
-        const tileSize = 32; // Size of each tile
+        // Set map properties
+        this.mapWidth = 10;
+        this.mapHeight = 10;
+        this.minSize = 5;
+        this.tileSize = 32;
+        this.currentSeed = Date.now();
+        console.log(`Initial Seed: ${this.currentSeed}`);
 
         // Initialize the Map
-        this.map = new Map(mapWidth, mapHeight, minSize);
+        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
+
+        // Create a group for map tiles
+        this.mapGroup = this.add.group();
 
         // Debugging: Log partition details
         console.log("Map Partitions:");
@@ -73,7 +78,19 @@ class MainScene extends Phaser.Scene {
         this.fireSpread = new FireSpread(this.map, weather);
 
         // Render the Map
-        this.renderMap(this.map, tileSize);
+        this.renderMap(this.map, this.tileSize);
+
+        // Add a button to restart the game with a new map
+        this.add.text(10, 40, 'Restart Game', {
+            font: '16px Arial',
+            color: '#FFFFFF',
+            backgroundColor: '#0000FF',
+            padding: { x: 10, y: 5 }
+        })
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.restartGame();
+            });
 
         // Start a fire at a 'random' tile
         this.startFire();
@@ -91,6 +108,9 @@ class MainScene extends Phaser.Scene {
      * @param {number} tileSize - The size of each tile in pixels.
      */
     renderMap(map, tileSize) {
+        // Clear the map group before rendering a new map
+        this.mapGroup.clear(true, true);
+
         // Calculate starting x and y to center the map
         const startX = (this.cameras.main.width - map.width * tileSize) / 2;
         const startY = (this.cameras.main.height - map.height * tileSize) / 2;
@@ -118,8 +138,26 @@ class MainScene extends Phaser.Scene {
                 sprite.on('pointerdown', () => {
                     console.log(`Clicked on ${tile.terrain} at (${x}, ${y})`);
                 });
+
+                // Add sprite to the map group
+                this.mapGroup.add(sprite);
             });
         });
+    }
+
+    restartGame() {
+        console.log("Restarting game...");
+
+        // Generate a new unique seed
+        this.currentSeed = Date.now();
+        console.log(`Current Seed: ${this.currentSeed}`);
+
+        // Regenerate the map
+        this.map.regenerateMap(this.currentSeed);
+
+        // Redraw the map
+        this.renderMap(this.map, this.tileSize);
+        console.log("Game restarted with a new map.")
     }
 
 
@@ -180,9 +218,6 @@ class MainScene extends Phaser.Scene {
             repeat: 10 // Will run 10 times, then stop
         });
     }
-
-
-
 }
 
 export default MainScene;

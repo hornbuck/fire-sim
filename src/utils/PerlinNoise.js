@@ -44,6 +44,16 @@ export default class PerlinNoise {
     }
 
     /**
+     * Update the seed and regenerate the noise grid.
+     * @param {number/string} newSeed - The new seed value.
+     */
+    setSeed(newSeed) {
+        const numericSeed = typeof newSeed === 'string' ? this.stringToNumber(newSeed) : newSeed;
+        noise.seed(numericSeed);
+        this.noiseGrid = this.generateNoiseGrid();
+    }
+
+    /**
      * Get the noise value for specific coordinates.
      * @param {number} x - The x-coordinate;
      * @param {number} y - The y-coordinate;
