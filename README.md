@@ -41,34 +41,19 @@ Designed as an educational tool, Sim Firefighter highlights the complexities of 
 
 ## **Features**
 
-### **Current (v0.0.3)**
+### **Current (v0.0.4)**
 
-- **Basic Map Layout**:
-    - A grid-based map generated procedurally using Perlin noise within Binary Space Partitions, featuring placeholder tiles representing different terrains (e.g., dry grass, forest, and open land).
-- **Static Resource Icons**:
-    - Placeholder icons for firefighting resources, statically displayed on map tiles.
-- **Basic UI (HUD/Sidebar)**:
-    - Sidebar displays placeholder resource information (e.g., "Water: 0/5").
-    - Clicking of each resource icon has been implementated
-    - New tooltips and cursor images when resources are activated
-- **Detailed Sprites**
-    - Dynamic fire sprite with special effects
-    - Sprites for different tile types
-- **GitHub Pages**
-    - Launched on GitHub pages
-  
-
+- **Interactive Resource Deployment:** Players can deploy firefighting assets such as helicopters and fire trucks, dynamically impacting fire spread.
+- **Procedural Map Generation:** Utilizes Perlin Noise, BSP Partitioning, and Cellular Automata to generate diverse terrain types including water, trees, grass, and shrubs.
+- **Dynamic Fire Spread:** Fires propagate realistically, influenced by terrain type and other factors.
+- **Player Interaction:** Clickable resources allow users to take strategic actions on the map.
 
 ### **Planned (Future Updates)**
 
-- **Interactive Resource Deployment**:
-    - Players will allocate resources such as helicopters and fire trucks to suppress fires dynamically.
-- **Fire Spread Mechanics**:
-    - Fire propagation influenced by terrain, weather, and resource management.
-- **Weather Systems**:
-    - Dynamic environmental factors like wind, temperature, and humidity affecting fire behavior.
-- **Leaderboards and Achievements**:
-    - Track player performance with achievements and real-time leaderboards.
+- **Advanced Fire Spreading:** Refine algorithms for terrain-specific fire behavior.
+- **Advanced Terrain Features:** Refined terrain types with Cellular Automata.
+- **Dynamic Weather Systems:** Incorporate environmental factors like wind, temperature, and humidity with visual cues.
+- **Enhanced Leaderboards and Achievements:** Add detailed achievement tracking and real-time leaderboard updates.
 
 ---
 
@@ -133,6 +118,11 @@ To run the project locally, ensure you have:
 
 4. Open the game in your browser:
     - Navigate to `http://127.0.0.1:8080` or the URL provided by your server.
+  
+5. Run tests (if applicable):
+   ```bash
+   npm test
+   ```
 
 ---
 
