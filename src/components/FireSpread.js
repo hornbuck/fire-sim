@@ -1,4 +1,4 @@
-import { technique } from './DeploymentClickEvents.js'
+import { technique, use_resource } from './DeploymentClickEvents.js'
 
 /**
  * Lights a blaze on a terrain tile and makes fire clickable to extinguish later.
@@ -25,6 +25,7 @@ export function lightFire(scene, sprite, flameGroup) {
         function (pointer, localX, localY, event) {
             if (technique === 'WATER') {
                 fireSprite.destroy();
+                use_resource(scene);
             }
         },
         this
