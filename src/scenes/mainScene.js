@@ -167,7 +167,7 @@ class MainScene extends Phaser.Scene {
         this.renderMap(this.map, this.tileSize);
         console.log("Game restarted with a new map.")
     }
-  
+
 
     /**
      * Starts a fire at a random tile on the map by setting its burnStatus to "burning"
