@@ -1,5 +1,14 @@
 import {activate_resource, show_tooltip} from "./DeploymentClickEvents.js";
 
+// Initialize blank text objects for later resource rendering
+export let hoseText;
+export let extinguisherText;
+export let helicopterText;
+export let firetruckText;
+export let airtankerText;
+export let hotshotcrewText;
+export let smokejumperText;
+
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -17,7 +26,7 @@ export function createHUD(scene) {
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setOrigin(0.5, 0.5);
-    const hoseText = scene.add.text(750, 90, "10/10", {
+    hoseText = scene.add.text(750, 90, "10/10", {
         font: '12px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -30,7 +39,7 @@ export function createHUD(scene) {
 
     // Group 2: Fire Extinguisher
     const extinguisher = scene.add.image(750, 130, 'extinguisher').setScale(iconSize).setOrigin(0.5, 0.5);
-    const extinguisherText = scene.add.text(750, 170, '5/5', {
+    extinguisherText = scene.add.text(750, 170, '5/5', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -42,7 +51,7 @@ export function createHUD(scene) {
 
     // Group 3: Helicopter
     const helicopter = scene.add.image(750, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
-    const helicopterText = scene.add.text(750, 250, '3/3', {
+    helicopterText = scene.add.text(750, 250, '3/3', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -54,7 +63,7 @@ export function createHUD(scene) {
 
     // Group 4: Firetruck
     const firetruck = scene.add.image(750, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
-    const firetruckText = scene.add.text(750, 330, '3/3', {
+    firetruckText = scene.add.text(750, 330, '3/3', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -66,7 +75,7 @@ export function createHUD(scene) {
 
     // Group 5: Airtanker
     const airtanker = scene.add.image(750, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
-    const airtankerText = scene.add.text(750, 410, '2/2', {
+    airtankerText = scene.add.text(750, 410, '2/2', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -78,7 +87,7 @@ export function createHUD(scene) {
 
     // Group 6: Hotshot Crew
     const hotshotcrew = scene.add.image(750, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
-    const hotshotcrewText = scene.add.text(750, 490, '1/1', {
+    hotshotcrewText = scene.add.text(750, 490, '1/1', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -90,7 +99,7 @@ export function createHUD(scene) {
 
     // Group 7: Smokejumper
     const smokejumper = scene.add.image(750, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
-    const smokejumperText = scene.add.text(750, 570, '5/5', {
+    smokejumperText = scene.add.text(750, 570, '5/5', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
