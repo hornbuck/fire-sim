@@ -202,7 +202,7 @@ class MainScene extends Phaser.Scene {
 
         // Ensure the fire sprite is added to the tile when fire starts
         if (tile.sprite) {
-            lightFire(this, tile.sprite);
+            lightFire(this, tile.sprite, this.flameGroup);
             tile.fireSprite = true; // Mark that fire has been visually applied
         }
     }
@@ -232,7 +232,7 @@ class MainScene extends Phaser.Scene {
                         const tile = this.map.grid[y][x];
                         if (tile.burnStatus === "burning" && !tile.fireSprite) {
                             const tileSprite = tile.sprite; // Get the sprite for the tile
-                            lightFire(this, tileSprite); // Call lightFire
+                            lightFire(this, tileSprite, this.flameGroup); // Call lightFire
                             tile.fireSprite = true; // Mark that fire has been lit for this tile
                         }
                     }
