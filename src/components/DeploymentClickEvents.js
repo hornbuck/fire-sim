@@ -62,51 +62,52 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
 export function use_resource (scene) {
     if (activated_resource === "hose") {
         if (hose > 0) {
+            console.log("Hose was applied!");
             hose -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
     if (activated_resource === "extinguisher") {
         if (extinguisher > 0) {
             extinguisher -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
     if (activated_resource === "helicopter") {
         if (helicopter > 0) {
             helicopter -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
     if (activated_resource === "firetruck") {
         if (firetruck > 0) {
             firetruck -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
     if (activated_resource === "airtanker") {
         if (airtanker > 0) {
             airtanker -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
     if (activated_resource === "hotshot-crew") {
         if (hotshotcrew > 0) {
             hotshotcrew -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
     if (activated_resource === "smokejumper") {
         if (smokejumper > 0) {
             smokejumper -= 1;
         } else {
-            console.log("Sorry! You ran out!")
+            console.log("Sorry! You ran out!");
         }
     }
 }
