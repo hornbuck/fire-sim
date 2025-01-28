@@ -1,5 +1,3 @@
-
-import weather from "./Weather.js";
 import { technique, use_resource } from './DeploymentClickEvents.js'
 
 /**
@@ -20,7 +18,7 @@ export function lightFire(scene, sprite, flameGroup) {
     // Add fire sprite to the group
     flameGroup.add(fireSprite);
 
-    // Make fire clickable to extinguish using resources
+    // Make fire clickable to extinguish later
     fireSprite.setInteractive();
     fireSprite.on(
         "pointerdown",

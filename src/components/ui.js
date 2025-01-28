@@ -1,6 +1,5 @@
 import {activate_resource, show_tooltip, set_text} from "./DeploymentClickEvents.js";
 
-
 // Initialize blank text objects for later resource rendering
 export let hoseText;
 export let extinguisherText;
@@ -10,7 +9,6 @@ export let airtankerText;
 export let hotshotcrewText;
 export let smokejumperText;
 
-// Render scene
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -143,6 +141,4 @@ export function preloadHUD(scene) {
         frameHeight: 64 // Height of each frame
     });
 }
-
-
 
