@@ -14,7 +14,7 @@ import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smok
 /**
  * Represents the main gameplay scene in the Sim Firefighter game.
  */
-class MainScene extends Phaser.Scene {
+export class MainScene extends Phaser.Scene {
     /**
      * Constructs the MainScene class.
      */
