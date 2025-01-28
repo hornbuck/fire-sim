@@ -1,6 +1,4 @@
-// Global streams for tracking which technique is currently active
-// and which resource is currently activated to use
-
+// Global stream to track which technique is currently active
 export let technique = "";
 export let activated_resource = "none";
 
@@ -37,14 +35,12 @@ export function activate_resource (resource, resourceName, ONcursorURL, OFFcurso
                 resource.setTexture('active-' + resourceName +'');
                 scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
                 technique = techniqueNameON;
-                activated_resource = resourceName;
                 active = false;
             } else {
                 resource.setTexture(resourceName);
                 scene.input.setDefaultCursor('url('+ OFFcursorURL +'), pointer');
                 scene.input.removeDebug(resource);
                 technique = techniqueNameOFF;
-                activated_resource = "none";
                 active = true;
             }
         },
@@ -61,7 +57,6 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
         tooltip.setVisible(false);
     });
 }
-
 // This function adjusts the countdown
 // TO-DO: Add deployment graphics/animations week of Jan 27
 export function use_resource (scene) {

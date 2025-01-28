@@ -3,12 +3,13 @@
  * @description Defines the MainScene class, responsible for rendering and managing the main gameplay scene in the Sim Firefighter game.
  * Includes HUD creation, procedural map generation, and interactive terrain rendering.
  */
+
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
 import FireSpread, { lightFire } from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
-import {hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText} from "../components/ui.js";
-import {hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper} from "../components/DeploymentClickEvents.js";
+import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
+import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
 
 /**
  * Represents the main gameplay scene in the Sim Firefighter game.
@@ -156,7 +157,6 @@ class MainScene extends Phaser.Scene {
                 sprite.setInteractive();
 
                 // Add click interaction for each tile
-                // Currently, only shrubs are considered
                 sprite.on('pointerdown', () => {
                     console.log(`Clicked on ${tile.terrain} at (${x}, ${y})`);
                 });
