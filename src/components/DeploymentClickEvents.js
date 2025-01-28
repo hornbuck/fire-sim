@@ -35,12 +35,14 @@ export function activate_resource (resource, resourceName, ONcursorURL, OFFcurso
                 resource.setTexture('active-' + resourceName +'');
                 scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
                 technique = techniqueNameON;
+                activated_resource = `${resourceName}`;
                 active = false;
             } else {
                 resource.setTexture(resourceName);
                 scene.input.setDefaultCursor('url('+ OFFcursorURL +'), pointer');
                 scene.input.removeDebug(resource);
                 technique = techniqueNameOFF;
+                activated_resource = "none";
                 active = true;
             }
         },
