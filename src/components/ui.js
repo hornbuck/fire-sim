@@ -10,15 +10,6 @@ export let airtankerText;
 export let hotshotcrewText;
 export let smokejumperText;
 
-// Initialize blank text objects for later resource rendering
-export let hoseText;
-export let extinguisherText;
-export let helicopterText;
-export let firetruckText;
-export let airtankerText;
-export let hotshotcrewText;
-export let smokejumperText;
-
 // Render scene
 export function createHUD(scene) {
     console.log("createHUD called");
