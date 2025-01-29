@@ -6,14 +6,15 @@
 
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
-import FireSpread, { lightFire } from "../components/FireSpread.js";
-import Weather from "../components/Weather.js";
-
+import FireSpread, { lightFire } from '../components/FireSpread.js';
+import Weather from '../components/Weather.js';
+import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
+import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
 
 /**
  * Represents the main gameplay scene in the Sim Firefighter game.
  */
-class MainScene extends Phaser.Scene {
+export class MainScene extends Phaser.Scene {
     /**
      * Constructs the MainScene class.
      */
@@ -101,6 +102,20 @@ class MainScene extends Phaser.Scene {
         console.log("MainScene Create Finished");
     }
 
+    /**
+     * Renders/updates the resource limits onto the scene.
+     * @param hoseText - The text object of the firehose limit.
+     * @param hoseLimit - The number of firehose uses.
+     */
+    update() {
+        hoseText.setText(`${hose}/10`);
+        extinguisherText.setText(`${extinguisher}/5`);
+        helicopterText.setText(`${helicopter}/3`);
+        firetruckText.setText(`${firetruck}/3`);
+        airtankerText.setText(`${airtanker}/2`);
+        hotshotcrewText.setText(`${hotshotcrew}/1`);
+        smokejumperText.setText(`${smokejumper}/5`);
+    }
 
     /**
      * Renders the map tiles onto the scene.
@@ -166,6 +181,9 @@ class MainScene extends Phaser.Scene {
         // Redraw the map
         this.renderMap(this.map, this.tileSize);
         console.log("Game restarted with a new map.")
+
+        // Start the fire
+        this.startFire();
     }
 
 
