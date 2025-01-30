@@ -15,7 +15,7 @@ export function lightFire(scene, sprite, flameGroup) {
     let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze').setDepth(1).setScale(0.75, 0.75);
     fireSprite.play('fireAnimConfig');
 
-    console.log(flameGroup)
+    // console.log(flameGroup)
     // Add fire sprite to the group
     flameGroup.add(fireSprite);
 

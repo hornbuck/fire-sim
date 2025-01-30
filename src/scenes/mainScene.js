@@ -25,6 +25,7 @@ export class MainScene extends Phaser.Scene {
         this.gameClock = 0 // Initialize the game clock (in ms)
         this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
         this.lastFireSpreadTime = 0;
+        this.isFireSimRunning = false;
     }
 
     /**
@@ -75,7 +76,7 @@ export class MainScene extends Phaser.Scene {
     create() {
         console.log("MainScene Create Starting");
 
-        // Add a title or welcome text
+        // Title - Game name
         this.add.text(10, 10, 'Wildfire Command', {
             font: '20px Arial',
             color: '#FFFFFF'
@@ -100,7 +101,7 @@ export class MainScene extends Phaser.Scene {
             });
 
         // Start/Stop fire simulation button
-        this.add.text(10, 70, 'Start Fire', { // Y position set to 70 for the button to appear below
+        this.fireButton = this.add.text(10, 70, 'Start Fire', { // Y position set to 70 for the button to appear below
             font: '16px Arial',
             color: '#FFFFFF',
             backgroundColor: '#FF4500', // You can change the color for distinction
@@ -108,13 +109,42 @@ export class MainScene extends Phaser.Scene {
         })
             .setInteractive()
             .on('pointerdown', () => {
-                console.log("This would start/stop the fire spreading.")
+                this.toggleFireSimulation();
             });
+
+        // Add weather display HUD at a fixed position
+        this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
+            font: '16px Arial',
+            color: '#FFFFFF',
+            backgroundColor: '#0000FF',
+            padding: { x: 10, y: 5 }
+        });
+
+        // Initialize weather display
+        this.updateWeatherHUD(15,40,30);
 
         // Start a fire at a 'random' tile
         this.startFire();
 
         console.log("MainScene Create Finished");
+    }
+
+    // Function to update weather HUD
+    updateWeatherHUD(temp, wind, humidity) {
+        this.weatherText.setText(`Temp: ${temp}°F | Wind: ${wind} mph | Humidity: ${humidity}%`);
+    }
+
+    // Function to toggle fire simulation state
+    toggleFireSimulation() {
+        if (this.isFireSimRunning) {
+            console.log("Fire Simulation Stopped");
+            this.isFireSimRunning = false;
+            this.fireButton.setText('Start Fire');
+        } else {
+            console.log("Fire Simulation Started");
+            this.isFireSimRunning = true;
+            this.fireButton.setText('Stop Fire');
+        }
     }
 
     /**
@@ -126,7 +156,7 @@ export class MainScene extends Phaser.Scene {
         this.gameClock += delta; // Increment game clock by delta time (ms)
 
         // Handle fire spread every 5 seconds
-        if (this.gameClock - this.lastFireSpreadTime >= this.fireSpreadInterval) {
+        if (this.isFireSimRunning && this.gameClock - this.lastFireSpreadTime >= this.fireSpreadInterval) {
             this.lastFireSpreadTime = this.gameClock;
             this.updateFireSpread();
         }
