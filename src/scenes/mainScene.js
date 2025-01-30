@@ -101,10 +101,10 @@ export class MainScene extends Phaser.Scene {
             });
 
         // Start/Stop fire simulation button
-        this.fireButton = this.add.text(10, 70, 'Start Fire', { // Y position set to 70 for the button to appear below
+        this.fireButton = this.add.text(10, 70, 'Start Fire', {
             font: '16px Arial',
             color: '#FFFFFF',
-            backgroundColor: '#FF4500', // You can change the color for distinction
+            backgroundColor: '#FF4500',
             padding: { x: 10, y: 5 }
         })
             .setInteractive()
@@ -112,7 +112,7 @@ export class MainScene extends Phaser.Scene {
                 this.toggleFireSimulation();
             });
 
-        // Add weather display HUD at a fixed position
+        // Weather stats HUD
         this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
             font: '16px Arial',
             color: '#FFFFFF',
@@ -121,6 +121,7 @@ export class MainScene extends Phaser.Scene {
         });
 
         // Initialize weather display
+        // TODO: Add dynamic weather
         this.updateWeatherHUD(15,40,30);
 
         // Start a fire at a 'random' tile
@@ -137,11 +138,11 @@ export class MainScene extends Phaser.Scene {
     // Function to toggle fire simulation state
     toggleFireSimulation() {
         if (this.isFireSimRunning) {
-            console.log("Fire Simulation Stopped");
+            console.warn("Fire Simulation Stopped");
             this.isFireSimRunning = false;
             this.fireButton.setText('Start Fire');
         } else {
-            console.log("Fire Simulation Started");
+            console.warn("Fire Simulation Started");
             this.isFireSimRunning = true;
             this.fireButton.setText('Stop Fire');
         }
