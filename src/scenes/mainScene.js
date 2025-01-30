@@ -190,7 +190,7 @@ export class MainScene extends Phaser.Scene {
         });
     }
 
-  
+
     restartGame() {
         console.log("Restarting game...");
 
