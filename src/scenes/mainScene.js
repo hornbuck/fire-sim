@@ -21,6 +21,10 @@ export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene'); // Identifier for this scene
         console.log("MainScene Constructor Called");
+
+        this.gameClock = 0 // Initialize the game clock (in ms)
+        this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
+        this.lastFireSpreadTime = 0;
     }
 
     /**
@@ -96,9 +100,6 @@ export class MainScene extends Phaser.Scene {
         // Start a fire at a 'random' tile
         this.startFire();
 
-        // Initialize Fire Spread Logic
-        this.startFireSpreadSimulation();
-
         console.log("MainScene Create Finished");
     }
 
@@ -107,7 +108,15 @@ export class MainScene extends Phaser.Scene {
      * @param hoseText - The text object of the firehose limit.
      * @param hoseLimit - The number of firehose uses.
      */
-    update() {
+    update(time, delta) {
+        this.gameClock += delta; // Increment game clock by delta time (ms)
+
+        // Handle fire spread every 5 seconds
+        if (this.gameClock - this.lastFireSpreadTime >= this.fireSpreadInterval) {
+            this.lastFireSpreadTime = this.gameClock;
+            this.updateFireSpread();
+        }
+
         hoseText.setText(`${hose}/10`);
         extinguisherText.setText(`${extinguisher}/5`);
         helicopterText.setText(`${helicopter}/3`);
@@ -210,38 +219,18 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
+    updateFireSpread() {
+        console.log("Simulating fire step...");
+        this.fireSpread.simulateFireStep();
 
-
-    /**
-     * Starts a fire spread simulation that runs periodically, updating the fire's state on the map.
-     *
-     * - Runs every 2 seconds (`delay: 2000`) for 10 iterations (`repeat: 10`).
-     * - Invokes `this.fireSpread.simulateFireStep()` to compute fire progression.
-     * - Iterates through the map's grid to visually update tiles marked as "burning".
-     * - Calls `lightFire(this, tile.sprite)` to apply fire visuals and marks the tile as processed.
-     *
-     * Assumes `this.map.grid` contains tiles with `burnStatus`, `sprite`, and `fireSprite` properties.
-     */
-    startFireSpreadSimulation() {
-        this.time.addEvent({
-            delay: 2000,
-            callback: () => {
-                console.log("Simulating fire step...");
-                this.fireSpread.simulateFireStep();
-
-                // Iterate over the tiles after each simulation step and light the fire
-                for (let y = 0; y < this.map.height; y++) {
-                    for (let x = 0; x < this.map.width; x++) {
-                        const tile = this.map.grid[y][x];
-                        if (tile.burnStatus === "burning" && !tile.fireSprite) {
-                            const tileSprite = tile.sprite; // Get the sprite for the tile
-                            lightFire(this, tileSprite, this.flameGroup); // Call lightFire
-                            tile.fireSprite = true; // Mark that fire has been lit for this tile
-                        }
-                    }
+        // Update burning tiles
+        this.map.grid.forEach((row) => {
+            row.forEach((tile) => {
+                if (tile.burnStatus === "burning" && !tile.fireSprite) {
+                    lightFire(this, tile.sprite, this.flameGroup);
+                    tile.fireSprite = true;
                 }
-            },
-            repeat: 10 // Will run 10 times, then stop
+            });
         });
     }
 }
