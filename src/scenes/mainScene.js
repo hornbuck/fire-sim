@@ -43,6 +43,31 @@ export class MainScene extends Phaser.Scene {
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
     }
 
+    initializeMap() {
+        this.mapWidth = 10;
+        this.mapHeight = 10;
+        this.minSize = 5;
+        this.tileSize = 32;
+
+        this.currentSeed = Date.now();
+        console.log(`Initial Seed: ${this.currentSeed}`);
+
+        // Initialize the map
+        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
+
+        // Debugging: Log partition details
+        console.log("Map Partitions:");
+        this.map.bsp.getPartitions().forEach((partition, index) => {
+            console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
+        });
+
+        const weather = new Weather(15, 40, 30);
+        this.fireSpread = new FireSpread(this.map, weather);
+
+        this.mapGroup = this.add.group();
+        this.renderMap(this.map, this.tileSize);
+    }
+
 
     /**
      * Sets up the scene, including HUD creation and procedural map generation.
@@ -59,31 +84,8 @@ export class MainScene extends Phaser.Scene {
         // Create the HUD
         createHUD(this);
 
-        // Set map properties
-        this.mapWidth = 10;
-        this.mapHeight = 10;
-        this.minSize = 5;
-        this.tileSize = 32;
-        this.currentSeed = Date.now();
-        console.log(`Initial Seed: ${this.currentSeed}`);
-
-        // Initialize the Map
-        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
-
-        // Create a group for map tiles
-        this.mapGroup = this.add.group();
-
-        // Debugging: Log partition details
-        console.log("Map Partitions:");
-        this.map.bsp.getPartitions().forEach((partition, index) => {
-            console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
-        });
-        const weather = new Weather(15, 40, 30); // temperature: 15°F, humidity: 40%, windSpeed: 30 mph
-
-        this.fireSpread = new FireSpread(this.map, weather);
-
-        // Render the Map
-        this.renderMap(this.map, this.tileSize);
+        // Generate and render map
+        this.initializeMap();
 
         // Add a button to restart the game with a new map
         this.add.text(10, 40, 'Restart Game', {
@@ -95,6 +97,18 @@ export class MainScene extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.restartGame();
+            });
+
+        // Start/Stop fire simulation button
+        this.add.text(10, 70, 'Start Fire', { // Y position set to 70 for the button to appear below
+            font: '16px Arial',
+            color: '#FFFFFF',
+            backgroundColor: '#FF4500', // You can change the color for distinction
+            padding: { x: 10, y: 5 }
+        })
+            .setInteractive()
+            .on('pointerdown', () => {
+                console.log("This would start/stop the fire spreading.")
             });
 
         // Start a fire at a 'random' tile
