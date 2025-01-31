@@ -124,11 +124,35 @@ export class MainScene extends Phaser.Scene {
         // TODO: Add dynamic weather
         this.updateWeatherHUD(15,40,30);
 
+        // Game Clock Component of HUD
+        this.gameClockText = this.add.text(200, 10, "Time: 00:00", {
+            fontSize: "18px",
+            fill: "#fff",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            padding: { x: 5, y: 5 }
+        }).setScrollFactor(0); // Keep HUD static when moving around
+
+        // Start updating game clock
+        this.elapsedTime = 0;
+
         // Start a fire at a 'random' tile
         this.startFire();
 
         console.log("MainScene Create Finished");
     }
+
+    updateGameClock(delta) {
+        this.elapsedTime += delta / 1000; // Convert milliseconds to seconds
+
+        let minutes = Math.floor(this.elapsedTime / 60);
+        let seconds = Math.floor(this.elapsedTime % 60);
+
+        // Format time as MM:SS
+        let formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        this.gameClockText.setText(`Time: ${formattedTime}`);
+    }
+
 
     // Function to update weather HUD
     updateWeatherHUD(temp, wind, humidity) {
@@ -154,13 +178,14 @@ export class MainScene extends Phaser.Scene {
      * @param hoseLimit - The number of firehose uses.
      */
     update(time, delta) {
-        this.gameClock += delta; // Increment game clock by delta time (ms)
+        this.updateGameClock(delta); // Increment game clock by delta time (ms)
 
         // Handle fire spread every 5 seconds
-        if (this.isFireSimRunning && this.gameClock - this.lastFireSpreadTime >= this.fireSpreadInterval) {
-            this.lastFireSpreadTime = this.gameClock;
+        if (this.isFireSimRunning && this.elapsedTime - this.lastFireSpreadTime >= this.fireSpreadInterval / 1000) {
+            this.lastFireSpreadTime = this.elapsedTime;
             this.updateFireSpread();
         }
+
 
         hoseText.setText(`${hose}/10`);
         extinguisherText.setText(`${extinguisher}/5`);
@@ -235,6 +260,10 @@ export class MainScene extends Phaser.Scene {
         // Redraw the map
         this.renderMap(this.map, this.tileSize);
         console.log("Game restarted with a new map.")
+
+        // Reset the game clock
+        this.elapsedTime = 0;
+        this.updateGameClock(0);
 
         // Start the fire
         this.startFire();
