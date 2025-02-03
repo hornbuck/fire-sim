@@ -1,3 +1,10 @@
+/**
+ * @file CellularAutomata.js
+ * @description Applies cellular automata rules to refine terrain generation by smoothing transitions
+ *              between terrain types. This module processes a procedurally generated grid and adjusts
+ *              terrain based on neighboring tiles to create more natural, organic landscapes.
+ */
+
 export default class CellularAutomata {
     /**
      * Applies cellular automata rules to refine terrain transitions.
