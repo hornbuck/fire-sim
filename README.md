@@ -11,7 +11,7 @@ Wildfire Command is a browser-based 2D simulation game designed to educate users
   - [**Overview**](#overview)
     - [**Purpose**](#purpose)
   - [**Features**](#features)
-    - [**Current (v0.0.3)**](#current-v003)
+    - [**Current (v0.0.4)**](#current-v004)
     - [**Planned (Future Updates)**](#planned-future-updates)
   - [**Technical Design**](#technical-design)
     - [**Core Elements**](#core-elements)
@@ -120,6 +120,7 @@ To run the project locally, ensure you have:
     - Navigate to `http://127.0.0.1:8080` or the URL provided by your server.
   
 5. Run tests (if applicable):
+
    ```bash
    npm test
    ```
@@ -145,5 +146,3 @@ To run the project locally, ensure you have:
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-
-[def]: #v10-vision
