@@ -74,10 +74,13 @@ export default class Map {
      * @returns {string} The corresponding terrain type.
      */
     getTerrainFromNoise(value) {
-        if (value < -0.5) return 'water';
-        if (value < 0) return 'tree';
-        if (value < 0.5) return 'grass';
-        return 'shrub';
+        let terrain = 'shrub';
+
+        if (value < - 0.2) terrain = 'water';
+        if (value < 0.4) terrain = 'tree';
+        if (value < 0.7) terrain = 'grass';
+
+        return terrain;
     }
 
     /**
