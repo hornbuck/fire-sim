@@ -68,20 +68,27 @@ export default class Map {
         return CellularAutomata.apply(grid);
     }    
 
-    /**
-     * Maps Perlin Noise values to terrain types.
-     * @param {number} value - The noise value from Perlin Noise.
-     * @returns {string} The corresponding terrain type.
-     */
-    getTerrainFromNoise(value) {
-        let terrain = 'shrub';
+/**
+ * Maps Perlin Noise values to terrain types.
+ * @param {number} value - The noise value from Perlin Noise.
+ * @returns {string} The corresponding terrain type.
+ */
+getTerrainFromNoise(value) {
+    let terrain = 'shrub'; // Default to shrub
 
-        if (value < - 0.2) terrain = 'water';
-        if (value < 0.4) terrain = 'tree';
-        if (value < 0.7) terrain = 'grass';
+    if (value < 0.2) {
+        terrain = 'water';
+    } else if (value < 0.4) { // Use "else if" instead of "elif"
+        terrain = 'tree';
+    } else if (value < 0.7) { // Corrected this condition
+        terrain = 'grass';
+    } 
 
-        return terrain;
-    }
+    console.log(`Noise: ${value}, Terrain: ${terrain}`);
+
+    return terrain;
+}
+
 
     /**
      * Prints the terrain type of each tile in the map grid to the console.
