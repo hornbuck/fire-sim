@@ -25,6 +25,7 @@ export default class CellularAutomata {
                 } else if (neighbors.water > 5) {
                     newGrid[y][x].terrain = 'water'; // Water
                 }
+                // Other possible terrain types to add: 'mountain', 'sand', 'rock', road, town.
             }
         }
 
