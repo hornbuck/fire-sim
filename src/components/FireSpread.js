@@ -4,33 +4,31 @@ import { technique, use_resource } from './DeploymentClickEvents.js'
  * Lights a blaze on a terrain tile and makes fire clickable to extinguish later.
  * @param {Object} scene - The Phaser scene where the fire animation will play.
  * @param {Object} sprite - The sprite representing the terrain tile where the fire is ignited.
+ * @param flameGroup
  */
 export function lightFire(scene, sprite, flameGroup) {
-    scene.anims.create({
-        key: "fireAnimConfig",
-        frames: scene.anims.generateFrameNumbers('fire-blaze'),
-        frameRate: 10,
-        repeat: -1
-    });
-    let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze').setDepth(1).setScale(0.75, 0.75);
-    fireSprite.play('fireAnimConfig');
+    if (!scene.anims.exists('fireAnimConfig')) {
+        scene.anims.create({
+            key: "fireAnimConfig",
+            frames: scene.anims.generateFrameNumbers('fire-blaze'),
+            frameRate: 10,
+            repeat: -1
+        });
+    }
 
-    // console.log(flameGroup)
-    // Add fire sprite to the group
+    let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze')
+        .setDepth(1)
+        .setScale(0.75)
+        .play('fireAnimConfig');
+
     flameGroup.add(fireSprite);
 
-    // Make fire clickable to extinguish later
     fireSprite.setInteractive();
-    fireSprite.on(
-        "pointerdown",
-        function (pointer, localX, localY, event) {
-            if (technique === 'WATER') {
-                fireSprite.destroy();
-                use_resource(scene);
-            }
-        },
-        this
-    );
+    fireSprite.on("pointerdown", () => {
+        if (technique === 'WATER') {
+            fireSprite.destroy();
+        }
+    });
 }
 
 class FireSpread {
@@ -96,15 +94,20 @@ class FireSpread {
      * @returns {number} - The number of tiles ignited as a result of this burning tile.
      */
     processBurningTile(tile, newGrid, x, y) {
-        let spreadCount = 0;
-        spreadCount += this.spreadFire(tile, newGrid);
-        newGrid[y][x].fuel -= 1;
-        if (newGrid[y][x].fuel <= 0) {
-            newGrid[y][x].burnStatus = "burnt";
-            console.log(`Tile (${x}, ${y}) is now burnt.`);
+        let spreadCount = this.spreadFire(tile, newGrid);
+        let curTile = newGrid[y][x];
+
+        curTile.fuel = Math.max(0, curTile.fuel - 1); // Prevent negative fuel
+
+        if (curTile.fuel === 0) {
+            curTile.burnStatus = "burnt";
+            console.warn(`Tile (${x}, ${y}) is now burnt.`);
         }
+
         return spreadCount;
     }
+
+
 
 
     /**
@@ -123,7 +126,7 @@ class FireSpread {
         for (const neighbor of neighbors) {
             const neighborTile = grid[neighbor.y][neighbor.x];
 
-            // Extracted logic for checking neighbor's ability to ignite
+            if (neighborTile.burnStatus === "burning") continue; // Avoid re-igniting
             if (this.canIgnite(neighborTile)) {
                 spreadCount += this.attemptIgnite(neighborTile);
             }
@@ -131,6 +134,7 @@ class FireSpread {
 
         return spreadCount;
     }
+
 
 
     /**

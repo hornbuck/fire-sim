@@ -76,48 +76,89 @@ export class MainScene extends Phaser.Scene {
     create() {
         console.log("MainScene Create Starting");
 
-        // Title - Game name
-        this.add.text(10, 10, 'Wildfire Command', {
-            font: '20px Arial',
-            color: '#FFFFFF'
-        });
+        this.input.on('pointerdown', this.handleTileClick, this);
 
-        // Create the HUD
+        // Create UI elements
+        this.createUIElements();
+
+        // Create the HUD (calling the existing function)
         createHUD(this);
 
         // Generate and render map
         this.initializeMap();
 
-        // Add a button to restart the game with a new map
-        this.add.text(10, 40, 'Restart Game', {
-            font: '16px Arial',
-            color: '#FFFFFF',
-            backgroundColor: '#0000FF',
-            padding: { x: 10, y: 5 }
+        // Start updating game clock
+        this.elapsedTime = 0;
+
+        // Start a fire at a 'random' tile
+        this.startFire();
+
+        console.log("MainScene Create Finished");
+    }
+
+
+
+    /**
+     * Create UI elements - game title, restart game, start/stop fire, weather stats, tile info overlay
+     */
+    createUIElements() {
+        // Tile info text (for when a tile is clicked)
+        this.tileInfoText = this.add.text(10, 400, "", {
+            fontSize: "16px",
+            fill: "#fff",
+            backgroundColor: "rgba(0, 0, 0)",
+            padding: { x: 10, y: 5 },
+            align: "left"
+        }).setDepth(10).setScrollFactor(0); // Keeps it fixed on screen
+
+        // Title - Game name
+        this.add.text(10, 10, 'Wildfire Command', {
+            font: '20px "Georgia", serif',  // More rustic font
+            color: '#8B4513'  // Brown color for a rustic feel
+        });
+
+        // Restart Game button
+        const restartButton = this.add.text(10, 40, 'Restart Game', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
         })
             .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                restartButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                restartButton.setStyle({ backgroundColor: '#A0522D' });
+            })
             .on('pointerdown', () => {
                 this.restartGame();
             });
 
         // Start/Stop fire simulation button
         this.fireButton = this.add.text(10, 70, 'Start Fire', {
-            font: '16px Arial',
-            color: '#FFFFFF',
-            backgroundColor: '#FF4500',
-            padding: { x: 10, y: 5 }
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#8B0000', // Dark red, gives a fiery feel
+            padding: { x: 15, y: 10 }
         })
             .setInteractive()
+            .on('pointerover', () => {
+                this.fireButton.setStyle({ backgroundColor: '#A52A2A' });
+            })
+            .on('pointerout', () => {
+                this.fireButton.setStyle({ backgroundColor: '#8B0000' });
+            })
             .on('pointerdown', () => {
                 this.toggleFireSimulation();
             });
 
         // Weather stats HUD
         this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
-            font: '16px Arial',
-            color: '#FFFFFF',
-            backgroundColor: '#0000FF',
-            padding: { x: 10, y: 5 }
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#556B2F',  // Olive green for a rustic feel
+            padding: { x: 15, y: 10 }
         });
 
         // Initialize weather display
@@ -131,15 +172,41 @@ export class MainScene extends Phaser.Scene {
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0); // Keep HUD static when moving around
-
-        // Start updating game clock
-        this.elapsedTime = 0;
-
-        // Start a fire at a 'random' tile
-        this.startFire();
-
-        console.log("MainScene Create Finished");
     }
+
+
+
+
+    handleTileClick(pointer) {
+        // Convert click positiion to tile coordinates
+        const startX = (this.cameras.main.width - this.map.width * this.tileSize) / 2;
+        const startY = (this.cameras.main.height - this.map.height * this.tileSize) / 2;
+
+        let tileX = Math.floor((pointer.x - startX) / this.tileSize);
+        let tileY = Math.floor((pointer.y - startY) / this.tileSize);
+
+        console.warn(`Clicked tile coordinates: (${tileX}, ${tileY})`);
+
+        // Ensure the click is within the map bounds
+        if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
+            let clickedTile = this.map.getTile(tileX, tileY);
+            console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
+
+            if (clickedTile) {
+                this.updateTileInfoDisplay(clickedTile);
+            }
+        }
+    }
+
+    updateTileInfoDisplay(tile) {
+        this.tileInfoText.setText(
+            `Terrain: ${tile.terrain}
+        \nFlammability: ${tile.flammability}
+        \nFuel: ${tile.fuel}
+        \nBurn Status: ${tile.burnStatus}`
+        );
+    }
+
 
     updateGameClock(delta) {
         this.elapsedTime += delta / 1000; // Convert milliseconds to seconds
