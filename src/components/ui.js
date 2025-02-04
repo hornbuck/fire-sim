@@ -140,5 +140,23 @@ export function preloadHUD(scene) {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
+
+    // Load extinguisher spritesheet
+    scene.load.spritesheet('set-extinguisher', 'assets/64x64-Map-Tiles/Deployable%20Resources/extinguisher.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    // Load helicopter spritesheet
+    scene.load.spritesheet('set-firetruck', 'assets//64x64-Map-Tiles/Deployable%20Resources/firetruck.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    // Load firetruck spritesheet
+    scene.load.spritesheet('set-helicopter', 'assets//64x64-Map-Tiles/Deployable%20Resources/helicopter.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
 }
 

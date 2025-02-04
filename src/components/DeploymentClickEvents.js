@@ -73,6 +73,31 @@ export function use_resource (scene) {
     if (activated_resource === "extinguisher") {
         if (extinguisher > 0) {
             extinguisher -= 1;
+
+            let m_x = 0;
+            let m_y = 0;
+            
+            // Register extinguish animation
+            scene.anims.create({
+                key: "extinguisherAnimConfig",
+                frames: scene.anims.generateFrameNumbers('set-extinguisher'),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            // Get mouse position and play animation upon click
+            scene.input.on('pointerdown', function (pointer) {
+                m_x = pointer.x;
+                m_y = pointer.y;
+                let cloudSprite = scene.add.sprite(m_x,m_y, 'set-extinguisher').setDepth(1).setScale(0.75, 0.75);
+                cloudSprite.play('extinguisherAnimConfig');
+                scene.time.delayedCall(3000, () => {
+                    cloudSprite.destroy();
+                });
+                console.log(`Mouse coordinates: x=${m_x}, y=${m_y}`);
+            });
+
+            
         } else {
             console.log("Sorry! You ran out!");
         }
@@ -80,6 +105,7 @@ export function use_resource (scene) {
     if (activated_resource === "helicopter") {
         if (helicopter > 0) {
             helicopter -= 1;
+            
         } else {
             console.log("Sorry! You ran out!");
         }
