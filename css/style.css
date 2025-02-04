@@ -10,6 +10,8 @@
 /* ==========================================================================
    Base styles: opinionated defaults
    ========================================================================== */
+/* IMPORTS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 html {
   color: #222;
@@ -172,9 +174,9 @@ textarea {
 }
 
 @media print,
-  (-webkit-min-device-pixel-ratio: 1.25),
-  (min-resolution: 1.25dppx),
-  (min-resolution: 120dpi) {
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 1.25dppx),
+(min-resolution: 120dpi) {
   /* Style adjustments for high resolution devices */
 }
 
@@ -245,3 +247,149 @@ textarea {
   }
 }
 
+
+/* Styles for User Signup and Login  */
+#SignUpPage {
+  margin: 0;
+  padding: 0;
+  --accent-color: #f1802d;
+  --base-color: white;
+  --text-color: #549aab;
+  --input-color: #d2f6f7;
+}
+
+body#SignUpPage {
+  font-family: 'Poppins', sans-serif;
+  font-size: 12pt;
+  color: var(--text-color);
+  text-align: center;
+  min-height: 100vh;
+  background-image: url(../Assets/icons/ForestFireBackground.jpg);
+  background-size: cover;
+  background-position: right;
+  overflow: hidden;
+}
+
+.wrapper {
+  box-sizing: border-box;
+  background-color: var(--base-color);
+  height: 100vh;
+  width: max(40%, 600px);
+  padding: 10px;
+  border-radius: 0 20px 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+body#SignUpPage h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+body#SignUpPage form {
+  width: min(400px, 100%);
+  margin-top: 20px;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+body#SignUpPage form > div{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+body#SignUpPage form label{
+  flex-shrink: 0;
+  height: 50px;
+  width: 50px;
+  background-color: var(--accent-color);
+  fill: var(--base-color);
+  border-radius: 10px 0 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+body#SignUpPage form input{
+  box-sizing: border-box;
+  flex-grow: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 1em;
+  font: inherit;
+  border-radius: 0 10px 10px 0;
+  border: 2px solid var(--input-color);
+  border-left: none;
+  background-color: var(--input-color);
+  transition: 150ms ease;
+}
+
+body#SignUpPage form input:hover {
+  border-color: var(--accent-color);
+}
+
+body#SignUpPage form input:focus {
+  outline: none;
+  border-color: var(--text-color);
+}
+
+body#SignUpPage form > div:has(input:focus) label {
+  background-color: var(--text-color);
+}
+
+body#SignUpPage form input::placeholder {
+  color: var(--text-color);
+}
+
+body#SignUpPage form button {
+  margin-top: 10px;
+  border: none;
+  border-radius: 1000px;
+  padding: .85em 4em;
+  background-color: var(--accent-color);
+  color: var(--base-color);
+  font: inherit;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+
+body#SignUpPage form button:hover {
+  background-color: var(--text-color);
+}
+
+body#SignUpPage form button:focus {
+  outline: none;
+  background-color: var(--text-color);
+}
+
+body#SignUpPage a {
+  text-decoration: none;
+  color: var(--accent-color);
+}
+
+body#SignUpPage a:hover {
+  text-decoration: underline;
+}
+
+@media(max-width: 1100px) {
+  .wrapper {
+    width: min(600px, 100%);
+    border-radius: 0;
+  }
+}
+
+/* User Validation Styling  */
+#error-message {
+  color: #f06272;
+}
