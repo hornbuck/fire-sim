@@ -24,11 +24,16 @@ export function lightFire(scene, sprite, flameGroup) {
     flameGroup.add(fireSprite);
 
     fireSprite.setInteractive();
-    fireSprite.on("pointerdown", () => {
-        if (technique === 'WATER') {
-            fireSprite.destroy();
-        }
-    });
+    fireSprite.on(
+        "pointerdown",
+        function (pointer, localX, localY, event) {
+            if (technique === 'WATER') {
+                fireSprite.destroy();
+                use_resource(scene);
+            }
+        },
+        this
+    );
 }
 
 class FireSpread {
