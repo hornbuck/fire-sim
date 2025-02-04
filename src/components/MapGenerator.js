@@ -6,6 +6,7 @@
 import BSPPartition from "../utils/BSPPartition.js";
 import TerrainTile from './TerrainTile.js';
 import PerlinNoise from '../utils/PerlinNoise.js'
+import CellularAutomata from "../utils/CellularAutomata.js";
 
 export default class Map {
     /**
@@ -38,18 +39,21 @@ export default class Map {
     }
 
     /**
-     * Generates the map by applying Perlin Noise within BSP-partitioned regions.
+     * Generates the map by applying Perlin Noise within BSP-partitioned regions
+     *      and refines terrain using Cellular Automata.
      * @returns {Array<Array<TerrainTile>>} A 2D grid of TerrainTile objects.
      */
     generateMap() {
+        // Step 1: Initialize the grid
         const grid = Array.from({ length: this.height }, () => Array(this.width).fill(null));
-        const partitions = this.bsp.getPartitions(); // Retrieve partitions
+        const partitions = this.bsp.getPartitions(); // Retrieve BSP partitions
 
         if (partitions.length === 0) {
             console.error('BSPPartition failed to create any partitions. Falling back to single-partition grid.');
             partitions.push({ x: 0, y: 0, width: this.width, height: this.height });
-        }
+            }
 
+        // Step 2: Generate terrain using Perlin Noise within each BSP partition
         partitions.forEach(partition => {
             for (let y = partition.y; y < partition.y + partition.height; y++) {
                 for (let x = partition.x; x < partition.x + partition.width; x++) {
@@ -60,20 +64,31 @@ export default class Map {
             }
         });
 
-        return grid;
+        // Step 3: Apply Cellular Automata to refine terrain transitions
+        return CellularAutomata.apply(grid);
     }    
 
-    /**
-     * Maps Perlin Noise values to terrain types.
-     * @param {number} value - The noise value from Perlin Noise.
-     * @returns {string} The corresponding terrain type.
-     */
-    getTerrainFromNoise(value) {
-        if (value < -0.5) return 'water';
-        if (value < 0) return 'tree';
-        if (value < 0.5) return 'grass';
-        return 'shrub';
-    }
+/**
+ * Maps Perlin Noise values to terrain types.
+ * @param {number} value - The noise value from Perlin Noise.
+ * @returns {string} The corresponding terrain type.
+ */
+getTerrainFromNoise(value) {
+    let terrain = 'shrub'; // Default to shrub
+
+    if (value < 0.2) {
+        terrain = 'water';
+    } else if (value < 0.4) { // Use "else if" instead of "elif"
+        terrain = 'tree';
+    } else if (value < 0.7) { // Corrected this condition
+        terrain = 'grass';
+    } 
+
+    console.log(`Noise: ${value}, Terrain: ${terrain}`);
+
+    return terrain;
+}
+
 
     /**
      * Prints the terrain type of each tile in the map grid to the console.

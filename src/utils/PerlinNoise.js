@@ -1,7 +1,7 @@
 import { noise } from './perlin.js';
 
 export default class PerlinNoise {
-    constructor(width, height, scale = 10, seed = Math.random()) {
+    constructor(width, height, scale = 5, seed = Math.random()) {
         this.width = width;
         this.height = height;
         this.scale = scale;
