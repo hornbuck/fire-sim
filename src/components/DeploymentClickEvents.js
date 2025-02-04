@@ -80,6 +80,28 @@ export function use_resource (scene) {
     if (activated_resource === "helicopter") {
         if (helicopter > 0) {
             helicopter -= 1;
+
+            const m_x = 0;
+            const m_y = 0;
+
+            // Get mouse position
+            scene.input.on('pointermove', function (pointer) {
+                m_x = pointer.x;
+                m_y = pointer.y;
+                console.log(`Mouse coordinates: x=${m_x}, y=${m_y}`);
+            });
+            
+            // Play extinguish animation upon click
+            scene.anims.create({
+                key: "extinguisherAnimConfig",
+                frames: scene.anims.generateFrameNumbers('set-extinguisher'),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            let fireSprite = scene.add.sprite(m_x, m_y, 'set-extinguisher').setDepth(1).setScale(0.75, 0.75);
+            fireSprite.play('extinguisherAnimConfig');
+            
         } else {
             console.log("Sorry! You ran out!");
         }
