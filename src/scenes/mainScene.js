@@ -21,6 +21,11 @@ export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene'); // Identifier for this scene
         console.log("MainScene Constructor Called");
+
+        this.gameClock = 0 // Initialize the game clock (in ms)
+        this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
+        this.lastFireSpreadTime = 0;
+        this.isFireSimRunning = false;
     }
 
     /**
@@ -39,6 +44,31 @@ export class MainScene extends Phaser.Scene {
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
     }
 
+    initializeMap() {
+        this.mapWidth = 10;
+        this.mapHeight = 10;
+        this.minSize = 5;
+        this.tileSize = 32;
+
+        this.currentSeed = Date.now();
+        console.log(`Initial Seed: ${this.currentSeed}`);
+
+        // Initialize the map
+        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
+
+        // Debugging: Log partition details
+        console.log("Map Partitions:");
+        this.map.bsp.getPartitions().forEach((partition, index) => {
+            console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
+        });
+
+        const weather = new Weather(15, 40, 30);
+        this.fireSpread = new FireSpread(this.map, weather);
+
+        this.mapGroup = this.add.group();
+        this.renderMap(this.map, this.tileSize);
+    }
+
 
     /**
      * Sets up the scene, including HUD creation and procedural map generation.
@@ -46,60 +76,167 @@ export class MainScene extends Phaser.Scene {
     create() {
         console.log("MainScene Create Starting");
 
-        // Add a title or welcome text
-        this.add.text(10, 10, 'Wildfire Command', {
-            font: '20px Arial',
-            color: '#FFFFFF'
-        });
+        this.input.on('pointerdown', this.handleTileClick, this);
 
-        // Create the HUD
+        // Create UI elements
+        this.createUIElements();
+
+        // Create the HUD (calling the existing function)
         createHUD(this);
 
-        // Set map properties
-        this.mapWidth = 10;
-        this.mapHeight = 10;
-        this.minSize = 5;
-        this.tileSize = 32;
-        this.currentSeed = Date.now();
-        console.log(`Initial Seed: ${this.currentSeed}`);
+        // Generate and render map
+        this.initializeMap();
 
-        // Initialize the Map
-        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
-
-        // Create a group for map tiles
-        this.mapGroup = this.add.group();
-
-        // Debugging: Log partition details
-        console.log("Map Partitions:");
-        this.map.bsp.getPartitions().forEach((partition, index) => {
-            console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
-        });
-        const weather = new Weather(15, 40, 30); // temperature: 15°F, humidity: 40%, windSpeed: 30 mph
-
-        this.fireSpread = new FireSpread(this.map, weather);
-
-        // Render the Map
-        this.renderMap(this.map, this.tileSize);
-
-        // Add a button to restart the game with a new map
-        this.add.text(10, 40, 'Restart Game', {
-            font: '16px Arial',
-            color: '#FFFFFF',
-            backgroundColor: '#0000FF',
-            padding: { x: 10, y: 5 }
-        })
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.restartGame();
-            });
+        // Start updating game clock
+        this.elapsedTime = 0;
 
         // Start a fire at a 'random' tile
         this.startFire();
 
-        // Initialize Fire Spread Logic
-        this.startFireSpreadSimulation();
-
         console.log("MainScene Create Finished");
+    }
+
+
+
+    /**
+     * Create UI elements - game title, restart game, start/stop fire, weather stats, tile info overlay
+     */
+    createUIElements() {
+        // Tile info text (for when a tile is clicked)
+        this.tileInfoText = this.add.text(10, 400, "", {
+            fontSize: "16px",
+            fill: "#fff",
+            backgroundColor: "rgba(0, 0, 0)",
+            padding: { x: 10, y: 5 },
+            align: "left"
+        }).setDepth(10).setScrollFactor(0); // Keeps it fixed on screen
+
+        // Title - Game name
+        this.add.text(10, 10, 'Wildfire Command', {
+            font: '20px "Georgia", serif',  // More rustic font
+            color: '#8B4513'  // Brown color for a rustic feel
+        });
+
+        // Restart Game button
+        const restartButton = this.add.text(10, 40, 'Restart Game', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                restartButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                restartButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                this.restartGame();
+            });
+
+        // Start/Stop fire simulation button
+        this.fireButton = this.add.text(10, 70, 'Start Fire', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#8B0000', // Dark red, gives a fiery feel
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {
+                this.fireButton.setStyle({ backgroundColor: '#A52A2A' });
+            })
+            .on('pointerout', () => {
+                this.fireButton.setStyle({ backgroundColor: '#8B0000' });
+            })
+            .on('pointerdown', () => {
+                this.toggleFireSimulation();
+            });
+
+        // Weather stats HUD
+        this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#556B2F',  // Olive green for a rustic feel
+            padding: { x: 15, y: 10 }
+        });
+
+        // Initialize weather display
+        // TODO: Add dynamic weather
+        this.updateWeatherHUD(15,40,30);
+
+        // Game Clock Component of HUD
+        this.gameClockText = this.add.text(200, 10, "Time: 00:00", {
+            fontSize: "18px",
+            fill: "#fff",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            padding: { x: 5, y: 5 }
+        }).setScrollFactor(0); // Keep HUD static when moving around
+    }
+
+
+
+
+    handleTileClick(pointer) {
+        // Convert click positiion to tile coordinates
+        const startX = (this.cameras.main.width - this.map.width * this.tileSize) / 2;
+        const startY = (this.cameras.main.height - this.map.height * this.tileSize) / 2;
+
+        let tileX = Math.floor((pointer.x - startX) / this.tileSize);
+        let tileY = Math.floor((pointer.y - startY) / this.tileSize);
+
+        console.warn(`Clicked tile coordinates: (${tileX}, ${tileY})`);
+
+        // Ensure the click is within the map bounds
+        if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
+            let clickedTile = this.map.getTile(tileX, tileY);
+            console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
+
+            if (clickedTile) {
+                this.updateTileInfoDisplay(clickedTile);
+            }
+        }
+    }
+
+    updateTileInfoDisplay(tile) {
+        this.tileInfoText.setText(
+            `Terrain: ${tile.terrain}
+        \nFlammability: ${tile.flammability}
+        \nFuel: ${tile.fuel}
+        \nBurn Status: ${tile.burnStatus}`
+        );
+    }
+
+
+    updateGameClock(delta) {
+        this.elapsedTime += delta / 1000; // Convert milliseconds to seconds
+
+        let minutes = Math.floor(this.elapsedTime / 60);
+        let seconds = Math.floor(this.elapsedTime % 60);
+
+        // Format time as MM:SS
+        let formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        this.gameClockText.setText(`Time: ${formattedTime}`);
+    }
+
+
+    // Function to update weather HUD
+    updateWeatherHUD(temp, wind, humidity) {
+        this.weatherText.setText(`Temp: ${temp}°F | Wind: ${wind} mph | Humidity: ${humidity}%`);
+    }
+
+    // Function to toggle fire simulation state
+    toggleFireSimulation() {
+        if (this.isFireSimRunning) {
+            console.warn("Fire Simulation Stopped");
+            this.isFireSimRunning = false;
+            this.fireButton.setText('Start Fire');
+        } else {
+            console.warn("Fire Simulation Started");
+            this.isFireSimRunning = true;
+            this.fireButton.setText('Stop Fire');
+        }
     }
 
     /**
@@ -107,7 +244,16 @@ export class MainScene extends Phaser.Scene {
      * @param hoseText - The text object of the firehose limit.
      * @param hoseLimit - The number of firehose uses.
      */
-    update() {
+    update(time, delta) {
+        this.updateGameClock(delta); // Increment game clock by delta time (ms)
+
+        // Handle fire spread every 5 seconds
+        if (this.isFireSimRunning && this.elapsedTime - this.lastFireSpreadTime >= this.fireSpreadInterval / 1000) {
+            this.lastFireSpreadTime = this.elapsedTime;
+            this.updateFireSpread();
+        }
+
+
         hoseText.setText(`${hose}/10`);
         extinguisherText.setText(`${extinguisher}/5`);
         helicopterText.setText(`${helicopter}/3`);
@@ -167,7 +313,7 @@ export class MainScene extends Phaser.Scene {
         });
     }
 
-  
+
     restartGame() {
         console.log("Restarting game...");
 
@@ -181,6 +327,10 @@ export class MainScene extends Phaser.Scene {
         // Redraw the map
         this.renderMap(this.map, this.tileSize);
         console.log("Game restarted with a new map.")
+
+        // Reset the game clock
+        this.elapsedTime = 0;
+        this.updateGameClock(0);
 
         // Start the fire
         this.startFire();
@@ -210,38 +360,18 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
+    updateFireSpread() {
+        console.log("Simulating fire step...");
+        this.fireSpread.simulateFireStep();
 
-
-    /**
-     * Starts a fire spread simulation that runs periodically, updating the fire's state on the map.
-     *
-     * - Runs every 2 seconds (`delay: 2000`) for 10 iterations (`repeat: 10`).
-     * - Invokes `this.fireSpread.simulateFireStep()` to compute fire progression.
-     * - Iterates through the map's grid to visually update tiles marked as "burning".
-     * - Calls `lightFire(this, tile.sprite)` to apply fire visuals and marks the tile as processed.
-     *
-     * Assumes `this.map.grid` contains tiles with `burnStatus`, `sprite`, and `fireSprite` properties.
-     */
-    startFireSpreadSimulation() {
-        this.time.addEvent({
-            delay: 2000,
-            callback: () => {
-                console.log("Simulating fire step...");
-                this.fireSpread.simulateFireStep();
-
-                // Iterate over the tiles after each simulation step and light the fire
-                for (let y = 0; y < this.map.height; y++) {
-                    for (let x = 0; x < this.map.width; x++) {
-                        const tile = this.map.grid[y][x];
-                        if (tile.burnStatus === "burning" && !tile.fireSprite) {
-                            const tileSprite = tile.sprite; // Get the sprite for the tile
-                            lightFire(this, tileSprite, this.flameGroup); // Call lightFire
-                            tile.fireSprite = true; // Mark that fire has been lit for this tile
-                        }
-                    }
+        // Update burning tiles
+        this.map.grid.forEach((row) => {
+            row.forEach((tile) => {
+                if (tile.burnStatus === "burning" && !tile.fireSprite) {
+                    lightFire(this, tile.sprite, this.flameGroup);
+                    tile.fireSprite = true;
                 }
-            },
-            repeat: 10 // Will run 10 times, then stop
+            });
         });
     }
 }
