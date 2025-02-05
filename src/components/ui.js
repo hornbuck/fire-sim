@@ -158,5 +158,12 @@ export function preloadHUD(scene) {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
+
+    scene.load.spritesheet('waterr', 'assets//64x64-Map-Tiles/water.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    
 }
 

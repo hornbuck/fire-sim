@@ -43,7 +43,7 @@ export default class Map {
      *      and refines terrain using Cellular Automata.
      * @returns {Array<Array<TerrainTile>>} A 2D grid of TerrainTile objects.
      */
-    generateMap() {
+    generateMap(scene) {
         // Step 1: Initialize the grid
         const grid = Array.from({ length: this.height }, () => Array(this.width).fill(null));
         const partitions = this.bsp.getPartitions(); // Retrieve BSP partitions

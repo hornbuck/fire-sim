@@ -39,9 +39,20 @@ export class MainScene extends Phaser.Scene {
 
         // Preload terrain assets
         this.load.image('water', 'assets/64x64-Map-Tiles/water.png');
-        this.load.image('grass', 'assets/64x64-Map-Tiles/flowers.png');
+        this.load.image('grass', 'assets/64x64-Map-Tiles/grass.png');
         this.load.image('shrub', 'assets/64x64-Map-Tiles/Shrubs/shrubs-on-sand.png');
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
+
+        // Preload terrain animation assets
+        this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
+            frameWidth: 64, // Width of each frame
+            frameHeight: 64 // Height of each frame
+        });
+
+        // Preload burned terrain assets
+        this.load.image('burned-grass', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass.png');
+        this.load.image('burned-shrub', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-shrubs-on-sand.png');
+        this.load.image('burned-tree', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-trees-on-light-dirt.png');
     }
 
     initializeMap() {
@@ -307,6 +318,25 @@ export class MainScene extends Phaser.Scene {
                     console.log(`Clicked on ${tile.terrain} at (${x}, ${y})`);
                 });
 
+                // TO-DO: Water Animation Overlay
+                /*if (tile.terrain == "water") {
+                    console.log(`Map height: ${map.height}`);
+                    console.log(`Tile Sprite X: ${tile.sprite.y}`);
+                    console.log("Gotcha!")
+
+                    this.anims.create({
+                        key: "water-anim",
+                        frames: this.anims.generateFrameNumbers('water-sheet'),
+                        frameRate: 10,
+                        repeat: -1
+                    });
+                
+                        let watertile = this.add.sprite(tile.sprite.x, tile.sprite.y, 'water-anim');
+                        watertile.play('water-anim');
+                    
+                }
+                */
+
                 // Add sprite to the map group
                 this.mapGroup.add(sprite);
             });
@@ -316,7 +346,7 @@ export class MainScene extends Phaser.Scene {
 
     restartGame() {
         console.log("Restarting game...");
-
+        
         // Generate a new unique seed
         this.currentSeed = Date.now();
         console.log(`Current Seed: ${this.currentSeed}`);
