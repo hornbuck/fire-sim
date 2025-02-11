@@ -1,9 +1,10 @@
 /**
- * @file MainScene.js
+ * @file mainScene.js
  * @description Defines the MainScene class, responsible for rendering and managing the main gameplay scene in the Sim Firefighter game.
  * Includes HUD creation, procedural map generation, and interactive terrain rendering.
  */
-
+import { auth } from '../firebaseConfig.js';
+import { signOut } from 'firebase/auth';
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
 import FireSpread, { lightFire } from '../components/FireSpread.js';
@@ -128,6 +129,36 @@ export class MainScene extends Phaser.Scene {
             color: '#8B4513'  // Brown color for a rustic feel
         });
 
+        // Logout Button
+        const logoutButton = this.add.text(10, 500, 'Logout', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                logoutButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                logoutButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                // Call Firebase signOut and switch scenes on success
+                signOut(auth)
+                    .then(() => {
+                        console.log('User logged out successfully.');
+                        this.scene.stop('MainScene');
+                        this.scene.start('SignupScene');
+                        console.log('Hey');
+
+                    })
+                    .catch((error) => {
+                        console.error('Error logging out:', error);
+                        alert('Error logging out: ' + error.message);
+                    });
+            });
+
         // Restart Game button
         const restartButton = this.add.text(10, 40, 'Restart Game', {
             font: '16px "Georgia", serif',
@@ -184,8 +215,6 @@ export class MainScene extends Phaser.Scene {
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0); // Keep HUD static when moving around
     }
-
-
 
 
     handleTileClick(pointer) {
