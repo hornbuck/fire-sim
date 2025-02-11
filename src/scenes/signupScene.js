@@ -13,6 +13,7 @@ export default class SignupScene extends Phaser.Scene {
     }
 
     create() {
+
         // Add a title text.
         this.add.text(300, 100, 'Sign Up', { fontSize: '32px', color: '#fff' });
 
@@ -37,6 +38,7 @@ export default class SignupScene extends Phaser.Scene {
         emailInput.node.setAttribute('type', 'email');
         emailInput.node.setAttribute('name', 'email');
         emailInput.node.setAttribute('placeholder', 'Email');
+        emailInput.node.classList.add('input-field');
 
         // Create the Password input field.
         const passwordInput = this.add.dom(400, 270, 'input', {
@@ -60,7 +62,7 @@ export default class SignupScene extends Phaser.Scene {
         repeatPasswordInput.node.setAttribute('name', 'repeatPassword');
         repeatPasswordInput.node.setAttribute('placeholder', 'Repeat Password');
 
-        // Create the Sign Up button.
+        // Create the SignUp button.
         const signupButton = this.add.dom(400, 370, 'button', {
             width: '100px',
             height: '40px',
@@ -120,7 +122,7 @@ export default class SignupScene extends Phaser.Scene {
             this.scene.start('LoginScene');
         });
 
-        const toGame = this.add.dom(400, 470, 'button', {
+        const toGame = this.add.dom(700, 20, 'button', {
             width: '130px',
             height: '40px',
             fontSize: '16px',

@@ -249,6 +249,11 @@ textarea {
 
 
 /* Styles for User Signup and Login  */
+
+/* Define styles for your input fields */
+
+
+
 #SignUpPage {
   margin: 0;
   padding: 0;
@@ -257,6 +262,21 @@ textarea {
   --text-color: #549aab;
   --input-color: #d2f6f7;
 }
+
+.input-field {
+  box-sizing: border-box;
+  flex-grow: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 1em;
+  font: inherit;
+  border-radius: 0 10px 10px 0;
+  border: 2px solid var(--input-color);
+  border-left: none;
+  background-color: #A0522D;
+}
+
+
 
 body#SignUpPage {
   font-family: 'Poppins', sans-serif;

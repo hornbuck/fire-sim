@@ -11,7 +11,7 @@ const config = {
     width: 800,
     height: 600,
     parent: 'game-container',
-    scene: [SignupScene, LoginScene, MainScene],
+    scene: [LoginScene, SignupScene, MainScene],
     backgroundColor: '#282c34',
     scale: {
         mode: Phaser.Scale.FIT,

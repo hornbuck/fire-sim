@@ -129,6 +129,26 @@ export class MainScene extends Phaser.Scene {
             color: '#8B4513'  // Brown color for a rustic feel
         });
 
+        // Login Button via MainScene
+        const loginMenuButton = this.add.text(200, 500, 'Logout', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                loginMenuButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                loginMenuButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                window.location.reload();
+                this.scene.start('LoginScene');
+            })
+
+
         // Logout Button
         const logoutButton = this.add.text(10, 500, 'Logout', {
             font: '16px "Georgia", serif',
@@ -149,8 +169,8 @@ export class MainScene extends Phaser.Scene {
                     .then(() => {
                         console.log('User logged out successfully.');
                         this.scene.stop('MainScene');
-                        this.scene.start('SignupScene');
-                        console.log('Hey');
+                        window.location.reload();
+                        this.scene.start('LoginScene');
 
                     })
                     .catch((error) => {
