@@ -1,40 +1,26 @@
 /**
  * @file MainScene.js
- * @description Defines the MainScene class, responsible for rendering and managing the main gameplay scene in the Sim Firefighter game.
- * Includes HUD creation, procedural map generation, and interactive terrain rendering.
+ * @description Defines the MainScene class, responsible for rendering and managing the main gameplay scene.
  */
 
-import Map from '../components/MapGenerator.js';
+import { MapHandler } from '../components/MapLogic.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
-import FireSpread, { lightFire } from '../components/FireSpread.js';
-import Weather from '../components/Weather.js';
 import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
 
-/**
- * Represents the main gameplay scene in the Sim Firefighter game.
- */
 export class MainScene extends Phaser.Scene {
-    /**
-     * Constructs the MainScene class.
-     */
     constructor() {
-        super('MainScene'); // Identifier for this scene
+        super('MainScene');
         console.log("MainScene Constructor Called");
 
-        this.gameClock = 0 // Initialize the game clock (in ms)
+        this.gameClock = 0;
         this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
     }
 
-    /**
-     * Preloads assets required for the scene, including HUD and terrain assets.
-     */
     preload() {
         console.log("MainScene Preload Starting");
-
-        // Preload HUD assets
         preloadHUD(this);
 
         // Preload terrain assets
@@ -45,8 +31,8 @@ export class MainScene extends Phaser.Scene {
 
         // Preload terrain animation assets
         this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
-            frameWidth: 64, // Width of each frame
-            frameHeight: 64 // Height of each frame
+            frameWidth: 64,
+            frameHeight: 64
         });
 
         // Preload burned terrain assets
@@ -55,154 +41,98 @@ export class MainScene extends Phaser.Scene {
         this.load.image('burned-tree', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-trees-on-light-dirt.png');
     }
 
-    initializeMap() {
-        this.mapWidth = 10;
-        this.mapHeight = 10;
-        this.minSize = 5;
-        this.tileSize = 32;
-
-        this.currentSeed = Date.now();
-        console.log(`Initial Seed: ${this.currentSeed}`);
-
-        // Initialize the map
-        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
-
-        // Debugging: Log partition details
-        console.log("Map Partitions:");
-        this.map.bsp.getPartitions().forEach((partition, index) => {
-            console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
-        });
-
-        const weather = new Weather(15, 40, 30);
-        this.fireSpread = new FireSpread(this.map, weather);
-
-        this.mapGroup = this.add.group();
-        this.renderMap(this.map, this.tileSize);
-    }
-
-
-    /**
-     * Sets up the scene, including HUD creation and procedural map generation.
-     */
     create() {
+
+
         console.log("MainScene Create Starting");
-
         this.input.on('pointerdown', this.handleTileClick, this);
-
-        // Create UI elements
         this.createUIElements();
-
-        // Create the HUD (calling the existing function)
         createHUD(this);
 
-        // Generate and render map
-        this.initializeMap();
+        // Initialize the map using MapHandler
+        this.mapHandler = new MapHandler(this, {
+            mapWidth: 10,
+            mapHeight: 10,
+            minSize: 5,
+            tileSize: 32,
+            currentSeed: Date.now(),
+        });
+        this.mapHandler.renderMap();
 
-        // Start updating game clock
         this.elapsedTime = 0;
-
-        // Start a fire at a 'random' tile
-        this.startFire();
+        this.mapHandler.startFire();
 
         console.log("MainScene Create Finished");
     }
 
-
-
-    /**
-     * Create UI elements - game title, restart game, start/stop fire, weather stats, tile info overlay
-     */
     createUIElements() {
-        // Tile info text (for when a tile is clicked)
+        // UI elements (HUD, buttons, etc.) remain unchanged...
         this.tileInfoText = this.add.text(10, 400, "", {
             fontSize: "16px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0)",
             padding: { x: 10, y: 5 },
             align: "left"
-        }).setDepth(10).setScrollFactor(0); // Keeps it fixed on screen
+        }).setDepth(10).setScrollFactor(0);
 
-        // Title - Game name
         this.add.text(10, 10, 'Wildfire Command', {
-            font: '20px "Georgia", serif',  // More rustic font
-            color: '#8B4513'  // Brown color for a rustic feel
-        });
+            font: '20px "Georgia", serif',
+            color: '#8B4513'
+        }).setDepth(10).setScrollFactor(0);;
 
-        // Restart Game button
         const restartButton = this.add.text(10, 40, 'Restart Game', {
             font: '16px "Georgia", serif',
             color: '#FFF',
-            backgroundColor: '#A0522D', // Rustic wood-like color
+            backgroundColor: '#A0522D',
             padding: { x: 15, y: 10 }
         })
             .setInteractive()
-            .on('pointerover', () => {  // Hover effect
-                restartButton.setStyle({ backgroundColor: '#8B4513' });
-            })
-            .on('pointerout', () => {  // Reset when not hovering
-                restartButton.setStyle({ backgroundColor: '#A0522D' });
-            })
-            .on('pointerdown', () => {
-                this.restartGame();
-            });
+            .on('pointerover', () => restartButton.setStyle({ backgroundColor: '#8B4513' }))
+            .on('pointerout', () => restartButton.setStyle({ backgroundColor: '#A0522D' }))
+            .on('pointerdown', () => this.restartGame())
+            .setDepth(10).setScrollFactor(0);
 
-        // Start/Stop fire simulation button
         this.fireButton = this.add.text(10, 70, 'Start Fire', {
             font: '16px "Georgia", serif',
             color: '#FFF',
-            backgroundColor: '#8B0000', // Dark red, gives a fiery feel
+            backgroundColor: '#8B0000',
             padding: { x: 15, y: 10 }
         })
             .setInteractive()
-            .on('pointerover', () => {
-                this.fireButton.setStyle({ backgroundColor: '#A52A2A' });
-            })
-            .on('pointerout', () => {
-                this.fireButton.setStyle({ backgroundColor: '#8B0000' });
-            })
-            .on('pointerdown', () => {
-                this.toggleFireSimulation();
-            });
+            .on('pointerover', () => this.fireButton.setStyle({ backgroundColor: '#A52A2A' }))
+            .on('pointerout', () => this.fireButton.setStyle({ backgroundColor: '#8B0000' }))
+            .on('pointerdown', () => this.toggleFireSimulation())
+            .setDepth(10).setScrollFactor(0);
 
-        // Weather stats HUD
         this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
             font: '16px "Georgia", serif',
             color: '#FFF',
-            backgroundColor: '#556B2F',  // Olive green for a rustic feel
+            backgroundColor: '#556B2F',
             padding: { x: 15, y: 10 }
-        });
+        }).setDepth(10).setScrollFactor(0);;
+        this.updateWeatherHUD(15, 40, 30);
 
-        // Initialize weather display
-        // TODO: Add dynamic weather
-        this.updateWeatherHUD(15,40,30);
-
-        // Game Clock Component of HUD
         this.gameClockText = this.add.text(200, 10, "Time: 00:00", {
             fontSize: "18px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
-        }).setScrollFactor(0); // Keep HUD static when moving around
+        }).setDepth(10).setScrollFactor(0);
     }
 
-
-
-
     handleTileClick(pointer) {
-        // Convert click positiion to tile coordinates
-        const startX = (this.cameras.main.width - this.map.width * this.tileSize) / 2;
-        const startY = (this.cameras.main.height - this.map.height * this.tileSize) / 2;
+        // Use the MapHandler's tile dimensions to calculate click coordinates
+        const startX = (this.cameras.main.width - this.mapHandler.map.width * this.mapHandler.tileSize) / 2;
+        const startY = (this.cameras.main.height - this.mapHandler.map.height * this.mapHandler.tileSize) / 2;
 
-        let tileX = Math.floor((pointer.x - startX) / this.tileSize);
-        let tileY = Math.floor((pointer.y - startY) / this.tileSize);
+        let tileX = Math.floor((pointer.x - startX) / this.mapHandler.tileSize);
+        let tileY = Math.floor((pointer.y - startY) / this.mapHandler.tileSize);
 
-        console.warn(`Clicked tile coordinates: (${tileX}, ${tileY})`);
+        // console.warn(`Clicked tile coordinates: (${tileX}, ${tileY})`);
 
-        // Ensure the click is within the map bounds
-        if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
-            let clickedTile = this.map.getTile(tileX, tileY);
+        if (tileX >= 0 && tileX < this.mapHandler.map.width && tileY >= 0 && tileY < this.mapHandler.map.height) {
+            let clickedTile = this.mapHandler.map.getTile(tileX, tileY);
             console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
-
             if (clickedTile) {
                 this.updateTileInfoDisplay(clickedTile);
             }
@@ -212,32 +142,24 @@ export class MainScene extends Phaser.Scene {
     updateTileInfoDisplay(tile) {
         this.tileInfoText.setText(
             `Terrain: ${tile.terrain}
-        \nFlammability: ${tile.flammability}
-        \nFuel: ${tile.fuel}
-        \nBurn Status: ${tile.burnStatus}`
+Flammability: ${tile.flammability}
+Fuel: ${tile.fuel}
+Burn Status: ${tile.burnStatus}`
         );
     }
 
-
     updateGameClock(delta) {
-        this.elapsedTime += delta / 1000; // Convert milliseconds to seconds
-
+        this.elapsedTime += delta / 1000;
         let minutes = Math.floor(this.elapsedTime / 60);
         let seconds = Math.floor(this.elapsedTime % 60);
-
-        // Format time as MM:SS
         let formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
-
-    // Function to update weather HUD
     updateWeatherHUD(temp, wind, humidity) {
         this.weatherText.setText(`Temp: ${temp}°F | Wind: ${wind} mph | Humidity: ${humidity}%`);
     }
 
-    // Function to toggle fire simulation state
     toggleFireSimulation() {
         if (this.isFireSimRunning) {
             console.warn("Fire Simulation Stopped");
@@ -250,21 +172,15 @@ export class MainScene extends Phaser.Scene {
         }
     }
 
-    /**
-     * Renders/updates the resource limits onto the scene.
-     * @param hoseText - The text object of the firehose limit.
-     * @param hoseLimit - The number of firehose uses.
-     */
     update(time, delta) {
-        this.updateGameClock(delta); // Increment game clock by delta time (ms)
+        this.updateGameClock(delta);
 
-        // Handle fire spread every 5 seconds
         if (this.isFireSimRunning && this.elapsedTime - this.lastFireSpreadTime >= this.fireSpreadInterval / 1000) {
             this.lastFireSpreadTime = this.elapsedTime;
-            this.updateFireSpread();
+            this.mapHandler.updateFireSpread();
         }
 
-
+        // Update UI texts for deployments
         hoseText.setText(`${hose}/10`);
         extinguisherText.setText(`${extinguisher}/5`);
         helicopterText.setText(`${helicopter}/3`);
@@ -274,135 +190,13 @@ export class MainScene extends Phaser.Scene {
         smokejumperText.setText(`${smokejumper}/5`);
     }
 
-    /**
-     * Renders the map tiles onto the scene.
-     * @param {Map} map - The procedural map instance to render.
-     * @param {number} tileSize - The size of each tile in pixels.
-     */
-    renderMap(map, tileSize) {
-        // Clear the map group before rendering a new map
-        this.mapGroup.clear(true, true);
-
-        // Clear flame icons before rendering a new map
-        if (this.flameGroup) {
-            this.flameGroup.clear(true, true);
-        } else {
-            this.flameGroup = this.add.group(); // Create flame group if it doesn't exist
-        }
-
-        // Calculate starting x and y to center the map
-        const startX = (this.cameras.main.width - map.width * tileSize) / 2;
-        const startY = (this.cameras.main.height - map.height * tileSize) / 2;
-
-        // Loop through the map grid and render each tile
-        map.grid.forEach((row, y) => {
-            row.forEach((tile, x) => {
-                // Determine terrain asset key
-                const terrainKey = this.textures.exists(tile.terrain) ? tile.terrain : 'defaultTerrain';
-
-                // Add sprite for each terrain type
-                const sprite = this.add.sprite(
-                    startX + x * tileSize,
-                    startY + y * tileSize,
-                    terrainKey
-                ).setOrigin(0).setScale(0.5, 0.5);
-
-                // Store sprite reference in the tile object
-                tile.sprite = sprite;
-
-                // Make the tile interactive
-                sprite.setInteractive();
-
-                // Add click interaction for each tile
-                sprite.on('pointerdown', () => {
-                    console.log(`Clicked on ${tile.terrain} at (${x}, ${y})`);
-                });
-
-                // TO-DO: Water Animation Overlay
-                /*if (tile.terrain == "water") {
-                    console.log(`Map height: ${map.height}`);
-                    console.log(`Tile Sprite X: ${tile.sprite.y}`);
-                    console.log("Gotcha!")
-
-                    this.anims.create({
-                        key: "water-anim",
-                        frames: this.anims.generateFrameNumbers('water-sheet'),
-                        frameRate: 10,
-                        repeat: -1
-                    });
-                
-                        let watertile = this.add.sprite(tile.sprite.x, tile.sprite.y, 'water-anim');
-                        watertile.play('water-anim');
-                    
-                }
-                */
-
-                // Add sprite to the map group
-                this.mapGroup.add(sprite);
-            });
-        });
-    }
-
-
     restartGame() {
         console.log("Restarting game...");
-        
-        // Generate a new unique seed
-        this.currentSeed = Date.now();
-        console.log(`Current Seed: ${this.currentSeed}`);
-
-        // Regenerate the map
-        this.map.regenerateMap(this.currentSeed);
-
-        // Redraw the map
-        this.renderMap(this.map, this.tileSize);
-        console.log("Game restarted with a new map.")
-
-        // Reset the game clock
+        this.mapHandler.restartMap(Date.now());
+        console.log("Game restarted with a new map.");
         this.elapsedTime = 0;
         this.updateGameClock(0);
-
-        // Start the fire
-        this.startFire();
-    }
-
-
-    /**
-     * Starts a fire at a random tile on the map by setting its burnStatus to "burning"
-     * and visually representing it with the fire sprite.
-     * Assumes `this.map` has `width`, `height`, and a 2D `grid` array with `burnStatus`.
-     * Logs the fire's starting location to the console.
-     */
-    startFire() {
-        // Randomly select a starting tile
-        const startX = Math.floor(Math.random() * this.map.width);
-        const startY = Math.floor(Math.random() * this.map.height);
-
-        // Set the selected tile's burnStatus to "burning"
-        const tile = this.map.grid[startY][startX];
-        tile.burnStatus = "burning";
-        console.log(`Starting fire at (${startX}, ${startY})`);
-
-        // Ensure the fire sprite is added to the tile when fire starts
-        if (tile.sprite) {
-            lightFire(this, tile.sprite, this.flameGroup);
-            tile.fireSprite = true; // Mark that fire has been visually applied
-        }
-    }
-
-    updateFireSpread() {
-        console.log("Simulating fire step...");
-        this.fireSpread.simulateFireStep();
-
-        // Update burning tiles
-        this.map.grid.forEach((row) => {
-            row.forEach((tile) => {
-                if (tile.burnStatus === "burning" && !tile.fireSprite) {
-                    lightFire(this, tile.sprite, this.flameGroup);
-                    tile.fireSprite = true;
-                }
-            });
-        });
+        this.mapHandler.startFire();
     }
 }
 
