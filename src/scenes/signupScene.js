@@ -1,17 +1,31 @@
 // src/scenes/signupScene.js
 import Phaser from 'phaser';
+import MainScene from './mainScene.js'; // Adjust the path as needed
 import { auth } from '../firebaseConfig.js';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
+
+/**
+ * Represents the Signup scene for new user's.
+ */
 export default class SignupScene extends Phaser.Scene {
+    /**
+     * Constructs the SignupScene class.
+     */
     constructor() {
         super({ key: 'SignupScene' });
     }
 
+    /**
+     * Preloads assets required for the scene, if needed.
+     */
     preload() {
         // Preload assets if needed.
     }
 
+    /**
+     * Sets up the scene, including buttons and user input fields
+     */
     create() {
 
         // Add a title text.
@@ -27,6 +41,7 @@ export default class SignupScene extends Phaser.Scene {
         nameInput.node.setAttribute('type', 'text');
         nameInput.node.setAttribute('name', 'name');
         nameInput.node.setAttribute('placeholder', 'Name');
+        nameInput.node.classList.add('input-field');
 
         // Create the Email input field.
         const emailInput = this.add.dom(400, 220, 'input', {
@@ -50,6 +65,7 @@ export default class SignupScene extends Phaser.Scene {
         passwordInput.node.setAttribute('type', 'password');
         passwordInput.node.setAttribute('name', 'password');
         passwordInput.node.setAttribute('placeholder', 'Password');
+        passwordInput.node.classList.add('input-field');
 
         // Create the Repeat Password input field.
         const repeatPasswordInput = this.add.dom(400, 320, 'input', {
@@ -61,12 +77,21 @@ export default class SignupScene extends Phaser.Scene {
         repeatPasswordInput.node.setAttribute('type', 'password');
         repeatPasswordInput.node.setAttribute('name', 'repeatPassword');
         repeatPasswordInput.node.setAttribute('placeholder', 'Repeat Password');
+        repeatPasswordInput.node.classList.add('input-field');
 
         // Create the SignUp button.
-        const signupButton = this.add.dom(400, 370, 'button', {
+        // Create a DOM element for the Login button.
+        const signupButton = this.add.dom(460, 380, 'button', {
             width: '100px',
-            height: '40px',
-            fontSize: '16px',
+            height: '30px',
+            font: '16px "Georgia", serif',
+            padding: { x: 15, y: 10 },
+            fontSize: '20px',
+            color: '#fff',
+            backgroundColor: '#8B0000',
+            border: '3px solid #FFD700',
+            borderRadius: '10px',
+            cursor: 'pointer',
         }, 'Sign Up').setOrigin(0.5);
 
         signupButton.addListener('click');
@@ -95,9 +120,17 @@ export default class SignupScene extends Phaser.Scene {
                     // Update the user's profile with the display name.
                     updateProfile(user, { displayName: name })
                         .then(() => {
-                            console.log('User profile updated.');
-                            // Transition to MainScene (or any scene you desire).
+                            console.log('Login successful:', userCredential);
+
+                            // Stop SignupScene
+                            this.scene.stop('SignupScene');
+
+                            // Re-add MainScene to the Scene Manager.
+                            this.scene.add('MainScene', MainScene, false);
+
+                            // Start MainScene afresh.
                             this.scene.start('MainScene');
+
                         })
                         .catch((error) => {
                             console.error('Profile update error:', error);
@@ -111,25 +144,41 @@ export default class SignupScene extends Phaser.Scene {
         });
 
         // Optional: Create a button to go back to the Login scene.
-        const loginButton = this.add.dom(400, 420, 'button', {
-            width: '130px',
-            height: '40px',
-            fontSize: '16px',
-        }, 'Back to Login').setOrigin(0.5);
+        // Create a DOM element for the "Back to Signup" button.
+        const loginButton = this.add.dom(315, 380, 'button', {
+            width: '100px',
+            height: '30px',
+            font: '16px "Georgia", serif',
+            padding: { x: 15, y: 10 },
+            fontSize: '20px',
+            color: '#fff',
+            backgroundColor: '#556B2F',
+            border: '3px solid #FFD700',
+            borderRadius: '10px',
+            cursor: 'pointer',
+        }, 'Login').setOrigin(0.5);
 
         loginButton.addListener('click');
         loginButton.on('click', () => {
             this.scene.start('LoginScene');
         });
 
+        // Optional: Create a button to go back to the Login scene.
         const toGame = this.add.dom(700, 20, 'button', {
             width: '130px',
             height: '40px',
             fontSize: '16px',
-        }, 'ENTER GAME').setOrigin(0.5);
+        }, 'PLAY').setOrigin(0.5);
 
         toGame.addListener('click');
         toGame.on('click', () => {
+            // Stop SignupScene
+            this.scene.stop('SignupScene');
+
+            // Re-add MainScene to the Scene Manager.
+            this.scene.add('MainScene', MainScene, false);
+
+            // Start MainScene afresh.
             this.scene.start('MainScene');
         });
     }
