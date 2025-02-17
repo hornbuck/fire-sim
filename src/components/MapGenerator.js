@@ -20,7 +20,7 @@ export default class Map {
         this.width = width;
         this.height = height;
         this.minSize = minSize;
-        this.perlin = new PerlinNoise(width, height);
+        this.perlin = new PerlinNoise(width, height, 5, seed);
         this.bsp = new BSPPartition(width, height, minSize);
 
         // Debug: Visualize the BSP partitions
