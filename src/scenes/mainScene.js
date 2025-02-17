@@ -348,7 +348,7 @@ export class MainScene extends Phaser.Scene {
         console.log("Restarting game...");
         
         // Generate a new unique seed
-        this.currentSeed = Date.now();
+        this.currentSeed = Math.floor(Math.random() * 1000000);
         console.log(`Current Seed: ${this.currentSeed}`);
 
         // Regenerate the map

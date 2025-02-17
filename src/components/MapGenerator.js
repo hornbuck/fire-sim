@@ -16,7 +16,7 @@ export default class Map {
      * @param {number} minSize - The minimum size for BSP partitioning.
      * @param {number|string} seed - The seed for the map.
      */
-    constructor(width, height, minSize, seed = Date.now()) {
+    constructor(width, height, minSize, seed = Math.random()) {
         this.width = width;
         this.height = height;
         this.minSize = minSize;
