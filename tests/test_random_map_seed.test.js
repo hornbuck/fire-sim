@@ -6,10 +6,10 @@ describe('PerlinNoise Seed Randomness', () => {
         const width = 10;
         const height = 10;
 
-        const noiseInstance1 = new PerlinNoise(width, height);
+        const noiseInstance1 = new PerlinNoise(width, height, 5, Date.now() + Math.random());
         const noiseGrid1 = noiseInstance1.noiseGrid;
 
-        const noiseInstance2 = new PerlinNoise(width, height);
+        const noiseInstance2 = new PerlinNoise(width, height, 5, Date.now() + Math.random());
         const noiseGrid2 = noiseInstance2.noiseGrid;
 
         let differences = 0;
