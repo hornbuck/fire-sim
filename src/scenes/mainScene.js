@@ -375,12 +375,16 @@ export class MainScene extends Phaser.Scene {
      * Logs the fire's starting location to the console.
      */
     startFire() {
-        // Randomly select a starting tile
-        const startX = Math.floor(Math.random() * this.map.width);
-        const startY = Math.floor(Math.random() * this.map.height);
+        let startX, startY, tile
 
+        do{
+        // Randomly select a starting tile
+        startX = Math.floor(Math.random() * this.map.width);
+        startY = Math.floor(Math.random() * this.map.height);
         // Set the selected tile's burnStatus to "burning"
-        const tile = this.map.grid[startY][startX];
+        tile = this.map.grid[startY][startX];
+        } while (tile.flammability === 0)
+        
         tile.burnStatus = "burning";
         console.log(`Starting fire at (${startX}, ${startY})`);
 
