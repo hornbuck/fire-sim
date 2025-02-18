@@ -135,8 +135,21 @@ export function preloadHUD(scene) {
     scene.load.image('active-hotshot-crew', 'assets/resources/activated/hotshot-crew.png');
     scene.load.image('active-smokejumper', 'assets/resources/activated/smokejumpers.png');
 
+    // Load "Out" Notifications for Assets
+    scene.load.image('out-of-hoses', 'assets/resources/notifications/fire-hose.png');
+    scene.load.image('out-of-fire-extinguishers', 'assets/resources/notifications/fire-extinguisher.png');
+    scene.load.image('out-of-helicopters', 'assets/resources/notifications/helicopter.png');
+    scene.load.image('out-of-firetrucks', 'assets/resources/notifications/firetruck.png');
+    
+
     // Load fire spritesheet
     scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    // Load fire-hose (team of firefighters) spritesheet
+    scene.load.spritesheet('set-hose', 'assets/64x64-Map-Tiles/Deployable%20Resources/fire-hose.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
@@ -147,13 +160,13 @@ export function preloadHUD(scene) {
         frameHeight: 64 // Height of each frame
     });
 
-    // Load helicopter spritesheet
+    // Load firetruck spritesheet
     scene.load.spritesheet('set-firetruck', 'assets//64x64-Map-Tiles/Deployable%20Resources/firetruck.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
 
-    // Load firetruck spritesheet
+    // Load helicopter spritesheet
     scene.load.spritesheet('set-helicopter', 'assets//64x64-Map-Tiles/Deployable%20Resources/helicopter.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
