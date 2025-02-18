@@ -1,3 +1,5 @@
+import AnimatedSprite from '../components/AnimatedSprites.js';
+
 // Global stream to track which technique is currently active
 export let technique = "";
 export let activated_resource = "none";
@@ -59,62 +61,77 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
         tooltip.setVisible(false);
     });
 }
+
 // This function adjusts the countdown
-// TO-DO: Add deployment graphics/animations week of Jan 27
-export function use_resource (scene) {
+// TO-DO: Add deployment graphics/animations
+export function use_resource (scene, x, y, fireSprite) {
+    
+    // Create an object that controls deployment graphics
+    let asset = new AnimatedSprite(3);
+
+    // Deploy animations
     if (activated_resource === "hose") {
         if (hose > 0) {
             console.log("Hose was applied!");
             hose -= 1;
+            asset.useHose(scene, x, y, fireSprite);
         } else {
             console.log("Sorry! You ran out!");
+            
+            // Notification to player that they are out of firehoses
+            const hose_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-hoses').setScale(0.8).setOrigin(0.5, 0.5);
+            hose_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                hose_notification.destroy();
+            });
         }
     }
     if (activated_resource === "extinguisher") {
         if (extinguisher > 0) {
             extinguisher -= 1;
+            asset.useFireExtinguisher(scene, x, y, fireSprite);
 
-            let m_x = 0;
-            let m_y = 0;
-            
-            // Register extinguish animation
-            scene.anims.create({
-                key: "extinguisherAnimConfig",
-                frames: scene.anims.generateFrameNumbers('set-extinguisher'),
-                frameRate: 10,
-                repeat: -1
-            });
-
-            // Get mouse position and play animation upon click
-            scene.input.on('pointerdown', function (pointer) {
-                m_x = pointer.x;
-                m_y = pointer.y;
-                let cloudSprite = scene.add.sprite(m_x,m_y, 'set-extinguisher').setDepth(1).setScale(0.75, 0.75);
-                cloudSprite.play('extinguisherAnimConfig');
-                scene.time.delayedCall(3000, () => {
-                    cloudSprite.destroy();
-                });
-                console.log(`Mouse coordinates: x=${m_x}, y=${m_y}`);
-            });
-
-            
         } else {
             console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of fire extinguishers
+            const extinguisher_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-fire-extinguishers').setScale(0.8).setOrigin(0.5, 0.5);
+            extinguisher_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                extinguisher_notification.destroy();
+            });
         }
     }
     if (activated_resource === "helicopter") {
         if (helicopter > 0) {
             helicopter -= 1;
+            asset.useHelicopter(scene, x, y, fireSprite);
             
         } else {
             console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of helicopters
+            const helicopter_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-helicopters').setScale(0.8).setOrigin(0.5, 0.5);
+            helicopter_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                helicopter_notification.destroy();
+            });
         }
     }
     if (activated_resource === "firetruck") {
         if (firetruck > 0) {
             firetruck -= 1;
+            asset.useFiretruck(scene, x, y, fireSprite);
+
         } else {
             console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of firetrucks
+            const firetruck_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-firetrucks').setScale(0.8).setOrigin(0.5, 0.5);
+            firetruck_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                firetruck_notification.destroy();
+            });
         }
     }
     if (activated_resource === "airtanker") {

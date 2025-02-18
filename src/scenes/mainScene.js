@@ -6,7 +6,8 @@
 
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
-import FireSpread, { lightFire } from '../components/FireSpread.js';
+import FireSpread from '../components/FireSpread.js';
+import AnimatedSprite from '../components/AnimatedSprites.js';
 import Weather from '../components/Weather.js';
 import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
@@ -385,7 +386,8 @@ export class MainScene extends Phaser.Scene {
 
         // Ensure the fire sprite is added to the tile when fire starts
         if (tile.sprite) {
-            lightFire(this, tile.sprite, this.flameGroup);
+            let blaze = new AnimatedSprite(3);
+            blaze.lightFire(this, tile.sprite, this.flameGroup);
             tile.fireSprite = true; // Mark that fire has been visually applied
         }
     }
@@ -398,7 +400,8 @@ export class MainScene extends Phaser.Scene {
         this.map.grid.forEach((row) => {
             row.forEach((tile) => {
                 if (tile.burnStatus === "burning" && !tile.fireSprite) {
-                    lightFire(this, tile.sprite, this.flameGroup);
+                    let blaze = new AnimatedSprite(3);
+                    blaze.lightFire(this, tile.sprite, this.flameGroup);
                     tile.fireSprite = true;
                 }
             });
