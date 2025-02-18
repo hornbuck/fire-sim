@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+import IntroScene from './scenes/IntroScene.js';
 import MainScene from './scenes/mainScene.js';
 
 // Log to confirm app.js is running
@@ -7,12 +9,12 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    scene: [MainScene],
+    scene: [IntroScene, MainScene],
     backgroundColor: '#282c34',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
+    }
 };
 
 // Create the game instance locally
