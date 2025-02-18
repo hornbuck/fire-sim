@@ -1,9 +1,8 @@
 /**
- * @file MainScene.js
+ * @file mainScene.js
  * @description Defines the MainScene class, responsible for rendering and managing the main gameplay scene in the Sim Firefighter game.
  * Includes HUD creation, procedural map generation, and interactive terrain rendering.
  */
-
 import Map from '../components/MapGenerator.js';
 import { createHUD, preloadHUD } from '../components/ui.js';
 import FireSpread from '../components/FireSpread.js';
@@ -11,6 +10,8 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import Weather from '../components/Weather.js';
 import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
+
+
 
 /**
  * Represents the main gameplay scene in the Sim Firefighter game.
@@ -86,7 +87,9 @@ export class MainScene extends Phaser.Scene {
      * Sets up the scene, including HUD creation and procedural map generation.
      */
     create() {
+
         console.log("MainScene Create Starting");
+
 
         this.input.on('pointerdown', this.handleTileClick, this);
 
@@ -109,7 +112,6 @@ export class MainScene extends Phaser.Scene {
     }
 
 
-
     /**
      * Create UI elements - game title, restart game, start/stop fire, weather stats, tile info overlay
      */
@@ -128,6 +130,57 @@ export class MainScene extends Phaser.Scene {
             font: '20px "Georgia", serif',  // More rustic font
             color: '#8B4513'  // Brown color for a rustic feel
         });
+
+        // Login Button via MainScene
+        const loginMenuButton = this.add.text(600, 10, 'Login', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                loginMenuButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                loginMenuButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                this.events.removeAllListeners();
+                this.scene.remove('MainScene'); // Removes the scene entirely.
+                this.scene.start('LoginScene');
+            })
+
+
+        /* Logout Button
+        const logoutMenuButton = this.add.text(600, 50, 'Logout', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                logoutMenuButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                logoutMenuButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                // Call Firebase signOut and switch scenes on success
+                signOut(auth)
+                    .then(() => {
+                        console.log('User logged out successfully.');
+                        this.scene.start('LoginScene');
+
+
+                    })
+                    .catch((error) => {
+                        console.error('Error logging out:', error);
+                        alert('Error logging out: ' + error.message);
+                    });
+            });
+         */
 
         // Restart Game button
         const restartButton = this.add.text(10, 40, 'Restart Game', {
@@ -185,8 +238,6 @@ export class MainScene extends Phaser.Scene {
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0); // Keep HUD static when moving around
     }
-
-
 
 
     handleTileClick(pointer) {
@@ -281,8 +332,12 @@ export class MainScene extends Phaser.Scene {
      * @param {number} tileSize - The size of each tile in pixels.
      */
     renderMap(map, tileSize) {
-        // Clear the map group before rendering a new map
-        this.mapGroup.clear(true, true);
+        // Destroy the mapGroup if it exists and is not already destroyed
+        if (this.mapGroup && !this.mapGroup.destroyed) {
+            this.mapGroup.destroy(true);
+        }
+        // Recreate the map group
+        this.mapGroup = this.add.group();
 
         // Clear flame icons before rendering a new map
         if (this.flameGroup) {

@@ -11,7 +11,7 @@ export default {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'js/app.js',
+    filename: 'js/[name].js',
     clean: true,
   },
 };

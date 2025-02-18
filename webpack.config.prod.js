@@ -1,10 +1,11 @@
+import webpack from 'webpack';
+const { DefinePlugin } = webpack;
 import { merge } from 'webpack-merge';
 import common from './webpack.common.js';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyPlugin from 'copy-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { GenerateSW } from 'workbox-webpack-plugin';
-import { DefinePlugin } from 'webpack';
 
 export default merge(common, {
       mode: 'production',
