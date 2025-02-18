@@ -73,7 +73,7 @@ export function use_resource (scene, x, y, fireSprite) {
     if (activated_resource === "hose") {
         if (hose > 0) {
             console.log("Hose was applied!");
-            hose -= 5;
+            hose -= 1;
             asset.useHose(scene, x, y, fireSprite);
         } else {
             console.log("Sorry! You ran out!");
