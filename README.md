@@ -111,7 +111,7 @@ To run the project locally, ensure you have:
     - Using [live-server](https://www.npmjs.com/package/live-server):
 
       ```bash
-      npx live-server
+      npm run start
       ```
 
     - Alternatively, use your IDE's built-in server.
