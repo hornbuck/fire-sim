@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import IntroScene from './scenes/IntroScene.js';
 import MainScene from './scenes/mainScene.js';
 import SignupScene from "./scenes/signupScene.js";
