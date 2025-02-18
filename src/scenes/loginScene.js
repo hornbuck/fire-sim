@@ -124,5 +124,24 @@ export default class LoginScene extends Phaser.Scene {
         signupButton.on('click', () => {
             this.scene.start('SignupScene');
         });
+
+        // Optional: Create a button to go back to the Login scene.
+        const toGame = this.add.dom(700, 20, 'button', {
+            width: '130px',
+            height: '40px',
+            fontSize: '16px',
+        }, 'PLAY').setOrigin(0.5);
+
+        toGame.addListener('click');
+        toGame.on('click', () => {
+            // Stop SignupScene
+            this.scene.stop('SignupScene');
+
+            // Re-add MainScene to the Scene Manager.
+            this.scene.add('MainScene', MainScene, false);
+
+            // Start MainScene afresh.
+            this.scene.start('MainScene');
+        });
     }
 }
