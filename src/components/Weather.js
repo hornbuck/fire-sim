@@ -27,7 +27,7 @@ class Weather {
         // Wind speed increases fire spread (higher wind speed = faster fire spread)
         influence += this.windSpeed * 0.2;
 
-        return influence;
+        return parseFloat(influence.toFixed(2));
     }
 }
 

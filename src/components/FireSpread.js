@@ -137,7 +137,7 @@ class FireSpread {
         const ignitionChance = this.calculateIgnitionChance(neighborTile);
         console.log(`Ignition chance: ${ignitionChance}`);
 
-        if (ignitionChance > 75) { // Threshold for testing
+        if (ignitionChance > 65) { // Threshold for testing
             neighborTile.burnStatus = "burning";
             return 1; // Indicates ignition
         }

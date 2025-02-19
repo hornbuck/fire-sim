@@ -20,12 +20,13 @@ export class MainScene extends Phaser.Scene {
     /**
      * Constructs the MainScene class.
      */
+
     constructor() {
         super('MainScene'); // Identifier for this scene
         console.log("MainScene Constructor Called");
 
-        this.elapsedTime = 0 // Initialize the game clock (in ms)
-        this.fireSpreadInterval = 10000; // Fire spreads every 10 seconds
+        this.gameClock = 0 // Initialize the game clock (in ms)
+        this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
     }
@@ -75,8 +76,8 @@ export class MainScene extends Phaser.Scene {
             console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
         });
 
-        const weather = new Weather(15, 40, 30);
-        this.fireSpread = new FireSpread(this.map, weather);
+        this.weather = new Weather(68, 30, 15);
+        this.fireSpread = new FireSpread(this.map, this.weather);
 
         this.mapGroup = this.add.group();
         this.renderMap(this.map, this.tileSize);
@@ -93,14 +94,14 @@ export class MainScene extends Phaser.Scene {
 
         this.input.on('pointerdown', this.handleTileClick, this);
 
+        // Generate and render map
+        this.initializeMap();
+
         // Create UI elements
         this.createUIElements();
 
         // Create the HUD (calling the existing function)
         createHUD(this);
-
-        // Generate and render map
-        this.initializeMap();
 
         // Start updating game clock
         this.elapsedTime = 0;
@@ -219,16 +220,12 @@ export class MainScene extends Phaser.Scene {
             });
 
         // Weather stats HUD
-        this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
+        this.weatherText = this.add.text(10, 100, `Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph`, {
             font: '16px "Georgia", serif',
             color: '#FFF',
             backgroundColor: '#556B2F',  // Olive green for a rustic feel
             padding: { x: 15, y: 10 }
         });
-
-        // Initialize weather display
-        // TODO: Add dynamic weather
-        this.updateWeatherHUD(15,40,30);
 
         // Game Clock Component of HUD
         this.gameClockText = this.add.text(200, 10, "Time: 00:00", {
@@ -283,10 +280,22 @@ export class MainScene extends Phaser.Scene {
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
+    updateWeatherOverTime() {
+        // Random adjustments within a range for dynamic effect
+        let tempChange = Phaser.Math.Between(-2, 2); // Temperature change between -2°F to 2°F
+        let windChange = Phaser.Math.Between(-1, 1); // Wind speed change between -1 to 1 mph
+        let humidityChange = Phaser.Math.Between(-3, 3); // Humidity change between -3% to 3%
 
-    // Function to update weather HUD
-    updateWeatherHUD(temp, wind, humidity) {
-        this.weatherText.setText(`Temp: ${temp}°F | Wind: ${wind} mph | Humidity: ${humidity}%`);
+        // Update the weather object with new values
+        let newTemp = this.weather.temperature + tempChange;
+        let newWind = Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100); // Keep wind within 0-100 mph
+        let newHumidity = Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100); // Keep humidity within 0-100%
+
+        // Update weather
+        this.weather.updateWeather(newTemp, newHumidity, newWind);
+
+        // Update the HUD display for weather
+        this.weatherText.setText(`Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph`);
     }
 
     // Function to toggle fire simulation state
@@ -314,6 +323,7 @@ export class MainScene extends Phaser.Scene {
         if (this.isFireSimRunning && this.elapsedTime - this.lastFireSpreadTime >= this.fireSpreadInterval / 1000) {
             this.lastFireSpreadTime = this.elapsedTime;
             this.updateFireSpread();
+            this.updateWeatherOverTime();
         }
 
 
