@@ -22,20 +22,27 @@ class FireSpread {
     simulateFireStep() {
         const newGrid = this.copyGrid();  // Extracted copying logic
         let spreadCount = 0;
-
+        let anyBurning = false;  // Flag to track if any tile is burning
+    
         for (let y = 0; y < this.map.height; y++) {
             for (let x = 0; x < this.map.width; x++) {
                 const tile = this.map.grid[y][x];
                 if (tile.burnStatus === "burning") {
+                    anyBurning = true;  // Set the flag if any tile is burning
                     console.log(`Processing burning tile at (${x}, ${y})`);
                     spreadCount += this.processBurningTile(tile, newGrid, x, y);
                 }
             }
         }
-
+    
+        if (!anyBurning) {
+            console.warn("No tiles are burning. You Win!!");
+        }
+    
         console.log(`${spreadCount} tiles ignited this step.`);
         this.map.grid = newGrid; // Update the map's grid with new fire states
     }
+    
 
 
     /**

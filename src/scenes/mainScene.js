@@ -24,8 +24,8 @@ export class MainScene extends Phaser.Scene {
         super('MainScene'); // Identifier for this scene
         console.log("MainScene Constructor Called");
 
-        this.gameClock = 0 // Initialize the game clock (in ms)
-        this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
+        this.elapsedTime = 0 // Initialize the game clock (in ms)
+        this.fireSpreadInterval = 10000; // Fire spreads every 10 seconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
     }

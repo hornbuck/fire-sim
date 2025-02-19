@@ -62,6 +62,31 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
     });
 }
 
+// Assuming you already have this method for handling tile clicks
+function handleFireExtinguish(fireSprite) {
+    // Convert fire sprite position to tile coordinates using the same method as handleTileClick
+    const startX = (this.cameras.main.width - this.map.width * this.tileSize) / 2;
+    const startY = (this.cameras.main.height - this.map.height * this.tileSize) / 2;
+
+    let tileX = Math.floor((fireSprite.x - startX) / this.tileSize);
+    let tileY = Math.floor((fireSprite.y - startY) / this.tileSize);
+
+    console.warn(`Fire at tile coordinates: (${tileX}, ${tileY})`);
+
+    // Ensure the tile is within bounds
+    if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
+        let clickedTile = this.map.getTile(tileX, tileY);
+        console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
+
+        // If tile exists, update its burn status
+        if (clickedTile) {
+            clickedTile.burnStatus = 'burnt';
+            console.log(`Tile at (${tileX}, ${tileY}) burn status updated to: ${clickedTile.burnStatus}`);
+        }
+    }
+}
+
+
 // This function adjusts the countdown
 // TO-DO: Add deployment graphics/animations
 export function use_resource (scene, x, y, fireSprite) {
@@ -75,6 +100,10 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Hose was applied!");
             hose -= 1;
             asset.useHose(scene, x, y, fireSprite);
+
+            scene.time.delayedCall(3000, () => {
+                handleFireExtinguish.call(scene, fireSprite)
+            })
         } else {
             console.log("Sorry! You ran out!");
             
