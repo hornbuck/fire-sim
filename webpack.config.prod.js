@@ -27,9 +27,9 @@ export default merge(common, {
         }),
         new CopyPlugin({
           patterns: [
-            // {from: 'img', to: 'img'},
+            {from: 'img', to: 'img'},
             {from: 'css', to: 'css'},
-            // {from: 'js/vendor', to: 'js/vendor'},
+            {from: 'js/vendor', to: 'js/vendor'},
             {from: 'icon.svg', to: 'icon.svg'},
             {from: 'favicon.ico', to: 'favicon.ico'},
             {from: 'robots.txt', to: 'robots.txt'},
