@@ -26,7 +26,7 @@ export class MainScene extends Phaser.Scene {
         console.log("MainScene Constructor Called");
 
         this.gameClock = 0 // Initialize the game clock (in ms)
-        this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
+        this.fireSpreadInterval = 3000; // Fire spreads every 10 seconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
     }
@@ -76,7 +76,7 @@ export class MainScene extends Phaser.Scene {
             console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
         });
 
-        this.weather = new Weather(68, 30, 15);
+        this.weather = new Weather(68, 30, 15, 'N');
         this.fireSpread = new FireSpread(this.map, this.weather);
 
         this.mapGroup = this.add.group();
@@ -220,7 +220,7 @@ export class MainScene extends Phaser.Scene {
             });
 
         // Weather stats HUD
-        this.weatherText = this.add.text(10, 100, `Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph`, {
+        this.weatherText = this.add.text(10, 100, `Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph | Direction: ${this.weather.windDirection}`, {
             font: '16px "Georgia", serif',
             color: '#FFF',
             backgroundColor: '#556B2F',  // Olive green for a rustic feel
@@ -260,7 +260,7 @@ export class MainScene extends Phaser.Scene {
 
     updateTileInfoDisplay(tile) {
         this.tileInfoText.setText(
-            `Terrain: ${tile.terrain}
+        `Terrain: ${tile.terrain}
         \nFlammability: ${tile.flammability}
         \nFuel: ${tile.fuel}
         \nBurn Status: ${tile.burnStatus}`
@@ -285,18 +285,26 @@ export class MainScene extends Phaser.Scene {
         let tempChange = Phaser.Math.Between(-2, 2); // Temperature change between -2°F to 2°F
         let windChange = Phaser.Math.Between(-1, 1); // Wind speed change between -1 to 1 mph
         let humidityChange = Phaser.Math.Between(-3, 3); // Humidity change between -3% to 3%
-
+    
         // Update the weather object with new values
         let newTemp = this.weather.temperature + tempChange;
         let newWind = Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100); // Keep wind within 0-100 mph
         let newHumidity = Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100); // Keep humidity within 0-100%
-
+    
+        // Small chance (1 in 10) for wind direction to change
+        let newWindDirection = this.weather.windDirection;
+        if (Phaser.Math.Between(1, 10) === 1) {
+            const directions = ["N", "E", "S", "W"];
+            newWindDirection = Phaser.Utils.Array.GetRandom(directions);
+        }
+    
         // Update weather
-        this.weather.updateWeather(newTemp, newHumidity, newWind);
-
+        this.weather.updateWeather(newTemp, newHumidity, newWind, newWindDirection);
+    
         // Update the HUD display for weather
-        this.weatherText.setText(`Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph`);
+        this.weatherText.setText(`Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph | Direction: ${this.weather.windDirection}`);
     }
+    
 
     // Function to toggle fire simulation state
     toggleFireSimulation() {

@@ -70,16 +70,28 @@ class FireSpread {
     processBurningTile(tile, newGrid, x, y) {
         let spreadCount = this.spreadFire(tile, newGrid);
         let curTile = newGrid[y][x];
-
+    
+        // Decrease fuel and check for burnt status
         curTile.fuel = Math.max(0, curTile.fuel - 1); // Prevent negative fuel
-
+    
+        // If fuel is depleted, mark the tile as burnt
         if (curTile.fuel === 0) {
             curTile.burnStatus = "burnt";
             console.warn(`Tile (${x}, ${y}) is now burnt.`);
+    
+            // // Check if the tile has a fire sprite and extinguish it
+            // if (tile.fireSprite) {
+            //     console.log(`Removing fire sprite for burnt tile at (${x}, ${y})`);
+            //     tile.fireSprite.destroy();  // Destroy the fire sprite
+            //     tile.fireSprite = null;  // Clear the reference to the sprite
+            // }
         }
-
+    
         return spreadCount;
     }
+    
+    
+    
 
 
 
@@ -102,12 +114,25 @@ class FireSpread {
 
             if (neighborTile.burnStatus === "burning") continue; // Avoid re-igniting
             if (this.canIgnite(neighborTile)) {
-                spreadCount += this.attemptIgnite(neighborTile);
+                const isDownwind = this.isTileDownwind(tile, neighbor)
+                spreadCount += this.attemptIgnite(neighborTile, isDownwind);
             }
         }
 
         return spreadCount;
     }
+
+    isTileDownwind(tile, neighbor) {
+        const { windDirection } = this.weather;
+    
+        if (windDirection === 'N' && neighbor.y < tile.y) return true; // Fire spreads faster southward
+        if (windDirection === 'S' && neighbor.y > tile.y) return true; // Fire spreads faster northward
+        if (windDirection === 'E' && neighbor.x > tile.x) return true; // Fire spreads faster westward
+        if (windDirection === 'W' && neighbor.x < tile.x) return true; // Fire spreads faster eastward
+    
+        return false;
+    }
+    
 
 
 
@@ -133,16 +158,21 @@ class FireSpread {
      *
      * @returns {number} - Returns 1 if the tile ignited, otherwise 0.
      */
-    attemptIgnite(neighborTile) {
-        const ignitionChance = this.calculateIgnitionChance(neighborTile);
-        console.log(`Ignition chance: ${ignitionChance}`);
-
-        if (ignitionChance > 65) { // Threshold for testing
-            neighborTile.burnStatus = "burning";
-            return 1; // Indicates ignition
+    attemptIgnite(neighborTile, isDownwind) {
+        let ignitionChance = this.calculateIgnitionChance(neighborTile);
+        
+        if (isDownwind) {
+            ignitionChance += this.weather.windSpeed * 0.3; // Boost for downwind tiles
+            console.log(`Downwind boost applied! New chance: ${ignitionChance}`);
         }
-        return 0; // No ignition
+    
+        if (ignitionChance > 65) {
+            neighborTile.burnStatus = "burning";
+            return 1;
+        }
+        return 0;
     }
+    
 
     /**
      * Gets the coordinates of neighboring tiles around a given tile.
