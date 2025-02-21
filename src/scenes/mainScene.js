@@ -10,7 +10,7 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import Weather from '../components/Weather.js';
 import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
-
+import CameraControls from '../components/CameraControls.js';
 
 
 /**
@@ -101,6 +101,9 @@ export class MainScene extends Phaser.Scene {
 
         // Generate and render map
         this.initializeMap();
+
+        // Initialize camera controls
+        this.cameraControls = new CameraControls(this);
 
         // Start updating game clock
         this.elapsedTime = 0;
@@ -237,6 +240,15 @@ export class MainScene extends Phaser.Scene {
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0); // Keep HUD static when moving around
+
+        // Separate UI camera to prevent zooming effects
+        this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+        this.uiCamera.setScroll(0, 0);
+
+        // Ensure UI elements are unaffected by zoom/pan
+        this.uiCamera.ignore(this.mapGroup);
+        this.cameras.main.ignore([this.tileInfoText]);  
+    
     }
 
 
