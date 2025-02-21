@@ -465,7 +465,7 @@ export class MainScene extends Phaser.Scene {
         if (tile.sprite) {
             let blaze = new AnimatedSprite(3);
             blaze.lightFire(this, tile.sprite, this.flameGroup);
-            tile.fireSprite = true; // Mark that fire has been visually applied
+            tile.fireS = blaze; // Mark that fire has been visually applied
         }
     }
 
@@ -479,7 +479,7 @@ export class MainScene extends Phaser.Scene {
                 if (tile.burnStatus === "burning" && !tile.fireSprite) {
                     let blaze = new AnimatedSprite(3);
                     blaze.lightFire(this, tile.sprite, this.flameGroup);
-                    tile.fireSprite = true;
+                    tile.fireS = blaze;
                 }
             });
         });

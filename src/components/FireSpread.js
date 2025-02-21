@@ -1,3 +1,5 @@
+import AnimatedSprite from "./AnimatedSprites.js";
+
 class FireSpread {
     /**
      * Creates an instance of the FireSpread class.
@@ -74,18 +76,21 @@ class FireSpread {
         // Decrease fuel and check for burnt status
         curTile.fuel = Math.max(0, curTile.fuel - 1); // Prevent negative fuel
     
+        console.log(`Tile (${x}, ${y}) fuel level: ${curTile.fuel}.`);
         // If fuel is depleted, mark the tile as burnt
         if (curTile.fuel === 0) {
             curTile.burnStatus = "burnt";
             console.warn(`Tile (${x}, ${y}) is now burnt.`);
     
-            // // Check if the tile has a fire sprite and extinguish it
-            // if (tile.fireSprite) {
-            //     console.log(`Removing fire sprite for burnt tile at (${x}, ${y})`);
-            //     tile.fireSprite.destroy();  // Destroy the fire sprite
-            //     tile.fireSprite = null;  // Clear the reference to the sprite
-            // }
+            // Check if the tile has a fire sprite and extinguish it
+            if (tile.fireS) {
+                console.log(`Removing fire sprite for burnt tile at (${x}, ${y})`);
+                setTimeout(() => { tile.fireS.extinguishFire(tile.fireS); }, 2000)
+                console.log(`Removed fire sprite for burnt tile at (${x}, ${y})`);
+            }
         }
+
+        console.warn(`Tile (${x}, ${y}) tile.firesprite status: ${tile.fireS}`);
     
         return spreadCount;
     }
