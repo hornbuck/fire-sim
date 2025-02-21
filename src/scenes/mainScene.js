@@ -128,6 +128,18 @@ export class MainScene extends Phaser.Scene {
             align: "left"
         }).setDepth(10).setScrollFactor(0); // Keeps it fixed on screen
 
+        // Ensure `mapGroup` exists before calling ignore
+        if (this.mapGroup) {
+            this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+            this.uiCamera.setScroll(0, 0);
+            this.uiCamera.ignore(this.mapGroup);
+        } else {
+            console.warn("mapGroup is not initialized when creating UI elements.");
+        }
+
+        // Ensure UI elements are ignored by the game camera
+        this.cameras.main.ignore([this.tileInfoText]); 
+
         // Title - Game name
         this.add.text(10, 10, 'Wildfire Command', {
             font: '20px "Georgia", serif',  // More rustic font
@@ -239,16 +251,7 @@ export class MainScene extends Phaser.Scene {
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
-        }).setScrollFactor(0); // Keep HUD static when moving around
-
-        // Separate UI camera to prevent zooming effects
-        this.uiCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
-        this.uiCamera.setScroll(0, 0);
-
-        // Ensure UI elements are unaffected by zoom/pan
-        this.uiCamera.ignore(this.mapGroup);
-        this.cameras.main.ignore([this.tileInfoText]);  
-    
+        }).setScrollFactor(0); // Keep HUD static when moving around 
     }
 
 
