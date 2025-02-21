@@ -10,7 +10,7 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import Weather from '../components/Weather.js';
 import { hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
-import CameraControls from '../components/CameraControls.js';
+import CameraControls from '../utils/CameraControls.js';
 
 
 /**
