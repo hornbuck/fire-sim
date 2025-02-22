@@ -84,7 +84,7 @@ getTerrainFromNoise(value) {
         terrain = 'grass';
     } 
 
-    console.log(`Noise: ${value}, Terrain: ${terrain}`);
+    // console.log(`Noise: ${value}, Terrain: ${terrain}`);
 
     return terrain;
 }
