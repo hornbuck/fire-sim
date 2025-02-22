@@ -3,11 +3,21 @@ export default class CameraControls {
         this.scene = scene;
         this.camera = scene.cameras.main;
 
-        // Set zoom and bounds
-        this.camera.setZoom(1);
-        this.camera.setBounds(0, 0, scene.mapWidth * scene.tileSize, scene.mapHeight * scene.tileSize);
+        // Debugging: Check if map dimensions are received
+        console.log("CameraControls Initialized with Scene:");
+        console.log("mapWidth:", scene.mapWidth);
+        console.log("mapHeight:", scene.mapHeight);
+        console.log("tileSize:", scene.tileSize);
 
-        // Enable panning and zooming
+        // Set zoom and bounds (with fallback values if undefined)
+        const mapWidth = scene.mapWidth ? scene.mapWidth * scene.tileSize : 800;
+        const mapHeight = scene.mapHeight ? scene.mapHeight * scene.tileSize : 600;
+
+        console.log("Final Bounds:", mapWidth, mapHeight);
+        this.camera.setBounds(0, 0, mapWidth, mapHeight);
+        this.camera.setZoom(1);
+
+        // Enable interactions
         this.enablePanning();
         this.enableZoom();
     }
@@ -16,14 +26,14 @@ export default class CameraControls {
         let dragStart = { x: 0, y: 0 };
 
         this.scene.input.on('pointerdown', (pointer) => {
-            if (!pointer.rightButtonDown()) { // Ignore right-clicks
-                dragStart.x = pointer.x;
-                dragStart.y = pointer.y;
-            }
+            console.log("Pointer Down Detected");
+            dragStart.x = pointer.x;
+            dragStart.y = pointer.y;
         });
 
         this.scene.input.on('pointermove', (pointer) => {
             if (pointer.isDown) {
+                console.log("Panning...");
                 this.camera.scrollX -= (pointer.x - dragStart.x) / this.camera.zoom;
                 this.camera.scrollY -= (pointer.y - dragStart.y) / this.camera.zoom;
                 dragStart.x = pointer.x;
@@ -34,7 +44,7 @@ export default class CameraControls {
 
     enableZoom() {
         this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            // Prevent zooming when interacting with UI elements
+            console.log("Zooming...");
             if (gameObjects.length > 0) return;
 
             let zoomFactor = Phaser.Math.Clamp(this.camera.zoom - deltaY * 0.001, 0.5, 2);
