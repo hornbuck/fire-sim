@@ -1,3 +1,4 @@
+// webpack.common.js
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,6 +13,7 @@ export default {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'js/[name].js',
+    publicPath: '/',
     clean: true,
   },
 };
