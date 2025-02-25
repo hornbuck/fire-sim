@@ -257,4 +257,13 @@ export default class MapScene extends Phaser.Scene {
             });
         });
     }
+
+    toggleFireSimulation() {
+        this.isFireSimRunning = !this.isFireSimRunning;
+        console.warn(`Fire Simulation ${this.isFireSimRunning ? "Started" : "Stopped"}`);
+    
+        // Notify UIScene to update the button text
+        this.scene.get('UIScene').events.emit('fireSimToggled', this.isFireSimRunning);
+    }
+    
 }
