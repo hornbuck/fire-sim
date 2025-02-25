@@ -29,6 +29,13 @@ export default class MapScene extends Phaser.Scene {
             frameHeight: 64 // Height of each frame
         });
 
+        // Load fire spritesheet
+        scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
+            frameWidth: 64, // Width of each frame
+            frameHeight: 64 // Height of each frame
+        });
+
+
         // Preload burned terrain assets
         this.load.image('burned-grass', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass.png');
         this.load.image('burned-shrub', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-shrubs-on-sand.png');
