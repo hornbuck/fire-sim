@@ -55,7 +55,7 @@ export default merge(common, {
         { from: 'icon.png', to: 'icon.png', noErrorOnMissing: true },
         { from: '404.html', to: '404.html', noErrorOnMissing: true },
         { from: 'site.webmanifest', to: 'site.webmanifest', noErrorOnMissing: true },
-        { from: path.resolve(__dirname, 'Assets'), to: 'assets', noErrorOnMissing: true },
+        { from: 'assets', to: 'assets', noErrorOnMissing: true },
       ],
     }),
     new BundleAnalyzerPlugin({
