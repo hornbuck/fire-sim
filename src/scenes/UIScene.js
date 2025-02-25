@@ -1,4 +1,4 @@
-import { createHUD, preloadHUD } from '../components/ui.js';
+import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
 
 export default class UIScene extends Phaser.Scene {
@@ -12,9 +12,19 @@ export default class UIScene extends Phaser.Scene {
 
     create() {
         console.log("UIScene Created");
+
+        // Ensure HUD is created
         createHUD(this);
 
-        // Fire Simulation Button
+        // Add text to HUD
+        this.hoseText = hoseText;
+        this.extinguisherText = extinguisherText;
+        this.helicopterText = helicopterText;
+        this.firetruckText = firetruckText;
+        this.airtankerText = airtankerText;
+        this.hotshotcrewText = hotshotcrewText;
+        this.smokejumperText = smokejumperText;
+
         this.fireButton = this.add.text(10, 70, 'Start Fire', {
             font: '16px Georgia',
             color: '#FFF',
@@ -26,7 +36,7 @@ export default class UIScene extends Phaser.Scene {
             });
 
         // Restart Button
-        this.restartButton = this.add.text(10, 40, 'Restart Game', {
+            this.restartButton = this.add.text(10, 40, 'Restart Game', {
             font: '16px Georgia',
             color: '#FFF',
             backgroundColor: '#A0522D',
@@ -36,11 +46,11 @@ export default class UIScene extends Phaser.Scene {
                 this.scene.get('MapScene').initializeMap();
             });
 
-        // Weather Info
-        this.weatherText = this.add.text(10, 100, 'Loading weather...');
+        // Weather Text
+            this.weatherText = this.add.text(10, 100, 'Loading weather...');
         this.tileInfoText = this.add.text(10, 400, '');
 
-        // Event Listeners
+        // Event listeners
         this.scene.get('MapScene').events.on('weatherUpdated', weather => {
             this.weatherText.setText(`Temp: ${weather.temperature}°F | Humidity: ${weather.humidity}% | Wind: ${weather.windSpeed} mph | Direction: ${weather.windDirection}`);
         });
@@ -55,12 +65,14 @@ export default class UIScene extends Phaser.Scene {
     }
 
     update() {
-        hoseText.setText(`${hose}/10`);
-        extinguisherText.setText(`${extinguisher}/5`);
-        helicopterText.setText(`${helicopter}/3`);
-        firetruckText.setText(`${firetruck}/3`);
-        airtankerText.setText(`${airtanker}/2`);
-        hotshotcrewText.setText(`${hotshotcrew}/1`);
-        smokejumperText.setText(`${smokejumper}/5`);
+        if (!this.hoseText) return; // Ensure hoseText exists before updating
+
+        this.hoseText.setText(`${hose}/10`);
+        this.extinguisherText.setText(`${extinguisher}/5`);
+        this.helicopterText.setText(`${helicopter}/3`);
+        this.firetruckText.setText(`${firetruck}/3`);
+        this.airtankerText.setText(`${airtanker}/2`);
+        this.hotshotcrewText.setText(`${hotshotcrew}/1`);
+        this.smokejumperText.setText(`${smokejumper}/5`);
     }
 }
