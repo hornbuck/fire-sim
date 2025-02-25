@@ -140,7 +140,15 @@ export function preloadHUD(scene) {
     scene.load.image('out-of-fire-extinguishers', 'assets/resources/notifications/fire-extinguisher.png');
     scene.load.image('out-of-helicopters', 'assets/resources/notifications/helicopter.png');
     scene.load.image('out-of-firetrucks', 'assets/resources/notifications/firetruck.png');
-    
+    scene.load.image('out-of-airtankers', 'assets/resources/notifications/airtankers.png');
+    scene.load.image('out-of-hotshots', 'assets/resources/notifications/hotshot-crews.png');
+    scene.load.image('out-of-smokejumpers', 'assets/resources/notifications/smokejumpers.png');
+
+    // Load "Timer" Spritesheet for Assets
+    scene.load.spritesheet('set-timer', 'assets/timer.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
 
     // Load fire spritesheet
     scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
@@ -172,6 +180,30 @@ export function preloadHUD(scene) {
         frameHeight: 64 // Height of each frame
     });
 
+    // Load airtanker spritesheet
+    scene.load.spritesheet('set-airtanker', 'assets//64x64-Map-Tiles/Deployable%20Resources/airtanker.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    // Load hotshot crew spritesheet
+    scene.load.spritesheet('set-hotshot', 'assets//64x64-Map-Tiles/Deployable%20Resources/hotshot-crew.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    // Load smokejumpers spritesheet (Part 1 of 2)
+     scene.load.spritesheet('set-smokejumpers', 'assets//64x64-Map-Tiles/Deployable%20Resources/smokejumpers.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
+    // Load smokejumpers spritesheet (Part 2 of 2)
+    scene.load.spritesheet('set-smokejumpers-dig', 'assets//64x64-Map-Tiles/Deployable%20Resources/trench-digger.png', {
+        frameWidth: 64, // Width of each frame
+        frameHeight: 64 // Height of each frame
+    });
+
     scene.load.spritesheet('waterr', 'assets//64x64-Map-Tiles/water.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
@@ -179,4 +211,3 @@ export function preloadHUD(scene) {
 
     
 }
-

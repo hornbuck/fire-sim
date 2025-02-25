@@ -56,6 +56,27 @@ export default class AnimatedSprite {
         this.sprite.destroy();
     }
 
+    //----------------------------------
+    ////// ASSET TIMER /////
+    startTimer(scene, x, y) {
+        console.log("Timer activated!");
+
+        // Register truck animation
+        scene.anims.create({
+            key: "timerAnimConfig",
+            frames: scene.anims.generateFrameNumbers('set-timer'),
+            frameRate: 30,
+            repeat: -1
+        });
+
+        // Play animation
+        let timerSprite = scene.add.sprite(x, y, 'set-hotshot').setDepth(2).setScale(1.0, 1.0);
+        timerSprite.play('timerAnimConfig');
+        scene.time.delayedCall(3000, () => {
+            timerSprite.destroy();
+        });
+    }
+
     //--------------------------------------------
     ////// FIREFIGHTERS WITH FIRE HOSE ASSET /////
     useHose(scene, x, y, fireSprite) {
@@ -155,6 +176,98 @@ export default class AnimatedSprite {
 
         // Destroy fire at end of animation
         scene.time.delayedCall(3500, () => {
+            fireSprite.destroy();
+        });
+    }
+
+    //----------------------------------
+    ////// AIRTANKER ASSET /////
+    useAirtanker(scene, x, y, fireSprite) {
+        console.log("Airtanker activated!");
+
+        // Register truck animation
+        scene.anims.create({
+            key: "airtankerAnimConfig",
+            frames: scene.anims.generateFrameNumbers('set-airtanker'),
+            frameRate: 30,
+            repeat: -1
+        });
+
+        // Play animation
+        let airtankerSprite = scene.add.sprite(x, y - 40, 'set-airtanker').setDepth(1).setScale(2.5, 2.5);
+        airtankerSprite.play('airtankerAnimConfig');
+        scene.time.delayedCall(1700, () => {
+            airtankerSprite.destroy();
+        });
+
+        // Destroy fire at end of animation
+        scene.time.delayedCall(2000, () => {
+            fireSprite.destroy();
+        });
+    }
+
+    //----------------------------------
+    ////// HOTSHOT CREW ASSET /////
+    useHotshotCrew(scene, x, y, fireSprite) {
+        console.log("Hotshot Crew activated!");
+
+        // Register truck animation
+        scene.anims.create({
+            key: "hotshotAnimConfig",
+            frames: scene.anims.generateFrameNumbers('set-hotshot'),
+            frameRate: 30,
+            repeat: -1
+        });
+
+        // Play animation
+        let airtankerSprite = scene.add.sprite(x + 40, y, 'set-hotshot').setDepth(1).setScale(1.0, 1.0);
+        airtankerSprite.play('hotshotAnimConfig');
+        scene.time.delayedCall(3000, () => {
+            airtankerSprite.destroy();
+        });
+
+        // Destroy fire at end of animation
+        scene.time.delayedCall(3000, () => {
+            fireSprite.destroy();
+        });
+    }
+
+    //----------------------------------
+    ////// SMOKEJUMPERS ASSET /////
+    useSmokejumpers(scene, x, y, fireSprite) {
+        console.log("Smokejumpers activated!");
+
+        // Register truck animation
+        scene.anims.create({
+            key: "smokejumpersAnimConfig",
+            frames: scene.anims.generateFrameNumbers('set-smokejumpers'),
+            frameRate: 30,
+            repeat: -1
+        });
+
+        scene.anims.create({
+            key: "smokejumpersGroundAnimConfig",
+            frames: scene.anims.generateFrameNumbers('set-smokejumpers-dig'),
+            frameRate: 30,
+            repeat: -1
+        });
+
+        // Play animation
+        let smokejumpersSprite = scene.add.sprite(x, y - 40, 'set-smokejumpers').setDepth(1).setScale(1.0, 1.0);
+        
+
+        smokejumpersSprite.play('smokejumpersAnimConfig');
+        scene.time.delayedCall(2000, () => {
+            smokejumpersSprite.destroy();
+            let smokejumpersGroundSprite = scene.add.sprite(x, y, 'set-smokejumpers-dig').setDepth(1).setScale(0.5, 0.5);
+            smokejumpersGroundSprite.play('smokejumpersGroundAnimConfig');
+            scene.time.delayedCall(3000, () => {
+                smokejumpersGroundSprite.destroy();
+            }) 
+        });
+
+        // Destroy fire at end of animation
+        scene.time.delayedCall(4000, () => {
             fireSprite.destroy();
         });
     }
