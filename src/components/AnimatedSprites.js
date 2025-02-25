@@ -36,6 +36,9 @@ export default class AnimatedSprite {
 
         flameGroup.add(fireSprite);
 
+        // Store reference to the terrain tile in the fire sprite
+        fireSprite.tile = sprite;  
+
         fireSprite.setInteractive();
         fireSprite.on(
             "pointerdown",

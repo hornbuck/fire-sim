@@ -20,12 +20,13 @@ export class MainScene extends Phaser.Scene {
     /**
      * Constructs the MainScene class.
      */
+
     constructor() {
         super('MainScene'); // Identifier for this scene
         console.log("MainScene Constructor Called");
 
         this.gameClock = 0 // Initialize the game clock (in ms)
-        this.fireSpreadInterval = 5000; // Fire spreads every 5 seconds
+        this.fireSpreadInterval = 3000; // Fire spreads every 10 seconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
     }
@@ -75,8 +76,8 @@ export class MainScene extends Phaser.Scene {
             console.log(`Partition ${index}: x=${partition.x}, y=${partition.y}, width=${partition.width}, height=${partition.height}`);
         });
 
-        const weather = new Weather(15, 40, 30);
-        this.fireSpread = new FireSpread(this.map, weather);
+        this.weather = new Weather(68, 30, 15, 'N');
+        this.fireSpread = new FireSpread(this.map, this.weather);
 
         this.mapGroup = this.add.group();
         this.renderMap(this.map, this.tileSize);
@@ -93,14 +94,14 @@ export class MainScene extends Phaser.Scene {
 
         this.input.on('pointerdown', this.handleTileClick, this);
 
+        // Generate and render map
+        this.initializeMap();
+
         // Create UI elements
         this.createUIElements();
 
         // Create the HUD (calling the existing function)
         createHUD(this);
-
-        // Generate and render map
-        this.initializeMap();
 
         // Start updating game clock
         this.elapsedTime = 0;
@@ -219,16 +220,12 @@ export class MainScene extends Phaser.Scene {
             });
 
         // Weather stats HUD
-        this.weatherText = this.add.text(10, 100, 'Weather: Loading...', {
+        this.weatherText = this.add.text(10, 100, `Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph | Direction: ${this.weather.windDirection}`, {
             font: '16px "Georgia", serif',
             color: '#FFF',
             backgroundColor: '#556B2F',  // Olive green for a rustic feel
             padding: { x: 15, y: 10 }
         });
-
-        // Initialize weather display
-        // TODO: Add dynamic weather
-        this.updateWeatherHUD(15,40,30);
 
         // Game Clock Component of HUD
         this.gameClockText = this.add.text(200, 10, "Time: 00:00", {
@@ -263,7 +260,7 @@ export class MainScene extends Phaser.Scene {
 
     updateTileInfoDisplay(tile) {
         this.tileInfoText.setText(
-            `Terrain: ${tile.terrain}
+        `Terrain: ${tile.terrain}
         \nFlammability: ${tile.flammability}
         \nFuel: ${tile.fuel}
         \nBurn Status: ${tile.burnStatus}`
@@ -283,11 +280,31 @@ export class MainScene extends Phaser.Scene {
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
-
-    // Function to update weather HUD
-    updateWeatherHUD(temp, wind, humidity) {
-        this.weatherText.setText(`Temp: ${temp}°F | Wind: ${wind} mph | Humidity: ${humidity}%`);
+    updateWeatherOverTime() {
+        // Random adjustments within a range for dynamic effect
+        let tempChange = Phaser.Math.Between(-2, 2); // Temperature change between -2°F to 2°F
+        let windChange = Phaser.Math.Between(-1, 1); // Wind speed change between -1 to 1 mph
+        let humidityChange = Phaser.Math.Between(-3, 3); // Humidity change between -3% to 3%
+    
+        // Update the weather object with new values
+        let newTemp = this.weather.temperature + tempChange;
+        let newWind = Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100); // Keep wind within 0-100 mph
+        let newHumidity = Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100); // Keep humidity within 0-100%
+    
+        // Small chance (1 in 10) for wind direction to change
+        let newWindDirection = this.weather.windDirection;
+        if (Phaser.Math.Between(1, 10) === 1) {
+            const directions = ["N", "E", "S", "W"];
+            newWindDirection = Phaser.Utils.Array.GetRandom(directions);
+        }
+    
+        // Update weather
+        this.weather.updateWeather(newTemp, newHumidity, newWind, newWindDirection);
+    
+        // Update the HUD display for weather
+        this.weatherText.setText(`Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph | Direction: ${this.weather.windDirection}`);
     }
+    
 
     // Function to toggle fire simulation state
     toggleFireSimulation() {
@@ -314,6 +331,7 @@ export class MainScene extends Phaser.Scene {
         if (this.isFireSimRunning && this.elapsedTime - this.lastFireSpreadTime >= this.fireSpreadInterval / 1000) {
             this.lastFireSpreadTime = this.elapsedTime;
             this.updateFireSpread();
+            this.updateWeatherOverTime();
         }
 
 
@@ -436,6 +454,7 @@ export class MainScene extends Phaser.Scene {
         // Randomly select a starting tile
         startX = Math.floor(Math.random() * this.map.width);
         startY = Math.floor(Math.random() * this.map.height);
+        
         // Set the selected tile's burnStatus to "burning"
         tile = this.map.grid[startY][startX];
         } while (tile.flammability === 0)
@@ -447,7 +466,7 @@ export class MainScene extends Phaser.Scene {
         if (tile.sprite) {
             let blaze = new AnimatedSprite(3);
             blaze.lightFire(this, tile.sprite, this.flameGroup);
-            tile.fireSprite = true; // Mark that fire has been visually applied
+            tile.fireS = blaze; // Mark that fire has been visually applied
         }
     }
 
@@ -461,7 +480,7 @@ export class MainScene extends Phaser.Scene {
                 if (tile.burnStatus === "burning" && !tile.fireSprite) {
                     let blaze = new AnimatedSprite(3);
                     blaze.lightFire(this, tile.sprite, this.flameGroup);
-                    tile.fireSprite = true;
+                    tile.fireS = blaze;
                 }
             });
         });

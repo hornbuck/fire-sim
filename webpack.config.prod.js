@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename);
 
 export default merge(common, {
   mode: 'production',
+
   output: {
     path: path.resolve(__dirname, 'dist'),
     // Use contenthash for caching purposes
@@ -32,17 +33,21 @@ export default merge(common, {
   performance: {
     maxAssetSize: 300000, // Warn for assets larger than 300KB
     maxEntrypointSize: 500000, // Warn for entry points larger than 500KB
+
     hints: 'warning',
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './index.html',
+
+
       // Minify the HTML for production
       minify: {
         removeComments: true,
         collapseWhitespace: true,
         removeRedundantAttributes: true,
       },
+
     }),
     new CopyPlugin({
       patterns: [
@@ -59,6 +64,7 @@ export default merge(common, {
       ],
     }),
     new BundleAnalyzerPlugin({
+
       analyzerMode: 'static', // Outputs and HTML file for analysis
       openAnalyzer: false, // Set to true to automatically open the report
     }),
@@ -71,4 +77,3 @@ export default merge(common, {
     }),
   ],
 });
-
