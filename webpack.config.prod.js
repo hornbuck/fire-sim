@@ -21,7 +21,7 @@ export default merge(common, {
     // Use contenthash for caching purposes
     filename: 'js/[name].[contenthash].js',
     // Adjust this if deploying to a subdirectory (e.g., GitHub Pages)
-    publicPath: '/',
+    publicPath: '/fire-sim/',
   },
   optimization: {
     minimize: true,
