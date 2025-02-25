@@ -75,6 +75,9 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Hose was applied!");
             hose -= 1;
             asset.useHose(scene, x, y, fireSprite);
+            
+            // Start timer
+            asset.startTimer(scene, 750, 50);
         } else {
             console.log("Sorry! You ran out!");
             
@@ -137,22 +140,46 @@ export function use_resource (scene, x, y, fireSprite) {
     if (activated_resource === "airtanker") {
         if (airtanker > 0) {
             airtanker -= 1;
+            asset.useAirtanker(scene, x, y, fireSprite);
         } else {
             console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of airtankers
+            const airtanker_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-airtankers').setScale(0.8).setOrigin(0.5, 0.5);
+            airtanker_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                airtanker_notification.destroy();
+            });
         }
     }
     if (activated_resource === "hotshot-crew") {
         if (hotshotcrew > 0) {
             hotshotcrew -= 1;
+            asset.useHotshotCrew(scene, x, y, fireSprite);
         } else {
             console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of hotshot crews
+            const hotshot_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-hotshots').setScale(0.8).setOrigin(0.5, 0.5);
+            hotshot_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                hotshot_notification.destroy();
+            });
         }
     }
     if (activated_resource === "smokejumper") {
         if (smokejumper > 0) {
             smokejumper -= 1;
+            asset.useSmokejumpers(scene, x, y, fireSprite);
         } else {
             console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of hotshot crews
+            const smokejumpers_notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-smokejumpers').setScale(0.8).setOrigin(0.5, 0.5);
+            smokejumpers_notification.setDepth(1);  // sends to top layer of scene
+            scene.time.delayedCall(1000, () => {
+                smokejumpers_notification.destroy();
+            });
         }
     }
 }
