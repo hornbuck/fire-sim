@@ -17,7 +17,6 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Ignore build output
-dist/
 build/
 *.log
 
