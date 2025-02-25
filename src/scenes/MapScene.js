@@ -1,6 +1,7 @@
 import Map from '../components/MapGenerator.js';
 import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
+import AnimatedSprite from '../components/AnimatedSprites.js';
 
 export default class MapScene extends Phaser.Scene {
     constructor() {
@@ -65,7 +66,12 @@ export default class MapScene extends Phaser.Scene {
         console.log(`Initial Seed: ${this.currentSeed}`);
 
         // Initialize the map
-        this.map = new Map(this.mapWidth, this.mapHeight, this.minSize, this.currentSeed);
+        this.map = new Map(
+            this.mapWidth, 
+            this.mapHeight, 
+            this.minSize, 
+            this.currentSeed
+        );
 
         // Debugging: Log partition details
         console.log("Map Partitions:");
@@ -149,61 +155,99 @@ export default class MapScene extends Phaser.Scene {
     }
 
     handleTileClick(pointer) {
-        let tileX = Math.floor(pointer.x / this.tileSize);
-        let tileY = Math.floor(pointer.y / this.tileSize);
+        // Convert click position to tile coordinates
+        const startX = (this.cameras.main.width - this.map.width * this.tileSize) / 2;
+        const startY = (this.cameras.main.height - this.map.height * this.tileSize) / 2;
 
+        let tileX = Math.floor((pointer.x - startX) / this.tileSize);
+        let tileY = Math.floor((pointer.y - startY) / this.tileSize);
+
+        console.warn(`Clicked tile coordinates: (${tileX}, ${tileY})`);
+
+        // Ensure the click is within the map bounds
         if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
             let clickedTile = this.map.getTile(tileX, tileY);
-            console.log(clickedTile ? `Tile found: ${clickedTile.terrain}` : "No tile found at this position!");
+            console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
 
             if (clickedTile) {
-                this.scene.get('UIScene').events.emit('tileInfo', clickedTile);
+                this.updateTileInfoDisplay(clickedTile);
             }
         }
     }
 
-    update(delta) {
-        this.elapsedTime += delta / 1000;
+    updateGameClock(delta) {
+        this.elapsedTime += delta / 1000; // Convert milliseconds to seconds
 
-        if (this.isFireSimRunning && this.elapsedTime - this.lastFireSpreadTime >= 3) {
-            this.lastFireSpreadTime = this.elapsedTime;
-            this.fireSpread.simulateFireStep();
-            this.updateWeatherOverTime();
+        let minutes = Math.floor(this.elapsedTime / 60);
+        let seconds = Math.floor(this.elapsedTime % 60);
 
-            this.scene.get('UIScene').events.emit('weatherUpdated', this.weather);
-        }
+        // Format time as MM:SS
+        let formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
     updateWeatherOverTime() {
-        let tempChange = Phaser.Math.Between(-2, 2);
-        let windChange = Phaser.Math.Between(-1, 1);
-        let humidityChange = Phaser.Math.Between(-3, 3);
-
-        this.weather.updateWeather(
-            this.weather.temperature + tempChange,
-            Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100),
-            Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100),
-            this.weather.windDirection
-        );
-
-        this.scene.get('UIScene').events.emit('weatherUpdated', this.weather);
+        // Random adjustments within a range for dynamic effect
+        let tempChange = Phaser.Math.Between(-2, 2); // Temperature change between -2°F to 2°F
+        let windChange = Phaser.Math.Between(-1, 1); // Wind speed change between -1 to 1 mph
+        let humidityChange = Phaser.Math.Between(-3, 3); // Humidity change between -3% to 3%
+    
+        // Update the weather object with new values
+        let newTemp = this.weather.temperature + tempChange;
+        let newWind = Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100); // Keep wind within 0-100 mph
+        let newHumidity = Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100); // Keep humidity within 0-100%
+    
+        // Small chance (1 in 10) for wind direction to change
+        let newWindDirection = this.weather.windDirection;
+        if (Phaser.Math.Between(1, 10) === 1) {
+            const directions = ["N", "E", "S", "W"];
+            newWindDirection = Phaser.Utils.Array.GetRandom(directions);
+        }
+    
+        // Update weather
+        this.weather.updateWeather(newTemp, newHumidity, newWind, newWindDirection);
+    
+        // Update the HUD display for weather
+        this.weatherText.setText(`Weather: Temp: ${this.weather.temperature}°F | Humidity: ${this.weather.humidity}% | Wind: ${this.weather.windSpeed} mph | Direction: ${this.weather.windDirection}`);
     }
 
     startFire() {
-        let startX, startY, tile;
+        let startX, startY, tile
 
-        do {
-            startX = Math.floor(Math.random() * this.map.width);
-            startY = Math.floor(Math.random() * this.map.height);
-            tile = this.map.grid[startY][startX];
-        } while (tile.flammability === 0);
-
+        do{
+        // Randomly select a starting tile
+        startX = Math.floor(Math.random() * this.map.width);
+        startY = Math.floor(Math.random() * this.map.height);
+        
+        // Set the selected tile's burnStatus to "burning"
+        tile = this.map.grid[startY][startX];
+        } while (tile.flammability === 0)
+        
         tile.burnStatus = "burning";
         console.log(`Starting fire at (${startX}, ${startY})`);
+
+        // Ensure the fire sprite is added to the tile when fire starts
+        if (tile.sprite) {
+            let blaze = new AnimatedSprite(3);
+            blaze.lightFire(this, tile.sprite, this.flameGroup);
+            tile.fireS = blaze; // Mark that fire has been visually applied
+        }
     }
 
-    toggleFireSimulation() {
-        this.isFireSimRunning = !this.isFireSimRunning;
-        this.scene.get('UIScene').events.emit('fireSimToggled', this.isFireSimRunning);
+    updateFireSpread() {
+        console.log("Simulating fire step...");
+        this.fireSpread.simulateFireStep();
+
+        // Update burning tiles
+        this.map.grid.forEach((row) => {
+            row.forEach((tile) => {
+                if (tile.burnStatus === "burning" && !tile.fireSprite) {
+                    let blaze = new AnimatedSprite(3);
+                    blaze.lightFire(this, tile.sprite, this.flameGroup);
+                    tile.fireS = blaze;
+                }
+            });
+        });
     }
 }
