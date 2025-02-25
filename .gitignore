@@ -43,3 +43,6 @@ pnpm-lock.yaml
 # Ignore Webpack/Bundler cache
 .cache/
 .parcel-cache/
+
+# Ignore VS Code Files
+.vscode/
