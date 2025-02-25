@@ -454,6 +454,7 @@ export class MainScene extends Phaser.Scene {
         // Randomly select a starting tile
         startX = Math.floor(Math.random() * this.map.width);
         startY = Math.floor(Math.random() * this.map.height);
+        
         // Set the selected tile's burnStatus to "burning"
         tile = this.map.grid[startY][startX];
         } while (tile.flammability === 0)
