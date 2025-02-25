@@ -20,37 +20,47 @@ export default class AnimatedSprite {
      */
     // Makes fire sprite lightable / extinguishable (upon click)
     lightFire(scene, sprite, flameGroup) {
+        console.log("Attempting to light fire...");
+    
         if (!scene.anims.exists('fireAnimConfig')) {
+            console.log("Creating fire animation...");
             scene.anims.create({
                 key: "fireAnimConfig",
-                frames: scene.anims.generateFrameNumbers('fire-blaze'),
+                frames: scene.anims.generateFrameNumbers('fire-blaze', { start: 0, end: 5 }),
                 frameRate: 10,
                 repeat: -1
             });
+        } else {
+            console.log("Fire animation already exists.");
         }
-
+    
         let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze')
             .setDepth(1)
-            .setScale(0.75)
-            .play('fireAnimConfig');
-
+            .setScale(0.75);
+    
+        console.log("Fire sprite created:", fireSprite);
+    
+        if (scene.anims.exists('fireAnimConfig')) {
+            console.log("Playing fire animation...");
+            fireSprite.play('fireAnimConfig');
+        } else {
+            console.error("ERROR: Animation 'fireAnimConfig' does not exist!");
+        }
+    
         flameGroup.add(fireSprite);
-
-        // Store reference to the terrain tile in the fire sprite
-        fireSprite.tile = sprite;  
-
+    
+        fireSprite.tile = sprite;
         fireSprite.setInteractive();
-        fireSprite.on(
-            "pointerdown",
-            function (pointer, localX, localY, event) {
-                if (technique === 'WATER') {
-                    use_resource(scene, fireSprite.x, fireSprite.y, fireSprite);
-                }
-            },
-            this.sprite = fireSprite //saves the sprite obj so that it can be manipulated later (eg. destroyed)
-        );
+    
+        fireSprite.on("pointerdown", function () {
+            if (technique === 'WATER') {
+                use_resource(scene, fireSprite.x, fireSprite.y, fireSprite);
+            }
+        });
+    
+        this.sprite = fireSprite;
     }
-
+    
     // Extinguishes fire sprite (no user input required)
     extinguishFire() {
         this.sprite.destroy();
