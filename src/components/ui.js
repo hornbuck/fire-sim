@@ -150,12 +150,6 @@ export function preloadHUD(scene) {
         frameHeight: 64 // Height of each frame
     });
 
-    // Load fire spritesheet
-    scene.load.spritesheet('fire-blaze', 'assets/64x64-Map-Tiles/animated-flame.png', {
-        frameWidth: 64, // Width of each frame
-        frameHeight: 64 // Height of each frame
-    });
-
     // Load fire-hose (team of firefighters) spritesheet
     scene.load.spritesheet('set-hose', 'assets/64x64-Map-Tiles/Deployable%20Resources/fire-hose.png', {
         frameWidth: 64, // Width of each frame
