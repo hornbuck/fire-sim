@@ -5,7 +5,8 @@
 
 // Imports
 import Phaser from 'phaser';
-import MainScene from './mainScene.js';
+import MapScene from './MapScene.js';
+import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -95,10 +96,10 @@ export default class LoginScene extends Phaser.Scene {
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     console.log('Login successful:', userCredential);
-                    // Transition: stop LoginScene, re-add MainScene, then start MainScene.
+                    // Transition: stop LoginScene, start MapScene and launch UIScene.
                     this.scene.stop('LoginScene');
-                    this.scene.add('MainScene', MainScene, false);
-                    this.scene.start('MainScene');
+                    this.scene.start('MapScene');
+                    this.scene.launch('UIScene');
                 })
                 .catch((error) => {
                     console.error('Login error:', error);
@@ -137,11 +138,9 @@ export default class LoginScene extends Phaser.Scene {
             // Stop SignupScene
             this.scene.stop('SignupScene');
 
-            // Re-add MainScene to the Scene Manager.
-            this.scene.add('MainScene', MainScene, false);
-
-            // Start MainScene afresh.
-            this.scene.start('MainScene');
+            // Start MapScene and launch UIScene
+            this.scene.start('MapScene');
+            this.scene.launch('UIScene');
         });
     }
 }
