@@ -477,7 +477,7 @@ export class MainScene extends Phaser.Scene {
         // Update burning tiles
         this.map.grid.forEach((row) => {
             row.forEach((tile) => {
-                if (tile.burnStatus === "burning" && !tile.fireSprite) {
+                if (tile.burnStatus === "burning" && !tile.fireS) {
                     let blaze = new AnimatedSprite(3);
                     blaze.lightFire(this, tile.sprite, this.flameGroup);
                     tile.fireS = blaze;
