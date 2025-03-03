@@ -51,6 +51,12 @@ export default class MapScene extends Phaser.Scene {
         // Start UI scene separately
         this.scene.launch('UIScene');
 
+        // Add a delay to ensure UIScene is ready before listening for events
+        this.time.delayedCall(100, () => {
+            this.scene.get('UIScene').events.on('toggleFire', this.toggleFireSimulation, this);
+            this.scene.get('UIScene').events.on('restartGame', this.initializeMap, this);
+        });
+
         // Start updating game clock
         this.elapsedTime = 0;
 
@@ -177,7 +183,7 @@ export default class MapScene extends Phaser.Scene {
             console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
 
             if (clickedTile) {
-                this.updateTileInfoDisplay(clickedTile);
+                this.scene.get('UIScene').events.emit('tileInfo', clickedTile);
             }
         }
     }
@@ -261,9 +267,8 @@ export default class MapScene extends Phaser.Scene {
     toggleFireSimulation() {
         this.isFireSimRunning = !this.isFireSimRunning;
         console.warn(`Fire Simulation ${this.isFireSimRunning ? "Started" : "Stopped"}`);
-    
-        // Notify UIScene to update the button text
+
+        // Notify UIScene to update UI
         this.scene.get('UIScene').events.emit('fireSimToggled', this.isFireSimRunning);
-    }
-    
+    }    
 }
