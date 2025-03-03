@@ -52,16 +52,23 @@ export default class UIScene extends Phaser.Scene {
 
         // Weather Text
             this.weatherText = this.add.text(10, 100, 'Loading weather...');
-        this.tileInfoText = this.add.text(10, 400, '');
 
         // Event listeners
         this.scene.get('MapScene').events.on('weatherUpdated', weather => {
             this.weatherText.setText(`Temp: ${weather.temperature}°F | Humidity: ${weather.humidity}% | Wind: ${weather.windSpeed} mph | Direction: ${weather.windDirection}`);
         });
 
-        this.scene.get('MapScene').events.on('tileInfo', tile => {
-            this.tileInfoText.setText(`Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`);
-        });
+        this.scene.get('MapScene').events.on('tileInfo', (tile) => {
+            console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`); // Debugging
+        
+            if (this.tileInfoText) {
+                this.tileInfoText.setText(`Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`);
+                this.tileInfoText.setVisible(true); // Ensure it's visible
+                this.tileInfoText.setDepth(100); // Bring it to the front
+            } else {
+                console.warn("tileInfoText is not defined in UIScene!");
+            }
+        });        
 
         this.scene.get('MapScene').events.on('fireSimToggled', isRunning => {
             this.fireButton.setText(isRunning ? 'Stop Fire' : 'Start Fire');
@@ -82,10 +89,10 @@ export default class UIScene extends Phaser.Scene {
 
     createUIElements() {
         // Tile info text (for when a tile is clicked)
-        this.tileInfoText = this.add.text(10, 400, "", {
+        this.tileInfoText = this.add.text(10, 400, "Tile Info", {
             fontSize: "16px",
             fill: "#fff",
-            backgroundColor: "rgba(0, 0, 0)",
+            backgroundColor: "rgba(0, 0, 0.7)",
             padding: { x: 10, y: 5 },
             align: "left"
         }).setDepth(10).setScrollFactor(0); // Keeps it fixed on screen
@@ -93,7 +100,7 @@ export default class UIScene extends Phaser.Scene {
         // Title - Game name
         this.add.text(10, 10, 'Wildfire Command', {
             font: '20px "Georgia", serif',
-            color: '#8B4513'  // Brown color for a rustic feel
+            color: '#8B4513'
         });
     
         // Restart Game button
