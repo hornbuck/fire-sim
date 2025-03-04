@@ -1,6 +1,7 @@
 // src/scenes/signupScene.js
 import Phaser from 'phaser';
-import MainScene from './mainScene.js'; // Adjust the path as needed
+import MapScene from './MapScene.js';
+import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
@@ -92,6 +93,7 @@ export default class SignupScene extends Phaser.Scene {
             border: '3px solid #FFD700',
             borderRadius: '10px',
             cursor: 'pointer',
+            depth: '3',
         }, 'Sign Up').setOrigin(0.5);
 
         signupButton.addListener('click');
@@ -125,11 +127,9 @@ export default class SignupScene extends Phaser.Scene {
                             // Stop SignupScene
                             this.scene.stop('SignupScene');
 
-                            // Re-add MainScene to the Scene Manager.
-                            this.scene.add('MainScene', MainScene, false);
-
-                            // Start MainScene afresh.
-                            this.scene.start('MainScene');
+                            // Start MapScene and UIScene
+                            this.scene.start('MapScene');
+                            this.scene.launch('UIScene');
 
                         })
                         .catch((error) => {
@@ -175,11 +175,9 @@ export default class SignupScene extends Phaser.Scene {
             // Stop SignupScene
             this.scene.stop('SignupScene');
 
-            // Re-add MainScene to the Scene Manager.
-            this.scene.add('MainScene', MainScene, false);
-
-            // Start MainScene afresh.
-            this.scene.start('MainScene');
+            // Start MapScene and UIScene
+            this.scene.start('MapScene');
+            this.scene.launch('UIScene');
         });
     }
 }
