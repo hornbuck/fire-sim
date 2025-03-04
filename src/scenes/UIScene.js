@@ -41,8 +41,28 @@ export default class UIScene extends Phaser.Scene {
     }
 
     createUIElements() {
-        // Game titlea
+        // Game title
         this.add.image(40, 40, 'Title', {});
+
+          // Login Button via MainScene
+        const loginMenuButton = this.add.text(600, 10, 'Login', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                loginMenuButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                loginMenuButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                this.events.removeAllListeners();
+                this.scene.remove('MainScene'); // Removes the scene entirely.
+                this.scene.start('LoginScene');
+            })
 
         // Restart Game button
         const restartButton = this.add.image(140, 50, 'Restart Button')
