@@ -9,7 +9,7 @@ export default class MapScene extends Phaser.Scene {
         console.log("MapScene Constructor Called");
 
         this.elapsedTime = 0; // Track elapsed game time in seconds
-        this.fireSpreadInterval = 3000; // Fire spread frequency in milliseconds
+        this.fireSpreadInterval = 8000; // Fire spread frequency in milliseconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
     }
