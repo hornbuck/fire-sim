@@ -93,6 +93,7 @@ export default class SignupScene extends Phaser.Scene {
             border: '3px solid #FFD700',
             borderRadius: '10px',
             cursor: 'pointer',
+            depth: '3',
         }, 'Sign Up').setOrigin(0.5);
 
         signupButton.addListener('click');

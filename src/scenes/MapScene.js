@@ -56,6 +56,7 @@ export default class MapScene extends Phaser.Scene {
         this.setupEventListeners();
 
         console.log("MapScene Create Finished");
+
     }
 
     setupEventListeners() {
