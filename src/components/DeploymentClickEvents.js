@@ -126,7 +126,7 @@ function handleFireExtinguish(fireSprite) {
 
         // If tile exists, update its burn status
         if (clickedTile) {
-            clickedTile.burnStatus = 'burnt';
+            clickedTile.burnStatus = 'extinguished';
             console.log(`Tile at (${tileX}, ${tileY}) burn status updated to: ${clickedTile.burnStatus}`);
         }
     }
