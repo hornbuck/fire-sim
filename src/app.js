@@ -21,7 +21,7 @@ const config = {
     },
     dom: {
         createContainer: true,
-    }
+    },
 };
 
 // Create the game instance locally

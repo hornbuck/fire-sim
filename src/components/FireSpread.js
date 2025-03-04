@@ -1,4 +1,5 @@
 import TerrainTile from "./TerrainTile.js";
+import { burn } from "./AnimatedSprites.js";
 
 class FireSpread {
     /**
@@ -76,9 +77,9 @@ class FireSpread {
     updateBurntTileSprite(x, y) {
         const tile = this.map.grid[y][x];
     
-        if (tile && tile.sprite) {
+        if (tile && tile.sprite) { //set to && burn == true after fixing bug
             // Replace the sprite texture with the burned version
-            tile.sprite.setTexture(tile.terrain); 
+            tile.sprite.setTexture(tile.terrain);
         }
     }
     

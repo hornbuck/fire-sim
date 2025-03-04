@@ -1,4 +1,8 @@
-import { technique, use_resource } from './DeploymentClickEvents.js'
+import { technique, use_resource, cooldown } from './DeploymentClickEvents.js'
+import { timerSprite } from './ui.js'
+
+// Protects tiles from being burned if an asset was used to put it out
+export let burn = "";
 
 //--------------------------------------------------------------------
 // BELOW ARE THE FUNCTIONS THAT CONTROL ALL OF THE ANIMATED SPRITES
@@ -68,29 +72,41 @@ export default class AnimatedSprite {
 
     //----------------------------------
     ////// ASSET TIMER /////
-    startTimer(scene, x, y) {
+    startTimer(index, scene, time, x, y) {
         console.log("Timer activated!");
+        cooldown[index] = 1;                // cooldown is activated
 
-        // Register truck animation
-        scene.anims.create({
-            key: "timerAnimConfig",
-            frames: scene.anims.generateFrameNumbers('set-timer'),
-            frameRate: 30,
-            repeat: -1
-        });
+        // Map Animations
+        //--> Register timer animation
+        if (!scene.anims.exists('set-timer')) {
+            scene.anims.create({
+                key: "timerAnimConfig",
+                frames: scene.anims.generateFrameNumbers('set-timer'),
+                frameRate: 30,
+                repeat: -1
+            });
+        }
 
         // Play animation
-        let timerSprite = scene.add.sprite(x, y, 'set-hotshot').setDepth(2).setScale(1.0, 1.0);
+        timerSprite.x = x;
+        timerSprite.y = y;
+        timerSprite.setVisible(true);
         timerSprite.play('timerAnimConfig');
-        scene.time.delayedCall(3000, () => {
-            timerSprite.destroy();
+        scene.time.delayedCall(time, () => {            
+            timerSprite.setVisible(false);
+            scene.anims.remove("timerAnimConfig");
+            cooldown[index] = 0;                            // turns off cooldown
         });
+
+        console.log(`Cooldown in StartTimer: ${cooldown[index]}`);
+        
     }
 
     //--------------------------------------------
     ////// FIREFIGHTERS WITH FIRE HOSE ASSET /////
     useHose(scene, x, y, fireSprite) {
         console.log("Team of firefighters activated!");
+        burn = "false";
             
         // Register hose animation
         scene.anims.create({
@@ -111,6 +127,7 @@ export default class AnimatedSprite {
         scene.time.delayedCall(4000, () => {
             fireSprite.destroy();
         });
+        
     }
 
     //----------------------------------
@@ -118,6 +135,7 @@ export default class AnimatedSprite {
     // Applies fire extinguisher
     useFireExtinguisher(scene, x, y, fireSprite) {
         console.log("Fire extinguisher activated!");
+        burn = "false";
             
         // Register extinguish animation
         scene.anims.create({
@@ -142,6 +160,7 @@ export default class AnimatedSprite {
     ////// FIRETRUCK ASSET /////
     useFiretruck(scene, x, y, fireSprite) {
         console.log("Fire truck activated!");
+        burn = "false";
             
         // Register truck animation
         scene.anims.create({
@@ -168,6 +187,7 @@ export default class AnimatedSprite {
     ////// HELICOPTER ASSET /////
     useHelicopter(scene, x, y, fireSprite) {
         console.log("Helicopter activated!");
+        burn = "false";
             
         // Register truck animation
         scene.anims.create({
@@ -188,12 +208,14 @@ export default class AnimatedSprite {
         scene.time.delayedCall(3500, () => {
             fireSprite.destroy();
         });
+        
     }
 
     //----------------------------------
     ////// AIRTANKER ASSET /////
     useAirtanker(scene, x, y, fireSprite) {
         console.log("Airtanker activated!");
+        burn = "false";
 
         // Register truck animation
         scene.anims.create({
@@ -214,12 +236,14 @@ export default class AnimatedSprite {
         scene.time.delayedCall(2000, () => {
             fireSprite.destroy();
         });
+        
     }
 
     //----------------------------------
     ////// HOTSHOT CREW ASSET /////
     useHotshotCrew(scene, x, y, fireSprite) {
         console.log("Hotshot Crew activated!");
+        burn = "false";
 
         // Register truck animation
         scene.anims.create({
@@ -240,12 +264,14 @@ export default class AnimatedSprite {
         scene.time.delayedCall(3000, () => {
             fireSprite.destroy();
         });
+        
     }
 
     //----------------------------------
     ////// SMOKEJUMPERS ASSET /////
     useSmokejumpers(scene, x, y, fireSprite) {
         console.log("Smokejumpers activated!");
+        burn = "false";
 
         // Register truck animation
         scene.anims.create({
@@ -269,7 +295,7 @@ export default class AnimatedSprite {
         smokejumpersSprite.play('smokejumpersAnimConfig');
         scene.time.delayedCall(2000, () => {
             smokejumpersSprite.destroy();
-            let smokejumpersGroundSprite = scene.add.sprite(x, y, 'set-smokejumpers-dig').setDepth(1).setScale(0.5, 0.5);
+            let smokejumpersGroundSprite = scene.add.sprite(x, y, 'set-smokejumpers-dig').setDepth(2).setScale(0.5, 0.5);
             smokejumpersGroundSprite.play('smokejumpersGroundAnimConfig');
             scene.time.delayedCall(3000, () => {
                 smokejumpersGroundSprite.destroy();
@@ -280,5 +306,6 @@ export default class AnimatedSprite {
         scene.time.delayedCall(4000, () => {
             fireSprite.destroy();
         });
+        
     }
 }
