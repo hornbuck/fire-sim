@@ -13,6 +13,20 @@ export default class UIScene extends Phaser.Scene {
         // Preload UI Elements
         this.load.image('Title', 'assets/UI/Title.png')
         this.load.image('Restart Button', 'assets/UI/restartButton.png')
+        this.load.image('login', 'assets/UI/login.png')
+
+        // Preload Weather UI elements
+        this.load.image('weather_title', 'assets/UI/weather_title.png')
+        this.load.image('humidity_full', 'assets/UI/humidity_full.png')
+        this.load.image('humidity_half', 'assets/UI/humidity_half.png')
+        this.load.image('humidity_low', 'assets/UI/humidity_low.png')
+        this.load.image('wind_1arrow', 'assets/UI/wind_1arrow.png')
+        this.load.image('wind_2arrow', 'assets/UI/wind_2arrow.png')
+        this.load.image('wind_3arrow', 'assets/UI/wind_3arrow.png')
+        this.load.image('north', '/assets/UI/north.png')
+        this.load.image('east', '/assets/UI/east.png')
+        this.load.image('south', '/assets/UI/south.png')
+        this.load.image('west', '/assets/UI/west.png')
     }
 
     create() {
@@ -42,41 +56,37 @@ export default class UIScene extends Phaser.Scene {
 
     createUIElements() {
         // Game title
-        this.add.image(40, 40, 'Title', {});
+        this.add.image(40, 40, 'Title');
 
-          // Login Button via MainScene
-        const loginMenuButton = this.add.text(600, 10, 'Login', {
-            font: '16px "Georgia", serif',
-            color: '#FFF',
-            backgroundColor: '#A0522D', // Rustic wood-like color
-            padding: { x: 15, y: 10 }
-        })
+        // Login Button via MainScene
+        const loginMenuButton = this.add.image(600, 30, 'login')
             .setInteractive()
             .on('pointerover', () => {  // Hover effect
-                loginMenuButton.setStyle({ backgroundColor: '#8B4513' });
+                loginMenuButton.setTint(0x8B4513); // Apply tint on hover
             })
             .on('pointerout', () => {  // Reset when not hovering
-                loginMenuButton.setStyle({ backgroundColor: '#A0522D' });
+                loginMenuButton.clearTint(); // Clear the tint
             })
             .on('pointerdown', () => {
                 this.events.removeAllListeners();
                 this.scene.remove('MainScene'); // Removes the scene entirely.
                 this.scene.start('LoginScene');
-            })
+            });
 
         // Restart Game button
         const restartButton = this.add.image(140, 50, 'Restart Button')
-        .setInteractive()
-        .setScale(1)
-        .on('pointerover', () => {  
-            restartButton.setTint(0x8B4513);
-        })
-        .on('pointerout', () => {  
-            restartButton.clearTint();
-        })
-        .on('pointerdown', () => {
-            this.events.emit('restartGame'); // Emit event to MapScene
-        });
+            .setInteractive()
+            .setScale(1)
+            .on('pointerover', () => {  
+                restartButton.setTint(0x8B4513); // Apply tint on hover
+            })
+            .on('pointerout', () => {  
+                restartButton.clearTint(); // Clear the tint
+            })
+            .on('pointerdown', () => {
+                this.events.emit('restartGame'); // Emit event to MapScene
+            });
+
 
         // Fire toggle button
         this.fireButton = this.add.text(600, 550, 'Start Fire', {
@@ -90,12 +100,8 @@ export default class UIScene extends Phaser.Scene {
             });
 
         // Weather Stats
-        this.weatherText = this.add.text(10, 550, `Loading weather...`, {
-            font: '16px "Georgia", serif',
-            color: '#FFF',
-            backgroundColor: '#556B2F',  // Olive green for a rustic feel
-            padding: { x: 15, y: 10 }
-        });
+        this.add.image(140, 500, 'weather_title')
+
 
         // Game Clock
         this.gameClockText = this.add.text(300, 10, "Time: 00:00", {
@@ -163,11 +169,62 @@ export default class UIScene extends Phaser.Scene {
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
-    // Handler for weather updates
     updateWeatherDisplay(weather) {
-        this.weatherText.setText(`Temp: ${weather.temperature}°F | Humidity: ${weather.humidity}% | Wind: ${weather.windSpeed} mph | Direction: ${weather.windDirection}`);
+        // Update Humidity Icon
+        let humidityIcon = 'humidity_low';
+        if (weather.humidity > 70) {
+            humidityIcon = 'humidity_full';
+        } else if (weather.hidity > 30) {
+            humidityIcon = 'humidity_half';
+        }
+    
+        // Update Wind Speed Icon
+        let windSpeedIcon = 'wind_1arrow';
+        if (weather.windSpeed > 15) {
+            windSpeedIcon = 'wind_3arrow';
+        } else if (weather.windSpeed > 5) {
+            windSpeedIcon = 'wind_2arrow';
+        }
+    
+        // Update Wind Direction Icon using switch
+        let windDirectionIcon;
+        switch (weather.windDirection) {
+            case 'N': windDirectionIcon = 'north'; break;
+            case 'E': windDirectionIcon = 'east'; break;
+            case 'S': windDirectionIcon = 'south'; break;
+            case 'W': windDirectionIcon = 'west'; break;
+            default: windDirectionIcon = 'north'; // Default to north if invalid direction
+        }
+    
+        // Destroy previous icons to prevent stacking
+        if (this.humidityIcon) this.humidityIcon.destroy();
+        if (this.windSpeedIcon) this.windSpeedIcon.destroy();
+        if (this.windDirectionIcon) this.windDirectionIcon.destroy();
+    
+        // Update the weather stats text (Grid style)
+        if (this.weatherStats) {
+            this.weatherStats.setText(`Temp:  ${weather.temperature}°F\n\nHumidity: ${weather.humidity}%`);
+        } else {
+            // Create the text if it doesn't exist at the correct position
+            this.weatherStats = this.add.text(10, 535, `Temp:  ${weather.temperature}°F\n\nHumidity: ${weather.humidity}%`);
+        }
+    
+        // Update wind speed and direction text
+        if (this.windStats) {
+            this.windStats.setText(`Wind: ${weather.windSpeed} mph\n\nDirection: ${weather.windDirection}`);
+        } else {
+            // Create the text if it doesn't exist at the correct position
+            this.windStats = this.add.text(180, 535, `Wind: ${weather.windSpeed} mph\n\nDirection: ${weather.windDirection}`);
+        }
+    
+        // Assign new icons to prevent stacking
+        this.humidityIcon = this.add.image(150, 570, humidityIcon).setScale(0.4);
+        this.windSpeedIcon = this.add.image(325, 542, windSpeedIcon).setScale(0.4);
+        this.windDirectionIcon = this.add.image(325, 568, windDirectionIcon).setScale(0.3);
     }
-
+    
+    
+    
     // Handler for tile information updates
     updateTileInfo(tile) {
         console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
