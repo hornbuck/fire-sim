@@ -12,6 +12,13 @@ export default class MapScene extends Phaser.Scene {
         this.fireSpreadInterval = 8000; // Fire spread frequency in milliseconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
+        
+        // Camera control settings
+        this.cameraSpeed = 10;
+        this.minZoom = 0.25;
+        this.maxZoom = 2;
+        this.currentZoom = 1;
+        this.isPanning = false;
     }
 
     preload() {
@@ -103,7 +110,7 @@ export default class MapScene extends Phaser.Scene {
         // Set up panning with middle mouse button or right mouse button
         this.input.on('pointerdown', (pointer) => {
             // Only start panning with middle or right button and if pointer is in map area
-            if (pointer.middleButtonDown() || pointer.rightButtonDown() && pointer.x < 700) {
+            if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < 700) {
                 this.isPanning = true;
                 this.lastPanPosition = { x: pointer.x, y: pointer.y };
 
@@ -128,7 +135,7 @@ export default class MapScene extends Phaser.Scene {
         });
 
         this.input.on('pointerup', (pointer) => {
-            if (this.Panning) {
+            if (this.isPanning) {
                 this.isPanning = false;
                 this.input.setDefaultCursor('pointer');
             }
@@ -231,10 +238,10 @@ export default class MapScene extends Phaser.Scene {
                 // Determine terrain asset key
                 const terrainKey = this.textures.exists(tile.terrain) ? tile.terrain : 'defaultTerrain';
 
-                // Create sprite
+                // Create sprite at world position (no startX/startY needed)
                 const sprite = this.add.sprite(
-                    startX + x * tileSize,
-                    startY + y * tileSize,
+                    x * tileSize,
+                    y * tileSize,
                     terrainKey
                 ).setOrigin(0);
 
@@ -273,7 +280,7 @@ export default class MapScene extends Phaser.Scene {
             let clickedTile = this.map.getTile(tileX, tileY);
 
             if (clickedTile) {
-                console.log('Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})');
+                console.log(`Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})`);
 
                 // Pass tile info to UI
                 this.events.emit('tileInfo', {
@@ -381,6 +388,13 @@ export default class MapScene extends Phaser.Scene {
 
         // Handle keyboard camera controls
         this.handleCameraControls(delta);
+
+        // Scale fire sprites based on camera zoom
+        if (this.flameGroup && this.flameGroup.getChildren().length > 0) {
+            this.flameGroup.getChildren().forEach((flame) => {
+                flame.setScale(1 / this.currentZoom);
+            });
+        }
     }
 
     handleCameraControls(delta) {
@@ -400,16 +414,16 @@ export default class MapScene extends Phaser.Scene {
             this.cameras.main.scrollY += moveY;
         }
 
-     // Handle keyboard zoom
-    if (this.zoomKeys.zoomIn.isDown) {
-        this.currentZoom = Phaser.Math.Clamp(this.currentZoom + 0.01, this.minZoom, this.maxZoom);
-        this.cameras.main.setZoom(this.currentZoom);
-        this.events.emit('zoomChanged', this.currentZoom);
-    } 
-    else if (this.zoomKeys.zoomOut.isDown) {
-        this.currentZoom = Phaser.Math.Clamp(this.currentZoom - 0.01, this.minZoom, this.maxZoom);
-        this.cameras.main.setZoom(this.currentZoom);
-        this.events.emit('zoomChanged', this.currentZoom);
+        // Handle keyboard zoom
+        if (this.zoomKeys.zoomIn.isDown) {
+            this.currentZoom = Phaser.Math.Clamp(this.currentZoom + 0.01, this.minZoom, this.maxZoom);
+            this.cameras.main.setZoom(this.currentZoom);
+            this.events.emit('zoomChanged', this.currentZoom);
+        } 
+        else if (this.zoomKeys.zoomOut.isDown) {
+            this.currentZoom = Phaser.Math.Clamp(this.currentZoom - 0.01, this.minZoom, this.maxZoom);
+            this.cameras.main.setZoom(this.currentZoom);
+            this.events.emit('zoomChanged', this.currentZoom);
+        }
     }
-}
 }
