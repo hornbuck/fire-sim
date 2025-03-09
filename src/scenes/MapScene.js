@@ -9,8 +9,8 @@ export default class MapScene extends Phaser.Scene {
         console.log("MapScene Constructor Called");
 
         // Map configuration constants
-        this.MAP_WIDTH = 20;      // Number of tiles horizontally
-        this.MAP_HEIGHT = 20;     // Number of tiles vertically
+        this.MAP_WIDTH = 100;      // Number of tiles horizontally
+        this.MAP_HEIGHT = 100;     // Number of tiles vertically
         this.TILE_SIZE = 64;      // Size of each tile in pixels
         this.MIN_PARTITION_SIZE = 5;
 
