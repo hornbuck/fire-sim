@@ -15,7 +15,7 @@ export default class MapScene extends Phaser.Scene {
         
         // Camera control settings
         this.cameraSpeed = 10;
-        this.minZoom = 0.25;
+        this.minZoom = 0.25; // Will be updated dynamically based on map size
         this.maxZoom = 2;
         this.currentZoom = 1;
         this.isPanning = false;
@@ -76,39 +76,63 @@ export default class MapScene extends Phaser.Scene {
     }
     
     setupCameraControls() {
+        // Calculate the minimum zoom level needed to fit the entire map on screen
+        const mapAspectRatio = this.mapPixelWidth / this.mapPixelHeight;
+        const screenAspectRatio = this.cameras.main.width / this.cameras.main.height;
+        
+        // Determine which dimension (width or height) constrains the view
+        if (mapAspectRatio > screenAspectRatio) {
+            // Width-constrained (horizontal map)
+            this.fitZoomLevel = Math.min(1, this.cameras.main.width / this.mapPixelWidth);
+        } else {
+            // Height-constrained (vertical map)
+            this.fitZoomLevel = Math.min(1, this.cameras.main.height / this.mapPixelHeight);
+        }
+        
+        // Set the minimum zoom to either our calculated fit level or 0.25, whichever is larger
+        this.minZoom = Math.max(this.fitZoomLevel * 0.8, 0.25);
+        
         // Create a camera that doesn't include the UI area
         // This main camera will be responsible for the map area (0, 0, 700, 600)
         this.cameras.main.setBounds(0, 0, this.mapPixelWidth, this.mapPixelHeight);
+        this.cameras.main.setViewport(0, 0, 700, 600);
         
         // Center the camera on the map
         this.cameras.main.centerOn(this.mapPixelWidth / 2, this.mapPixelHeight / 2);
         
         // Set initial zoom
+        this.currentZoom = Math.max(this.minZoom, 1);
         this.cameras.main.setZoom(this.currentZoom);
 
         // Set up zoom with mouse wheel
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            // Determine zoom direction
-            const zoomChange = (deltaY > 0) ? -0.1 : 0.1;
-            
-            // Calculate new zoom level with constraints
-            this.currentZoom = Phaser.Math.Clamp(
-                this.currentZoom + zoomChange, 
-                this.minZoom, 
-                this.maxZoom
-            );
-            
-            // Apply zoom level to camera
-            this.cameras.main.setZoom(this.currentZoom);
-            
-            // Emit zoom level for UI adjustments
-            this.events.emit('zoomChanged', this.currentZoom);
+            // Only zoom if the pointer is over the map area
+            if (pointer.x < 700) {
+                // Determine zoom direction
+                const zoomChange = (deltaY > 0) ? -0.1 : 0.1;
+                
+                // Calculate new zoom level with constraints
+                this.currentZoom = Phaser.Math.Clamp(
+                    this.currentZoom + zoomChange, 
+                    this.minZoom, 
+                    this.maxZoom
+                );
+                
+                // Apply zoom level to camera
+                this.cameras.main.setZoom(this.currentZoom);
+                
+                // Emit zoom level for UI adjustments
+                this.events.emit('zoomChanged', this.currentZoom);
+                
+                // If zoomed out to where map doesn't fill screen, center it
+                this.centerMapIfNeeded();
+            }
         });
         
         // Set up panning with middle mouse button or right mouse button
         this.input.on('pointerdown', (pointer) => {
-            // Only start panning with middle or right button
-            if (pointer.middleButtonDown() || pointer.rightButtonDown()) {
+            // Only start panning with middle or right button and if pointer is in map area
+            if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < 700) {
                 this.isPanning = true;
                 this.lastPanPosition = { x: pointer.x, y: pointer.y };
                 
@@ -155,6 +179,26 @@ export default class MapScene extends Phaser.Scene {
             zoomIn: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS),
             zoomOut: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS)
         };
+    }
+
+    centerMapIfNeeded() {
+        // Calculate the visible map area in screen coordinates
+        const visibleMapWidth = this.mapPixelWidth * this.currentZoom;
+        const visibleMapHeight = this.mapPixelHeight * this.currentZoom;
+        
+        // Get the camera viewport dimensions
+        const viewportWidth = this.cameras.main.width;
+        const viewportHeight = this.cameras.main.height;
+        
+        // Center the map if it's smaller than the viewport
+        if (visibleMapWidth < viewportWidth || visibleMapHeight < viewportHeight) {
+            // Calculate the center position
+            const centerX = this.mapPixelWidth / 2;
+            const centerY = this.mapPixelHeight / 2;
+            
+            // Smoothly pan to the center
+            this.cameras.main.pan(centerX, centerY, 300, 'Power2');
+        }
     }
 
     initializeMap() {
@@ -265,6 +309,11 @@ export default class MapScene extends Phaser.Scene {
     handleTileClick(pointer) {
         // Ignore clicks if in panning mode
         if (this.isPanning) {
+            return;
+        }
+        
+        // Ignore clicks in the UI area
+        if (pointer.x > 700) {
             return;
         }
         
@@ -417,15 +466,21 @@ export default class MapScene extends Phaser.Scene {
         }
         
         // Handle keyboard zoom
+        let zoomChanged = false;
         if (this.zoomKeys.zoomIn.isDown) {
             this.currentZoom = Phaser.Math.Clamp(this.currentZoom + 0.01, this.minZoom, this.maxZoom);
             this.cameras.main.setZoom(this.currentZoom);
-            this.events.emit('zoomChanged', this.currentZoom);
+            zoomChanged = true;
         } 
         else if (this.zoomKeys.zoomOut.isDown) {
             this.currentZoom = Phaser.Math.Clamp(this.currentZoom - 0.01, this.minZoom, this.maxZoom);
             this.cameras.main.setZoom(this.currentZoom);
+            zoomChanged = true;
+        }
+        
+        if (zoomChanged) {
             this.events.emit('zoomChanged', this.currentZoom);
+            this.centerMapIfNeeded();
         }
     }
 }
