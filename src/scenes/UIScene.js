@@ -1,5 +1,6 @@
 import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
 import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
+import Weather from '../components/Weather.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -8,6 +9,10 @@ export default class UIScene extends Phaser.Scene {
 
     preload() {
         preloadHUD(this);
+
+        // Preload UI Elements
+        this.load.image('Title', 'assets/UI/Title.png');
+        this.load.image('Restart Button', 'assets/UI/restartButton.png');
         
         // Load zoom control assets
         this.load.image('zoom-in', 'assets/zoom-in.png');
@@ -16,10 +21,10 @@ export default class UIScene extends Phaser.Scene {
 
     create() {
         console.log("UIScene Created");
-        
+
         // Create UI Elements
         this.createUIElements();
-
+        
         // Create zoom controls
         this.createZoomControls();
 
@@ -46,106 +51,176 @@ export default class UIScene extends Phaser.Scene {
 
     createUIElements() {
         // Game title
-        this.add.text(10, 10, 'Wildfire Command', {
-            font: '20px "Georgia", serif',
-            color: '#8B4513'
-        }).setScrollFactor(0);
+        this.add.image(40, 40, 'Title').setScrollFactor(0);
+
+        // Login Button via MainScene
+        const loginMenuButton = this.add.text(600, 10, 'Login', {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#A0522D', // Rustic wood-like color
+            padding: { x: 15, y: 10 }
+        })
+            .setScrollFactor(0)
+            .setInteractive()
+            .on('pointerover', () => {  // Hover effect
+                loginMenuButton.setStyle({ backgroundColor: '#8B4513' });
+            })
+            .on('pointerout', () => {  // Reset when not hovering
+                loginMenuButton.setStyle({ backgroundColor: '#A0522D' });
+            })
+            .on('pointerdown', () => {
+                this.events.removeAllListeners();
+                this.scene.remove('MainScene'); // Removes the scene entirely.
+                this.scene.start('LoginScene');
+            });
 
         // Restart Game button
-        this.restartButton = this.add.text(10, 40, 'Restart Game', {
-            font: '16px Georgia',
-            color: '#FFF',
-            backgroundColor: '#A0522D',
-            padding: { x: 15, y: 10 }
-        }).setInteractive()
-            .on('pointerdown', () => {
-                this.events.emit('restartGame');
+        const restartButton = this.add.image(140, 50, 'Restart Button')
+            .setScrollFactor(0)
+            .setInteractive()
+            .setScale(1)
+            .on('pointerover', () => {  
+                restartButton.setTint(0x8B4513);
             })
-            .setScrollFactor(0);
+            .on('pointerout', () => {  
+                restartButton.clearTint();
+            })
+            .on('pointerdown', () => {
+                this.events.emit('restartGame'); // Emit event to MapScene
+            });
 
-        // Fire toggle button (Start/Stop Fire)
-        this.fireButton = this.add.text(700, 570, 'Start Fire', {
+        // Fire toggle button
+        this.fireButton = this.add.text(600, 550, 'Start Fire', {
             font: '16px Georgia',
             color: '#FFF',
             backgroundColor: '#8B0000',
             padding: { x: 15, y: 10 }
-        }).setInteractive()
-            .on('pointerdown', () => {
-                this.events.emit('toggleFire');
-            })
+        })
             .setScrollFactor(0)
-            .setOrigin(1, 1);  // Align to bottom right
+            .setInteractive()
+            .on('pointerdown', () => {
+                console.log("Fire button clicked!");
+                this.events.emit('toggleFire'); // Emit event to MapScene
+            });
 
-        // Game clock - positioned at top center
-        this.gameClockText = this.add.text(400, 10, "Time: 00:00", {
-            fontSize: "18px",
-            fill: "#fff",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            padding: { x: 5, y: 5 }
-        }).setOrigin(0.5, 0).setScrollFactor(0);
+        // Weather Stats
+        this.weatherText = this.add.text(10, 550, `Loading weather...`, {
+            font: '16px "Georgia", serif',
+            color: '#FFF',
+            backgroundColor: '#556B2F',  // Olive green for a rustic feel
+            padding: { x: 15, y: 10 }
+        }).setScrollFactor(0);
 
+        // Game Clock
+        this.gameClockText = this.add.text(300, 10, "Time: 00:00", {
+            fontSize: "20px",
+            fill: "#ffffff",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            padding: { x: 10, y: 6 },
+            align: "center",
+            shadow: {
+                offsetX: 2,
+                offsetY: 2,
+                color: "rgba(0, 0, 0, 0.7)",
+                blur: 4,
+                stroke: true,
+                fill: true
+            }
+        })
+        .setScrollFactor(0)
+        .setDepth(10);
+        
         // Zoom level display
-        this.zoomText = this.add.text(400, 40, "Zoom: 100%", {
+        this.zoomText = this.add.text(300, 40, "Zoom: 100%", {
             fontSize: "16px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
-        }).setOrigin(0.5, 0).setScrollFactor(0);
-
-        // Controls info at top left
-        this.controlsText = this.add.text(10, 80, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
+        }).setScrollFactor(0);
+        
+        // Controls info
+        this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
             fontSize: "14px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0);
 
-        // Weather text at bottom of screen
-        this.weatherText = this.add.text(10, 570, 'Loading weather...', {
-            font: '16px Georgia',
-            color: '#FFF',
-            backgroundColor: '#556B2F',
-            padding: { x: 15, y: 10 }
-        }).setScrollFactor(0);
-
-        // Tile info display
-        this.tileInfoText = this.add.text(10, 400, "", {
-            fontSize: "16px",
-            fill: "#fff",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            padding: { x: 10, y: 5 },
-            align: "left"
-        }).setDepth(10).setScrollFactor(0).setVisible(false);
+        // Tile Info
+        this.tileInfoText = this.add.text(10, 200, 
+            "Select tile\nCoordinates: n/a\nTerrain: n/a\nFlammability: n/a\nFuel: n/a\nBurn Status: n/a", {
+                fill: "#ffffff",
+                backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
+                padding: { x: 14, y: 10 },
+                align: "left",
+                shadow: {
+                    offsetX: 0,
+                    offsetY: 0,
+                    color: "rgba(255, 255, 255, 0.3)",
+                    blur: 6,
+                    stroke: true,
+                    fill: true
+                }
+            })
+            .setDepth(10)
+            .setScrollFactor(0)
+            .setOrigin(0)
+            .setStyle({ borderRadius: "8px" });
     }
     
     createZoomControls() {
         // Add zoom buttons on the left side
         const buttonSize = 40;
         const buttonX = 10;
-        const zoomInY = 200;
-        const zoomOutY = 250;
+        const zoomInY = 320;
+        const zoomOutY = 370;
         
-        // Zoom in button
-        this.zoomInButton = this.add.rectangle(buttonX, zoomInY, buttonSize, buttonSize, 0x666666)
-            .setOrigin(0)
-            .setStrokeStyle(2, 0xffffff)
-            .setScrollFactor(0);
-            
-        this.add.text(buttonX + buttonSize/2, zoomInY + buttonSize/2, "+", {
-            fontSize: "24px",
-            fill: "#fff"
-        }).setOrigin(0.5).setScrollFactor(0);
+        // Try to create zoom buttons with images if available
+        let useImageAssets = false;
+        try {
+            if (this.textures.exists('zoom-in') && this.textures.exists('zoom-out')) {
+                useImageAssets = true;
+            }
+        } catch (e) {
+            useImageAssets = false;
+        }
         
-        // Zoom out button
-        this.zoomOutButton = this.add.rectangle(buttonX, zoomOutY, buttonSize, buttonSize, 0x666666)
-            .setOrigin(0)
-            .setStrokeStyle(2, 0xffffff)
-            .setScrollFactor(0);
+        if (useImageAssets) {
+            // Zoom in button
+            this.zoomInButton = this.add.image(buttonX, zoomInY, 'zoom-in')
+                .setOrigin(0)
+                .setDisplaySize(buttonSize, buttonSize)
+                .setScrollFactor(0);
+                
+            // Zoom out button
+            this.zoomOutButton = this.add.image(buttonX, zoomOutY, 'zoom-out')
+                .setOrigin(0)
+                .setDisplaySize(buttonSize, buttonSize)
+                .setScrollFactor(0);
+        } else {
+            // Fallback to rectangle buttons with text if images not available
+            // Zoom in button
+            this.zoomInButton = this.add.rectangle(buttonX, zoomInY, buttonSize, buttonSize, 0x666666)
+                .setOrigin(0)
+                .setStrokeStyle(2, 0xffffff)
+                .setScrollFactor(0);
+                
+            this.add.text(buttonX + buttonSize/2, zoomInY + buttonSize/2, "+", {
+                fontSize: "24px",
+                fill: "#fff"
+            }).setOrigin(0.5).setScrollFactor(0);
             
-        this.add.text(buttonX + buttonSize/2, zoomOutY + buttonSize/2, "-", {
-            fontSize: "24px",
-            fill: "#fff"
-        }).setOrigin(0.5).setScrollFactor(0);
+            // Zoom out button
+            this.zoomOutButton = this.add.rectangle(buttonX, zoomOutY, buttonSize, buttonSize, 0x666666)
+                .setOrigin(0)
+                .setStrokeStyle(2, 0xffffff)
+                .setScrollFactor(0);
+                
+            this.add.text(buttonX + buttonSize/2, zoomOutY + buttonSize/2, "-", {
+                fontSize: "24px",
+                fill: "#fff"
+            }).setOrigin(0.5).setScrollFactor(0);
+        }
         
         // Make buttons interactive
         this.zoomInButton.setInteractive().on('pointerdown', () => {
@@ -205,37 +280,11 @@ export default class UIScene extends Phaser.Scene {
         console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
         
         if (this.tileInfoText) {
-            this.tileInfoText.setText(`Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`);
-            
-            // Position the info near the clicked position if available
-            if (tile.screenX && tile.screenY) {
-                // Ensure text stays on screen
-                const padding = 10;
-                let x = tile.screenX + padding;
-                let y = tile.screenY + padding;
-                
-                // Adjust if would go off screen
-                if (x + this.tileInfoText.width > this.cameras.main.width) {
-                    x = tile.screenX - this.tileInfoText.width - padding;
-                }
-                
-                if (y + this.tileInfoText.height > this.cameras.main.height) {
-                    y = tile.screenY - this.tileInfoText.height - padding;
-                }
-                
-                this.tileInfoText.setPosition(x, y);
-            }
-            
+            this.tileInfoText.setText(
+                `Select tile\nCoordinates: (${tile.x}, ${tile.y})\nTerrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`
+            );
             this.tileInfoText.setVisible(true);
-            
-            // Hide after a few seconds
-            if (this.tileInfoHideTimer) {
-                this.tileInfoHideTimer.remove();
-            }
-            
-            this.tileInfoHideTimer = this.time.delayedCall(3000, () => {
-                this.tileInfoText.setVisible(false);
-            });
+            this.tileInfoText.setDepth(100);
         } else {
             console.warn("tileInfoText is not defined in UIScene!");
         }
