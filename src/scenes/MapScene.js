@@ -8,15 +8,27 @@ export default class MapScene extends Phaser.Scene {
         super('MapScene');
         console.log("MapScene Constructor Called");
 
-        this.elapsedTime = 0; // Track elapsed game time in seconds
-        this.fireSpreadInterval = 8000; // Fire spread frequency in milliseconds
+        // Map configuration constants
+        this.MAP_WIDTH = 20;      // Number of tiles horizontally
+        this.MAP_HEIGHT = 20;     // Number of tiles vertically
+        this.TILE_SIZE = 64;      // Size of each tile in pixels
+        this.MIN_PARTITION_SIZE = 5;
+
+        // Camera control configuration
+        this.CAMERA_SPEED = 10;   // Base camera panning speed
+        this.MIN_ZOOM = 0.25;     // Minimum zoom level (will be updated dynamically)
+        this.MAX_ZOOM = 2;        // Maximum zoom level
+        this.UI_WIDTH = 100;      // Width of UI area on right side
+        
+        // Fire simulation settings
+        this.FIRE_SPREAD_INTERVAL = 8000; // Fire spread frequency in milliseconds
+
+        // Game state variables
+        this.elapsedTime = 0;     // Track elapsed game time in seconds
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
         
-        // Camera control settings
-        this.cameraSpeed = 10;
-        this.minZoom = 0.25; // Will be updated dynamically based on map size
-        this.maxZoom = 2;
+        // Camera state variables
         this.currentZoom = 1;
         this.isPanning = false;
     }
@@ -76,46 +88,49 @@ export default class MapScene extends Phaser.Scene {
     }
     
     setupCameraControls() {
+        // Get the available viewport width (excluding UI area)
+        const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
+        const viewportHeight = this.cameras.main.height;
+        
         // Calculate the minimum zoom level needed to fit the entire map on screen
         const mapAspectRatio = this.mapPixelWidth / this.mapPixelHeight;
-        const screenAspectRatio = this.cameras.main.width / this.cameras.main.height;
+        const screenAspectRatio = viewportWidth / viewportHeight;
         
         // Determine which dimension (width or height) constrains the view
         if (mapAspectRatio > screenAspectRatio) {
             // Width-constrained (horizontal map)
-            this.fitZoomLevel = Math.min(1, this.cameras.main.width / this.mapPixelWidth);
+            this.fitZoomLevel = Math.min(1, viewportWidth / this.mapPixelWidth);
         } else {
             // Height-constrained (vertical map)
-            this.fitZoomLevel = Math.min(1, this.cameras.main.height / this.mapPixelHeight);
+            this.fitZoomLevel = Math.min(1, viewportHeight / this.mapPixelHeight);
         }
         
-        // Set the minimum zoom to either our calculated fit level or 0.25, whichever is larger
-        this.minZoom = Math.max(this.fitZoomLevel * 0.8, 0.25);
+        // Set the minimum zoom to either our calculated fit level or MIN_ZOOM, whichever is larger
+        this.MIN_ZOOM = Math.max(this.fitZoomLevel * 0.8, this.MIN_ZOOM);
         
         // Create a camera that doesn't include the UI area
-        // This main camera will be responsible for the map area (0, 0, 700, 600)
         this.cameras.main.setBounds(0, 0, this.mapPixelWidth, this.mapPixelHeight);
-        this.cameras.main.setViewport(0, 0, 700, 600);
+        this.cameras.main.setViewport(0, 0, viewportWidth, viewportHeight);
         
         // Center the camera on the map
         this.cameras.main.centerOn(this.mapPixelWidth / 2, this.mapPixelHeight / 2);
         
         // Set initial zoom
-        this.currentZoom = Math.max(this.minZoom, 1);
+        this.currentZoom = Math.max(this.MIN_ZOOM, 1);
         this.cameras.main.setZoom(this.currentZoom);
 
         // Set up zoom with mouse wheel
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
             // Only zoom if the pointer is over the map area
-            if (pointer.x < 700) {
+            if (pointer.x < viewportWidth) {
                 // Determine zoom direction
                 const zoomChange = (deltaY > 0) ? -0.1 : 0.1;
                 
                 // Calculate new zoom level with constraints
                 this.currentZoom = Phaser.Math.Clamp(
                     this.currentZoom + zoomChange, 
-                    this.minZoom, 
-                    this.maxZoom
+                    this.MIN_ZOOM, 
+                    this.MAX_ZOOM
                 );
                 
                 // Apply zoom level to camera
@@ -132,7 +147,7 @@ export default class MapScene extends Phaser.Scene {
         // Set up panning with middle mouse button or right mouse button
         this.input.on('pointerdown', (pointer) => {
             // Only start panning with middle or right button and if pointer is in map area
-            if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < 700) {
+            if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < viewportWidth) {
                 this.isPanning = true;
                 this.lastPanPosition = { x: pointer.x, y: pointer.y };
                 
@@ -202,15 +217,12 @@ export default class MapScene extends Phaser.Scene {
     }
 
     initializeMap() {
-        // Keep existing map size from original code for compatibility
-        this.mapWidth = 20;  // Increased from 10 for better pan/zoom experience
-        this.mapHeight = 20; // Increased from 10 for better pan/zoom experience
-        this.minSize = 5;
-        this.tileSize = 64;  // Original used half-scaled 32px tiles; we use 64px now
+        // Preserve current zoom level if restarting with existing map
+        const previousZoom = this.currentZoom || 1;
         
         // Calculate total map pixel dimensions
-        this.mapPixelWidth = this.mapWidth * this.tileSize;
-        this.mapPixelHeight = this.mapHeight * this.tileSize;
+        this.mapPixelWidth = this.MAP_WIDTH * this.TILE_SIZE;
+        this.mapPixelHeight = this.MAP_HEIGHT * this.TILE_SIZE;
 
         // Generate a new seed for map creation
         this.currentSeed = Date.now() * Math.random();
@@ -218,9 +230,9 @@ export default class MapScene extends Phaser.Scene {
 
         // Initialize the map
         this.map = new Map(
-            this.mapWidth, 
-            this.mapHeight, 
-            this.minSize, 
+            this.MAP_WIDTH, 
+            this.MAP_HEIGHT, 
+            this.MIN_PARTITION_SIZE, 
             this.currentSeed
         );
 
@@ -239,9 +251,8 @@ export default class MapScene extends Phaser.Scene {
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
         
-        // Preserve zoom level when restarting
-        const previousZoom = this.currentZoom || 1;
-        this.currentZoom = previousZoom;
+        // Restore zoom level while respecting the minimum constraint
+        this.currentZoom = Math.max(previousZoom, this.MIN_ZOOM);
 
         // Initialize sprite groups
         if (this.mapGroup && !this.mapGroup.destroyed) {
@@ -263,7 +274,7 @@ export default class MapScene extends Phaser.Scene {
         }
 
         // Render the map
-        this.renderMap(this.map, this.tileSize);
+        this.renderMap(this.map, this.TILE_SIZE);
 
         // Start a fire
         this.startFire();
@@ -273,8 +284,8 @@ export default class MapScene extends Phaser.Scene {
         this.events.emit('fireSimToggled', this.isFireSimRunning);
         this.events.emit('updateGameClock', this.elapsedTime);
         this.events.emit('mapSizeChanged', {
-            width: this.mapWidth,
-            height: this.mapHeight,
+            width: this.MAP_WIDTH,
+            height: this.MAP_HEIGHT,
             pixelWidth: this.mapPixelWidth,
             pixelHeight: this.mapPixelHeight
         });
@@ -313,7 +324,8 @@ export default class MapScene extends Phaser.Scene {
         }
         
         // Ignore clicks in the UI area
-        if (pointer.x > 700) {
+        const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
+        if (pointer.x > viewportWidth) {
             return;
         }
         
@@ -321,8 +333,8 @@ export default class MapScene extends Phaser.Scene {
         const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
         
         // Calculate tile coordinates based on world point
-        let tileX = Math.floor(worldPoint.x / this.tileSize);
-        let tileY = Math.floor(worldPoint.y / this.tileSize);
+        let tileX = Math.floor(worldPoint.x / this.TILE_SIZE);
+        let tileY = Math.floor(worldPoint.y / this.TILE_SIZE);
 
         // Ensure click is within map bounds
         if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
@@ -364,8 +376,8 @@ export default class MapScene extends Phaser.Scene {
         
         // Pan camera to fire location
         this.cameras.main.pan(
-            startX * this.tileSize + this.tileSize / 2,
-            startY * this.tileSize + this.tileSize / 2,
+            startX * this.TILE_SIZE + this.TILE_SIZE / 2,
+            startY * this.TILE_SIZE + this.TILE_SIZE / 2,
             1000,
             'Power2'
         );
@@ -430,7 +442,7 @@ export default class MapScene extends Phaser.Scene {
         
         // Handle fire spread at interval
         if (this.isFireSimRunning && 
-            this.elapsedTime - this.lastFireSpreadTime >= this.fireSpreadInterval / 1000) {
+            this.elapsedTime - this.lastFireSpreadTime >= this.FIRE_SPREAD_INTERVAL / 1000) {
             this.lastFireSpreadTime = this.elapsedTime;
             this.updateFireSpread();
             this.updateWeatherOverTime();
@@ -450,7 +462,7 @@ export default class MapScene extends Phaser.Scene {
     
     handleCameraControls(delta) {
         // Adjust camera speed based on zoom level
-        const adjustedSpeed = this.cameraSpeed / this.currentZoom;
+        const adjustedSpeed = this.CAMERA_SPEED / this.currentZoom;
         
         // Calculate camera movement based on keyboard input
         const moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
@@ -468,12 +480,12 @@ export default class MapScene extends Phaser.Scene {
         // Handle keyboard zoom
         let zoomChanged = false;
         if (this.zoomKeys.zoomIn.isDown) {
-            this.currentZoom = Phaser.Math.Clamp(this.currentZoom + 0.01, this.minZoom, this.maxZoom);
+            this.currentZoom = Phaser.Math.Clamp(this.currentZoom + 0.01, this.MIN_ZOOM, this.MAX_ZOOM);
             this.cameras.main.setZoom(this.currentZoom);
             zoomChanged = true;
         } 
         else if (this.zoomKeys.zoomOut.isDown) {
-            this.currentZoom = Phaser.Math.Clamp(this.currentZoom - 0.01, this.minZoom, this.maxZoom);
+            this.currentZoom = Phaser.Math.Clamp(this.currentZoom - 0.01, this.MIN_ZOOM, this.MAX_ZOOM);
             this.cameras.main.setZoom(this.currentZoom);
             zoomChanged = true;
         }
