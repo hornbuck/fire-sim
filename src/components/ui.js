@@ -1,7 +1,7 @@
 import {activate_resource, deactivate, show_tooltip, set_text} from "./DeploymentClickEvents.js";
 
-// Initialize player coins tracker
-export let playerCoins = 0;
+// Initialize player coins text object
+export let bank;
 
 // Initialize all asset sprite objects
 export let hose;
@@ -43,7 +43,7 @@ export function createHUD(scene) {
 
     // Player Coins Block to UI
     let coins = scene.add.sprite(80, 100, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5);
-    playerCoins = scene.add.text(65, 100, '0', {
+    bank = scene.add.text(100, 100, '0', {
         font: '24px Arial',
         fill: '#ffffff',
         align: 'center',

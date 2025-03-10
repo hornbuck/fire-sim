@@ -1,8 +1,15 @@
 import { technique, use_resource, cooldown } from './DeploymentClickEvents.js'
 import { timerSprite } from './ui.js'
 
-// Protects tiles from being burned if an asset was used to put it out
-export let burn = "";
+// ANIMATION LENGTH FOR EACH ASSET (in ms)
+export let t_hose = 4000;
+export let t_extinguisher = 3000;
+export let t_firetruck = 3000;
+export let t_helicopter = 3500;
+export let t_airtanker = 1700;
+export let t_hotshotcrew = 3000;
+export let t_smokejumpers_plane = 2000;
+export let t_smokejumpers_ground = 3000;
 
 //--------------------------------------------------------------------
 // BELOW ARE THE FUNCTIONS THAT CONTROL ALL OF THE ANIMATED SPRITES
@@ -106,7 +113,6 @@ export default class AnimatedSprite {
     ////// FIREFIGHTERS WITH FIRE HOSE ASSET /////
     useHose(scene, x, y, fireSprite) {
         console.log("Team of firefighters activated!");
-        burn = "false";
             
         // Register hose animation
         scene.anims.create({
@@ -119,12 +125,12 @@ export default class AnimatedSprite {
         // Play animation
         let hoseSprite = scene.add.sprite(x + 30, y + 10, 'set-hose').setDepth(1).setScale(1.0, 1.0);
         hoseSprite.play('hoseAnimConfig');
-        scene.time.delayedCall(4000, () => {
+        scene.time.delayedCall(t_hose, () => {
             hoseSprite.destroy();
         });
 
         // Destroy fire at end of animation
-        scene.time.delayedCall(4000, () => {
+        scene.time.delayedCall(t_hose, () => {
             fireSprite.destroy();
         });
         
@@ -135,7 +141,6 @@ export default class AnimatedSprite {
     // Applies fire extinguisher
     useFireExtinguisher(scene, x, y, fireSprite) {
         console.log("Fire extinguisher activated!");
-        burn = "false";
             
         // Register extinguish animation
         scene.anims.create({
@@ -148,7 +153,7 @@ export default class AnimatedSprite {
         // Play animation
         let cloudSprite = scene.add.sprite(x, y, 'set-extinguisher').setDepth(1).setScale(0.75, 0.75);
         cloudSprite.play('extinguisherAnimConfig');
-        scene.time.delayedCall(3000, () => {
+        scene.time.delayedCall(t_extinguisher, () => {
             cloudSprite.destroy();
         });
 
@@ -160,7 +165,6 @@ export default class AnimatedSprite {
     ////// FIRETRUCK ASSET /////
     useFiretruck(scene, x, y, fireSprite) {
         console.log("Fire truck activated!");
-        burn = "false";
             
         // Register truck animation
         scene.anims.create({
@@ -173,12 +177,12 @@ export default class AnimatedSprite {
         // Play animation
         let truckSprite = scene.add.sprite(x + 40, y, 'set-firetruck').setDepth(1).setScale(1.3, 1.3);
         truckSprite.play('firetruckAnimConfig');
-        scene.time.delayedCall(3000, () => {
+        scene.time.delayedCall(t_firetruck, () => {
             truckSprite.destroy();
         });
 
         // Destroy fire at end of animation
-        scene.time.delayedCall(3000, () => {
+        scene.time.delayedCall(t_firetruck, () => {
             fireSprite.destroy();
         });
     }
@@ -187,7 +191,6 @@ export default class AnimatedSprite {
     ////// HELICOPTER ASSET /////
     useHelicopter(scene, x, y, fireSprite) {
         console.log("Helicopter activated!");
-        burn = "false";
             
         // Register truck animation
         scene.anims.create({
@@ -200,12 +203,12 @@ export default class AnimatedSprite {
         // Play animation
         let helicopterSprite = scene.add.sprite(x, y - 40, 'set-helicopter').setDepth(1).setScale(1.5, 1.5);
         helicopterSprite.play('helicopterAnimConfig');
-        scene.time.delayedCall(3500, () => {
+        scene.time.delayedCall(t_helicopter, () => {
             helicopterSprite.destroy();
         });
 
         // Destroy fire at end of animation
-        scene.time.delayedCall(3500, () => {
+        scene.time.delayedCall(t_helicopter, () => {
             fireSprite.destroy();
         });
         
@@ -215,7 +218,6 @@ export default class AnimatedSprite {
     ////// AIRTANKER ASSET /////
     useAirtanker(scene, x, y, fireSprite) {
         console.log("Airtanker activated!");
-        burn = "false";
 
         // Register truck animation
         scene.anims.create({
@@ -228,12 +230,12 @@ export default class AnimatedSprite {
         // Play animation
         let airtankerSprite = scene.add.sprite(x, y - 40, 'set-airtanker').setDepth(1).setScale(2.5, 2.5);
         airtankerSprite.play('airtankerAnimConfig');
-        scene.time.delayedCall(1700, () => {
+        scene.time.delayedCall(t_airtanker, () => {
             airtankerSprite.destroy();
         });
 
         // Destroy fire at end of animation
-        scene.time.delayedCall(2000, () => {
+        scene.time.delayedCall(t_airtanker, () => {
             fireSprite.destroy();
         });
         
@@ -243,7 +245,6 @@ export default class AnimatedSprite {
     ////// HOTSHOT CREW ASSET /////
     useHotshotCrew(scene, x, y, fireSprite) {
         console.log("Hotshot Crew activated!");
-        burn = "false";
 
         // Register truck animation
         scene.anims.create({
@@ -256,12 +257,12 @@ export default class AnimatedSprite {
         // Play animation
         let airtankerSprite = scene.add.sprite(x + 40, y, 'set-hotshot').setDepth(1).setScale(1.0, 1.0);
         airtankerSprite.play('hotshotAnimConfig');
-        scene.time.delayedCall(3000, () => {
+        scene.time.delayedCall(t_hotshotcrew, () => {
             airtankerSprite.destroy();
         });
 
         // Destroy fire at end of animation
-        scene.time.delayedCall(3000, () => {
+        scene.time.delayedCall(t_hotshotcrew, () => {
             fireSprite.destroy();
         });
         
@@ -271,7 +272,6 @@ export default class AnimatedSprite {
     ////// SMOKEJUMPERS ASSET /////
     useSmokejumpers(scene, x, y, fireSprite) {
         console.log("Smokejumpers activated!");
-        burn = "false";
 
         // Register truck animation
         scene.anims.create({
@@ -290,20 +290,19 @@ export default class AnimatedSprite {
 
         // Play animation
         let smokejumpersSprite = scene.add.sprite(x, y - 40, 'set-smokejumpers').setDepth(1).setScale(1.0, 1.0);
-        
 
         smokejumpersSprite.play('smokejumpersAnimConfig');
-        scene.time.delayedCall(2000, () => {
+        scene.time.delayedCall(t_smokejumpers_plane, () => {
             smokejumpersSprite.destroy();
             let smokejumpersGroundSprite = scene.add.sprite(x, y, 'set-smokejumpers-dig').setDepth(2).setScale(0.5, 0.5);
             smokejumpersGroundSprite.play('smokejumpersGroundAnimConfig');
-            scene.time.delayedCall(3000, () => {
+            scene.time.delayedCall(t_smokejumpers_ground, () => {
                 smokejumpersGroundSprite.destroy();
             }) 
         });
 
         // Destroy fire at end of animation
-        scene.time.delayedCall(4000, () => {
+        scene.time.delayedCall(t_smokejumpers_ground, () => {
             fireSprite.destroy();
         });
         

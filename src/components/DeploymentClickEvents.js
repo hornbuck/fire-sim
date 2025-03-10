@@ -1,6 +1,6 @@
 import AnimatedSprite from '../components/AnimatedSprites.js';
-import { all_assets, playerCoins } from './ui.js';
-import { burn } from '../components/AnimatedSprites.js';
+import { all_assets, bank } from './ui.js';
+import { t_hose, t_extinguisher, t_firetruck, t_helicopter, t_airtanker, t_hotshotcrew, t_smokejumpers_plane, t_smokejumpers_ground} from '../components/AnimatedSprites.js';
 
 // Global vars to track which technique is currently active and whether their cooldown is active
 export let technique = "";
@@ -20,6 +20,10 @@ export let activated_resource = "none";
 export let cooldown = [0, 0, 0, 0, 0, 0, 0];
 
 // These are all of the global limits for all the resources
+
+//* Player Bank Limits
+export let coins = 0;
+
 //* Number Limits
 export let hose = 10;
 export let extinguisher = 5;
@@ -30,14 +34,15 @@ export let hotshotcrew = 1;
 export let smokejumper = 5;
 
 // These are the cooldowns for all the resources (in ms)
-let t_hose = 3000;
-let t_extinguisher = 500;
-let t_helicopter = 7000;
-let t_firetruck = 5000;
-let t_airtanker = 10000;
-let t_hotshotcrew = 3000;
+let c_hose = 3000;
+let c_extinguisher = 500;
+let c_helicopter = 7000;
+let c_firetruck = 5000;
+let c_airtanker = 10000;
+let c_hotshotcrew = 3000;
 let t_smokejumper = 15000;
 
+// Updates text of asset limits
 export function set_text(value, x, y, scene) {
     return scene.add.text(x, y, value, {
         font: '12px Arial',
@@ -146,14 +151,16 @@ export function use_resource (scene, x, y, fireSprite) {
             if (cooldown[0] == 0) {
                 hose -= 1;
                 asset.useHose(scene, x, y, fireSprite);
-                asset.startTimer(0, scene, t_hose, 750, 50);
-                //playerCoins.value = set_text("100", x, y, scene); --> BUG: make a new function that changes to the right color and location :)
+                asset.startTimer(0, scene, c_hose, 750, 50);
+                coins += 100;
+                
             } else {
                 show_notification(scene, 'cooldown');
             }
 
-            scene.time.delayedCall(3000, () => {
+            scene.time.delayedCall(t_hose, () => {
                 handleFireExtinguish.call(scene, fireSprite)
+                bank.setText(`${coins}`);
             })
         } else {
             console.log("Sorry! You ran out!");
@@ -161,7 +168,6 @@ export function use_resource (scene, x, y, fireSprite) {
             // Notification to player that they are out of firehoses
             show_notification(scene, 'out-of-hoses');
         }
-        //burn.value = "true"; --> FIX BUG
     }
     if (activated_resource === "extinguisher") {
         if (extinguisher > 0) {
@@ -169,7 +175,9 @@ export function use_resource (scene, x, y, fireSprite) {
             if (cooldown[1] == 0) {
                 extinguisher -= 1;
                 asset.useFireExtinguisher(scene, x, y, fireSprite);
-                asset.startTimer(1, scene, t_extinguisher, 750, 130);
+                asset.startTimer(1, scene, c_extinguisher, 750, 130);
+                coins += 50;
+                bank.setText(`${coins}`);
             } else {
                 show_notification(scene, 'cooldown');
             }
@@ -187,10 +195,16 @@ export function use_resource (scene, x, y, fireSprite) {
             if (cooldown[2] == 0) {
                 helicopter -= 1;
                 asset.useHelicopter(scene, x, y, fireSprite);
-                asset.startTimer(2, scene, t_helicopter, 750, 210);
+                asset.startTimer(2, scene, c_helicopter, 750, 210);
+                coins += 300;
             } else {
                 show_notification(scene, 'cooldown');
             }
+
+            scene.time.delayedCall(t_helicopter, () => {
+                handleFireExtinguish.call(scene, fireSprite)
+                bank.setText(`${coins}`);
+            })
             
         } else {
             console.log("Sorry! You ran out!");
@@ -205,10 +219,16 @@ export function use_resource (scene, x, y, fireSprite) {
             if (cooldown[3] == 0) {
                 firetruck -= 1;
                 asset.useFiretruck(scene, x, y, fireSprite);
-                asset.startTimer(3, scene, t_firetruck, 750, 290);
+                asset.startTimer(3, scene, c_firetruck, 750, 290);
+                coins += 200;
             } else {
                 show_notification(scene, 'cooldown');
             }
+
+            scene.time.delayedCall(t_firetruck, () => {
+                handleFireExtinguish.call(scene, fireSprite)
+                bank.setText(`${coins}`);
+            })
 
         } else {
             console.log("Sorry! You ran out!");
@@ -223,10 +243,16 @@ export function use_resource (scene, x, y, fireSprite) {
             if (cooldown[4] == 0) {
                 airtanker -= 1;
                 asset.useAirtanker(scene, x, y, fireSprite);
-                asset.startTimer(4, scene, t_airtanker, 750, 370);
+                asset.startTimer(4, scene, c_airtanker, 750, 370);
+                coins += 500;
             } else {
                 show_notification(scene, 'cooldown');
             }
+
+            scene.time.delayedCall(t_airtanker, () => {
+                handleFireExtinguish.call(scene, fireSprite)
+                bank.setText(`${coins}`);
+            })
 
         } else {
             console.log("Sorry! You ran out!");
@@ -241,10 +267,16 @@ export function use_resource (scene, x, y, fireSprite) {
             if (cooldown[5] == 0) {
                 hotshotcrew -= 1;
                 asset.useHotshotCrew(scene, x, y, fireSprite);
-                asset.startTimer(5, scene, t_hotshotcrew, 750, 450);
+                asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
+                coins += 300;
             } else {
                 show_notification(scene, 'cooldown');
             }
+
+            scene.time.delayedCall(t_hotshotcrew, () => {
+                handleFireExtinguish.call(scene, fireSprite)
+                bank.setText(`${coins}`);
+            })
 
         } else {
             console.log("Sorry! You ran out!");
@@ -260,9 +292,15 @@ export function use_resource (scene, x, y, fireSprite) {
                 smokejumper -= 1;
                 asset.useSmokejumpers(scene, x, y, fireSprite);
                 asset.startTimer(6, scene, 750, 530);
+                coins += 1000;
             } else {
                 show_notification(scene, 'cooldown');
             }
+
+            scene.time.delayedCall(t_smokejumpers_plane + t_smokejumpers_ground, () => {
+                handleFireExtinguish.call(scene, fireSprite)
+                bank.setText(`${coins}`);
+            })
 
         } else {
             console.log("Sorry! You ran out!");
