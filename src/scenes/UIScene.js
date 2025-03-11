@@ -27,6 +27,7 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('east', '/assets/UI/east.png')
         this.load.image('south', '/assets/UI/south.png')
         this.load.image('west', '/assets/UI/west.png')
+        this.load.image('weather_panel', 'assets/UI/weather_panel.jpg')
     }
 
     create() {
@@ -99,8 +100,22 @@ export default class UIScene extends Phaser.Scene {
                 this.events.emit('toggleFire'); // Emit event to MapScene
             });
 
-        // Weather Stats
-        this.add.image(140, 500, 'weather_title')
+        // Weather Toggle Button
+        this.weatherButton = this.add.image(140, 500, 'weather_title')
+        .setInteractive()
+        .on('pointerdown', () => this.toggleWeatherPanel());
+
+        // Weather Panel (Initially Hidden)
+        this.weatherPanel = this.add.container(80, 530);
+        this.weatherPanel.setVisible(false); // Start hidden
+
+        let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(0.1);
+        this.weatherStats = this.add.text(10, 10, "Temp: --°F\nHumidity: --%");
+        this.windStats = this.add.text(150, 10, "Wind: -- mph\nDirection: --");
+
+        this.weatherPanel.add([panelBg, this.weatherStats, this.windStats]);
+
+        this.isWeatherVisible = false;
 
 
         // Game Clock
@@ -167,6 +182,26 @@ export default class UIScene extends Phaser.Scene {
         let formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         
         this.gameClockText.setText(`Time: ${formattedTime}`);
+    }
+
+    toggleWeatherPanel() {
+        this.isWeatherVisible = !this.isWeatherVisible;
+
+        if (this.isWeatherVisible) {
+            this.weatherPanel.setVisible(true);
+            this.tweens.add({
+                targets: this.weatherPanel,
+                alpha: { from: 0, to: 1 },
+                duration: 300,
+            });
+        } else {
+            this.tweens.add({
+                targets: this.weatherPanel,
+                alpha: { from: 1, to: 0 },
+                duration: 300,
+                onComplete: () => this.weatherPanel.setVisible(false),
+            });
+        }
     }
 
     updateWeatherDisplay(weather) {
