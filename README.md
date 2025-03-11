@@ -1,17 +1,15 @@
-# **Wildfire Command (Sim Firefighter)**
-
-Wildfire Command is a browser-based 2D simulation game designed to educate users on wildfire management strategies. Built with **Phaser 3**, the game provides an interactive experience modeling fire spread dynamics, environmental influences, and resource management. Players will engage with the challenges of wildfire suppression in a realistic, cell-based environment.
+# **Wildfire Command - Alpha v0.1.0**
 
 ---
 
 ## **Table of Contents**
 
-- [**Wildfire Command (Sim Firefighter)**](#wildfire-command-sim-firefighter)
+- [**Wildfire Command - Alpha v0.1.0**](#wildfire-command---alpha-v010)
   - [**Table of Contents**](#table-of-contents)
   - [**Overview**](#overview)
     - [**Purpose**](#purpose)
   - [**Features**](#features)
-    - [**Current (v0.0.4)**](#current-v004)
+    - [**Current (Alpha v0.1.0)**](#current-alpha-v010)
     - [**Planned (Future Updates)**](#planned-future-updates)
   - [**Technical Design**](#technical-design)
     - [**Core Elements**](#core-elements)
@@ -29,30 +27,24 @@ Wildfire Command is a browser-based 2D simulation game designed to educate users
 
 ### **Purpose**
 
-Wildfire Command aims to bridge the gap between traditional wildfire training methods and experiential learning. The game emphasizes:
+Wildfire Command is a 2D browser-based simulation game designed to educate users on wildfire management strategies. Built with Phaser 3, it provides an interactive experience modeling fire spread dynamics, environmental influences, and resource management. Players will engage with the challenges of wildfire suppression in a realistic, cell-based environment.
 
-- Interactive simulation of wildfire behavior.
-- Strategic resource allocation and management.
-- Real-time decision-making under dynamic environmental conditions.
-
-Designed as an educational tool, Sim Firefighter highlights the complexities of wildfire suppression and offers a hands-on approach to learning.
+This alpha release (v0.1.0) introduces foundational game mechanics, including procedural terrain generation, dynamic fire behavior, and resource deployment.
 
 ---
 
 ## **Features**
 
-### **Current (v0.0.4)**
+### **Current (Alpha v0.1.0)**
 
 - **Interactive Resource Deployment:** Players can deploy firefighting assets such as helicopters and fire trucks, dynamically impacting fire spread.
 - **Procedural Map Generation:** Utilizes Perlin Noise, BSP Partitioning, and Cellular Automata to generate diverse terrain types including water, trees, grass, and shrubs.
 - **Dynamic Fire Spread:** Fires propagate realistically, influenced by terrain type and other factors.
 - **Player Interaction:** Clickable resources allow users to take strategic actions on the map.
+- **Deployed Version Available** Hosted via [GitHub Pages](https://hornbuck.github.io/fire-sim/)
 
 ### **Planned (Future Updates)**
 
-- **Advanced Fire Spreading:** Refine algorithms for terrain-specific fire behavior.
-- **Advanced Terrain Features:** Refined terrain types with Cellular Automata.
-- **Dynamic Weather Systems:** Incorporate environmental factors like wind, temperature, and humidity with visual cues.
 - **Enhanced Leaderboards and Achievements:** Add detailed achievement tracking and real-time leaderboard updates.
 
 ---
@@ -66,6 +58,7 @@ Designed as an educational tool, Sim Firefighter highlights the complexities of 
     - Terrain types influence fire behavior, such as higher spread rates on dry grass.
 2. **Fire Spread Simulation**:
     - Implements algorithms to model realistic fire propagation, accounting for environmental conditions and terrain attributes.
+    - Suppression mechanics allow strategic firefighting responses.
 3. **Resource Management**:
     - Players deploy firefighting assets like helicopters and hotshot crews to suppress fires within defined ranges and cooldowns.
 4. **Weather Systems**:
@@ -76,7 +69,7 @@ Designed as an educational tool, Sim Firefighter highlights the complexities of 
 - **Framework**: Phaser 3
 - **Database**: Firebase Firestore for player data and leaderboards
 - **IDE**: WebStorm
-- **Hosting**: GitHub Pages or Firebase Hosting (if scalability is required)
+- **Hosting**: GitHub Pages
 
 ---
 
@@ -145,4 +138,3 @@ To run the project locally, ensure you have:
 ## **License**
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
