@@ -1,5 +1,5 @@
 import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
-import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper } from '../components/DeploymentClickEvents.js';
+import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import Weather from '../components/Weather.js';
 
 export default class UIScene extends Phaser.Scene {
@@ -303,13 +303,13 @@ export default class UIScene extends Phaser.Scene {
     update() {
         // Update resource counts
         if (this.hoseText) {
-            this.hoseText.setText(`${hose}/10`);
-            this.extinguisherText.setText(`${extinguisher}/5`);
-            this.helicopterText.setText(`${helicopter}/3`);
-            this.firetruckText.setText(`${firetruck}/3`);
-            this.airtankerText.setText(`${airtanker}/2`);
-            this.hotshotcrewText.setText(`${hotshotcrew}/1`);
-            this.smokejumperText.setText(`${smokejumper}/5`);
+            this.hoseText.setText(`${getHose()} left`);
+            this.extinguisherText.setText(`${getExtinguisher()} left`);
+            this.helicopterText.setText(`${getHelicopter()} left`);
+            this.firetruckText.setText(`${getFiretruck()} left`);
+            this.airtankerText.setText(`${getAirtanker()} left`);
+            this.hotshotcrewText.setText(`${getHotshotCrew()} left`);
+            this.smokejumperText.setText(`${getSmokejumpers()} left`);
         }
     }
 
