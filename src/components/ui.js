@@ -46,12 +46,6 @@ export let s_total = 0;
 // Initialize timer sprites for later rendering
 export let timerSprite;
 
-// Set the number of assets (useful for external files)
-export function setHose(value) {
-    hose += value;
-    hoseText.setText(`${hose}/10`);
-}
-
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -93,6 +87,7 @@ export function createHUD(scene) {
     let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let remove_button = scene.add.sprite(400, 540, 'remove-button').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let purchase = scene.add.sprite(570, 500, 'purchase').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let no_funds = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'no-funds').setScale(1).setDepth(1100).setOrigin(0.5, 0.5).setVisible(false);
     
     let add_hose = scene.add.sprite(360, 210, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let add_extinguisher = scene.add.sprite(590, 210, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
@@ -160,14 +155,14 @@ export function createHUD(scene) {
     }).setDepth(600).setVisible(false);
 
     // Load player shop
-    setupShop(open_shop, shop, close, remove_button, purchase, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
+    setupShop(scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
 
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
     hose.name = "hose";
     all_assets[0] = hose;
-    hoseText = set_text(`10/10`, 750, 90, scene);
+    hoseText = set_text(`10 left`, 750, 90, scene);
     timerSprite = scene.add.sprite(750, 50, 'set-timer').setDepth(10).setScale(1.0, 1.0).setVisible(false);
     activate_resource(0, hose, "hose",'assets/cursors/water.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
@@ -178,7 +173,7 @@ export function createHUD(scene) {
     let extinguisher = scene.add.image(750, 130, 'extinguisher').setScale(iconSize).setOrigin(0.5, 0.5);
     extinguisher.name = "extinguisher";
     all_assets[1] = extinguisher;
-    extinguisherText = scene.add.text(750, 170, '5/5', {
+    extinguisherText = scene.add.text(750, 170, '5 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -192,7 +187,7 @@ export function createHUD(scene) {
     let helicopter = scene.add.image(750, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
     helicopter.name = "helicopter";
     all_assets[2] = helicopter;
-    helicopterText = scene.add.text(750, 250, '3/3', {
+    helicopterText = scene.add.text(750, 250, '3 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -206,7 +201,7 @@ export function createHUD(scene) {
     let firetruck = scene.add.image(750, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
     firetruck.name = "firetruck";
     all_assets[3] = firetruck;
-    firetruckText = scene.add.text(750, 330, '3/3', {
+    firetruckText = scene.add.text(750, 330, '3 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -220,7 +215,7 @@ export function createHUD(scene) {
     let airtanker = scene.add.image(750, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
     airtanker.name = "airtanker";
     all_assets[4] = airtanker;
-    airtankerText = scene.add.text(750, 410, '2/2', {
+    airtankerText = scene.add.text(750, 410, '2 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -234,7 +229,7 @@ export function createHUD(scene) {
     let hotshotcrew = scene.add.image(750, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
     hotshotcrew.name = "hotshot-crew";
     all_assets[5] = hotshotcrew;
-    hotshotcrewText = scene.add.text(750, 490, '1/1', {
+    hotshotcrewText = scene.add.text(750, 490, '1 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -248,7 +243,7 @@ export function createHUD(scene) {
     let smokejumper = scene.add.image(750, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
     smokejumper.name = "smokejumper";
     all_assets[6] = smokejumper;
-    smokejumperText = scene.add.text(750, 570, '5/5', {
+    smokejumperText = scene.add.text(750, 570, '5 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -272,6 +267,7 @@ export function preloadHUD(scene) {
     scene.load.image('remove-button', 'assets/UI/remove-button.png');
     scene.load.image('purchase', 'assets/UI/purchase.png');
     scene.load.image('close', 'assets/UI/close.png');
+    scene.load.image('no-funds', 'assets/UI/no-funds.png');
 
     // Load Resource Tooltips
     scene.load.image('hose-tooltip', 'assets/resources/tooltips/fire-hose.png');

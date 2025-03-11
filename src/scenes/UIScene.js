@@ -303,13 +303,13 @@ export default class UIScene extends Phaser.Scene {
     update() {
         // Update resource counts
         if (this.hoseText) {
-            this.hoseText.setText(`${hose}/10`);
-            this.extinguisherText.setText(`${extinguisher}/5`);
-            this.helicopterText.setText(`${helicopter}/3`);
-            this.firetruckText.setText(`${firetruck}/3`);
-            this.airtankerText.setText(`${airtanker}/2`);
-            this.hotshotcrewText.setText(`${hotshotcrew}/1`);
-            this.smokejumperText.setText(`${smokejumper}/5`);
+            this.hoseText.setText(`${hose} left`);
+            this.extinguisherText.setText(`${extinguisher} left`);
+            this.helicopterText.setText(`${helicopter} left`);
+            this.firetruckText.setText(`${firetruck} left`);
+            this.airtankerText.setText(`${airtanker} left`);
+            this.hotshotcrewText.setText(`${hotshotcrew} left`);
+            this.smokejumperText.setText(`${smokejumper} left`);
         }
     }
 

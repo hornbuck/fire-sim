@@ -22,7 +22,7 @@ export let cooldown = [0, 0, 0, 0, 0, 0, 0];
 // These are all of the global limits for all the resources
 
 //* Player Bank Limits
-export let coins = 0;
+export let coins = 100;
 
 //* Number Limits
 export let hose = 10;
@@ -50,6 +50,23 @@ export function getCoins() {
 // Set the number of coins (useful for external files)
 export function setCoins(value) {
     coins -= value;
+    
+    if (coins < 0) {
+        coins += value;
+        return false;
+    }
+
+    return true;
+}
+
+// Get the number of hose assets (useful for external files)
+export function getHose() {
+    return hose;
+}
+
+// Set the number of hose assets (useful for external files)
+export function setHose(value) {
+    hose += value;
 }
 
 // Updates text of asset limits

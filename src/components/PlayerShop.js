@@ -1,5 +1,5 @@
-import { bank, setHose } from "./ui.js";
-import { getCoins, setCoins } from "./DeploymentClickEvents.js";
+import { bank } from "./ui.js";
+import { show_notification, getCoins, setCoins,  getHose, setHose } from "./DeploymentClickEvents.js";
 import { s_hose, s_extinguisher, s_helicopter, s_firetruck, s_airtanker, s_hotshotcrew, s_smokejumpers, s_total,
     hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText,
     hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper
@@ -10,7 +10,7 @@ let cart_toggle = true;
 let hose_counter = 0;
 let total_cost = 0;
 
-export function manageShop(purchase, add_hose, add_extinguisher,
+export function manageShop(scene, purchase, no_funds, add_hose, add_extinguisher,
     add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers) {
     
     add_hose.on(
@@ -28,27 +28,35 @@ export function manageShop(purchase, add_hose, add_extinguisher,
     purchase.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
-            //hoseText.setText("meow"); 
-            setHose(12);
-            s_total.setText(`${total_cost}`);
 
-            setCoins(total_cost);
+            let auth_purch = setCoins(total_cost);
+
+            console.log(`${getCoins()}`);
+
+            if (auth_purch == false) {
+                show_notification(scene, no_funds);
+
+            } else {
+                setHose(hose_counter);
+                hoseText.setText(getHose());
+                s_total.setText(`${total_cost}`);
             
-            bank.setText(`${getCoins()}`);
-            s_total.setText("0");
+                bank.setText(`${getCoins()}`);
+                s_total.setText("0");
 
-            total_cost = 0;
-            hose_counter = 0;
-
-            s_hose.setText(`${hose_counter}`);  
-            
+                // Reset shop GUI values
+                total_cost = 0;
+                setCoins(total_cost);
+                hose_counter = 0;
+                s_hose.setText(`${hose_counter}`);
+            }      
                 
         },
         this
     );
 }
 
-export function setupShop (open_shop, shop, close, remove_button, purchase, add_hose, add_extinguisher,
+export function setupShop (scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher,
     add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers) {
 
     open_shop.setInteractive();
@@ -64,7 +72,7 @@ export function setupShop (open_shop, shop, close, remove_button, purchase, add_
     add_hotshotcrew.setInteractive();
     add_smokejumpers.setInteractive();
     
-    manageShop(purchase, add_hose, add_extinguisher,
+    manageShop(scene, purchase, no_funds, add_hose, add_extinguisher,
         add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
 
     open_shop.on(
