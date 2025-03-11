@@ -340,13 +340,13 @@ export class MainScene extends Phaser.Scene {
         }
 
 
-        hoseText.setText(`${hose}/10`);
-        extinguisherText.setText(`${extinguisher}/5`);
-        helicopterText.setText(`${helicopter}/3`);
-        firetruckText.setText(`${firetruck}/3`);
-        airtankerText.setText(`${airtanker}/2`);
-        hotshotcrewText.setText(`${hotshotcrew}/1`);
-        smokejumperText.setText(`${smokejumper}/5`);
+        hoseText.setText(`${hose} left`);
+        extinguisherText.setText(`${extinguisher} left`);
+        helicopterText.setText(`${helicopter} left`);
+        firetruckText.setText(`${firetruck} left`);
+        airtankerText.setText(`${airtanker} left`);
+        hotshotcrewText.setText(`${hotshotcrew} left`);
+        smokejumperText.setText(`${smokejumper} left`);
     }
 
     /**
