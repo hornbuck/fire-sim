@@ -16,7 +16,8 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('login', 'assets/UI/login.png')
 
         // Preload Weather UI elements
-        this.load.image('weather_title', 'assets/UI/weather_title.png')
+        this.load.image('weather_title_closed', 'assets/UI/weather_title_closed.png')
+        this.load.image('weather_title_opened', 'assets/UI/weather_title_opened.png')
         this.load.image('humidity_full', 'assets/UI/humidity_full.png')
         this.load.image('humidity_half', 'assets/UI/humidity_half.png')
         this.load.image('humidity_low', 'assets/UI/humidity_low.png')
@@ -27,7 +28,7 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('east', '/assets/UI/east.png')
         this.load.image('south', '/assets/UI/south.png')
         this.load.image('west', '/assets/UI/west.png')
-        this.load.image('weather_panel', 'assets/UI/weather_panel.jpg')
+        this.load.image('weather_panel', 'assets/UI/weather_panel.png')
     }
 
     create() {
@@ -101,15 +102,15 @@ export default class UIScene extends Phaser.Scene {
             });
 
         // Weather Toggle Button
-        this.weatherButton = this.add.image(140, 500, 'weather_title')
+        this.weatherButton = this.add.image(150, 560, 'weather_title_closed')
         .setInteractive()
         .on('pointerdown', () => this.toggleWeatherPanel());
 
         // Weather Panel (Initially Hidden)
-        this.weatherPanel = this.add.container(80, 530);
+        this.weatherPanel = this.add.container(10, 530);
         this.weatherPanel.setVisible(false); // Start hidden
 
-        let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(0.1);
+        let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(1);
         this.weatherStats = this.add.text(10, 10, "Temp: --°F\nHumidity: --%");
         this.windStats = this.add.text(150, 10, "Wind: -- mph\nDirection: --");
 
@@ -186,14 +187,25 @@ export default class UIScene extends Phaser.Scene {
 
     toggleWeatherPanel() {
         this.isWeatherVisible = !this.isWeatherVisible;
-
+    
         if (this.isWeatherVisible) {
             this.weatherPanel.setVisible(true);
+    
+            // Move weather title up & change image to "open"
+            this.weatherButton.setTexture('weather_title_opened');
+            this.tweens.add({
+                targets: this.weatherButton,
+                y: this.weatherButton.y - 50, // Adjust this value as needed
+                duration: 300,
+                ease: 'Power2'
+            });
+    
             this.tweens.add({
                 targets: this.weatherPanel,
                 alpha: { from: 0, to: 1 },
                 duration: 300,
             });
+    
         } else {
             this.tweens.add({
                 targets: this.weatherPanel,
@@ -201,62 +213,68 @@ export default class UIScene extends Phaser.Scene {
                 duration: 300,
                 onComplete: () => this.weatherPanel.setVisible(false),
             });
+    
+            // Move weather title down & change image to "closed"
+            this.weatherButton.setTexture('weather_title_closed');
+            this.tweens.add({
+                targets: this.weatherButton,
+                y: this.weatherButton.y + 50, // Adjust this value as needed
+                duration: 300,
+                ease: 'Power2'
+            });
         }
     }
 
+
     updateWeatherDisplay(weather) {
-        // Update Humidity Icon
-        let humidityIcon = 'humidity_low';
+        // Determine icons based on weather values
+        let humidityIconKey = 'humidity_low';
         if (weather.humidity > 70) {
-            humidityIcon = 'humidity_full';
-        } else if (weather.hidity > 30) {
-            humidityIcon = 'humidity_half';
+            humidityIconKey = 'humidity_full';
+        } else if (weather.humidity > 30) {
+            humidityIconKey = 'humidity_half';
         }
     
-        // Update Wind Speed Icon
-        let windSpeedIcon = 'wind_1arrow';
+        let windSpeedIconKey = 'wind_1arrow';
         if (weather.windSpeed > 15) {
-            windSpeedIcon = 'wind_3arrow';
+            windSpeedIconKey = 'wind_3arrow';
         } else if (weather.windSpeed > 5) {
-            windSpeedIcon = 'wind_2arrow';
+            windSpeedIconKey = 'wind_2arrow';
         }
     
-        // Update Wind Direction Icon using switch
-        let windDirectionIcon;
+        let windDirectionIconKey;
         switch (weather.windDirection) {
-            case 'N': windDirectionIcon = 'north'; break;
-            case 'E': windDirectionIcon = 'east'; break;
-            case 'S': windDirectionIcon = 'south'; break;
-            case 'W': windDirectionIcon = 'west'; break;
-            default: windDirectionIcon = 'north'; // Default to north if invalid direction
+            case 'N': windDirectionIconKey = 'north'; break;
+            case 'E': windDirectionIconKey = 'east'; break;
+            case 'S': windDirectionIconKey = 'south'; break;
+            case 'W': windDirectionIconKey = 'west'; break;
+            default: windDirectionIconKey = 'north'; // Default if invalid
         }
     
-        // Destroy previous icons to prevent stacking
-        if (this.humidityIcon) this.humidityIcon.destroy();
-        if (this.windSpeedIcon) this.windSpeedIcon.destroy();
-        if (this.windDirectionIcon) this.windDirectionIcon.destroy();
-    
-        // Update the weather stats text (Grid style)
-        if (this.weatherStats) {
-            this.weatherStats.setText(`Temp:  ${weather.temperature}°F\n\nHumidity: ${weather.humidity}%`);
-        } else {
-            // Create the text if it doesn't exist at the correct position
-            this.weatherStats = this.add.text(10, 535, `Temp:  ${weather.temperature}°F\n\nHumidity: ${weather.humidity}%`);
+        // Remove previous icons from the container, if they exist
+        if (this.humidityIcon) {
+            this.weatherPanel.remove(this.humidityIcon, true);
+        }
+        if (this.windSpeedIcon) {
+            this.weatherPanel.remove(this.windSpeedIcon, true);
+        }
+        if (this.windDirectionIcon) {
+            this.weatherPanel.remove(this.windDirectionIcon, true);
         }
     
-        // Update wind speed and direction text
-        if (this.windStats) {
-            this.windStats.setText(`Wind: ${weather.windSpeed} mph\n\nDirection: ${weather.windDirection}`);
-        } else {
-            // Create the text if it doesn't exist at the correct position
-            this.windStats = this.add.text(180, 535, `Wind: ${weather.windSpeed} mph\n\nDirection: ${weather.windDirection}`);
-        }
+        // Update the weather text inside the panel
+        this.weatherStats.setText(`Temp: ${weather.temperature}°F\n\nHumidity:`);
+        this.windStats.setText(`Wind:\n\nDirection:`);
     
-        // Assign new icons to prevent stacking
-        this.humidityIcon = this.add.image(150, 570, humidityIcon).setScale(0.4);
-        this.windSpeedIcon = this.add.image(325, 542, windSpeedIcon).setScale(0.4);
-        this.windDirectionIcon = this.add.image(325, 568, windDirectionIcon).setScale(0.3);
+        // Create new icons and add them as children of the weatherPanel
+        // Note: The positions here are relative to the weatherPanel container.
+        this.humidityIcon = this.add.image(114, 46, humidityIconKey).setScale(0.3);
+        this.windSpeedIcon = this.add.image(215, 18, windSpeedIconKey).setScale(0.4);
+        this.windDirectionIcon = this.add.image(256, 44, windDirectionIconKey).setScale(0.3);
+    
+        this.weatherPanel.add([this.humidityIcon, this.windSpeedIcon, this.windDirectionIcon]);
     }
+    
     
     
     
