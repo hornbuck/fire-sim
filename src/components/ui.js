@@ -1,4 +1,5 @@
 import {activate_resource, deactivate, show_tooltip, set_text} from "./DeploymentClickEvents.js";
+import { setupShop } from "./PlayerShop.js";
 
 // Initialize player coins text object
 export let bank;
@@ -23,7 +24,7 @@ export let hotshotcrew;
 export let smokejumper;
 export let all_assets = [];
 
-// Initialize blank text objects for later resource rendering
+// Initialize asset limits
 export let hoseText;
 export let extinguisherText;
 export let helicopterText;
@@ -61,14 +62,31 @@ export function createHUD(scene) {
     const sidebarCenter = 300; // Sidebar is vertically centered at 300px
     const iconSize = 0.8; // Scale of each icon
 
-    // Player Coins Block to UI
-    let coins = scene.add.sprite(80, 100, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5);
-    bank = scene.add.text(100, 100, '0', {
-        font: '24px Arial',
-        fill: '#ffffff',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(2);
+     // Player Coins Block to UI
+     let coins = scene.add.sprite(80, 100, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5);
+     bank = scene.add.text(100, 100, '0', {
+         font: '24px Arial',
+         fill: '#ffffff',
+         align: 'center',
+         wordWrap: { width: 80 },
+     }).setOrigin(0.5, 0.5).setDepth(2);
+
+     // Spawn player shop
+    let open_shop = scene.add.sprite(180, 100, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5);
+    let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let remove_button = scene.add.sprite(400, 540, 'remove-button').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let purchase = scene.add.sprite(570, 500, 'purchase').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    
+    let add_hose = scene.add.sprite(360, 210, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_extinguisher = scene.add.sprite(590, 210, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_helicopter = scene.add.sprite(360, 277, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_firetruck = scene.add.sprite(590, 277, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_airtanker = scene.add.sprite(360, 347, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_smokejumpers = scene.add.sprite(500, 413, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+
+    setupShop(open_shop, shop, close, remove_button, purchase, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
@@ -169,8 +187,16 @@ export function createHUD(scene) {
 export function preloadHUD(scene) {
     console.log("preloadHUD called");
 
-    // Load Player Coins
+    // Load Player Assets
     scene.load.image('coins', 'assets/coins.png');
+    scene.load.image('open-shop', 'assets/UI/open-shop.png');
+    scene.load.image('shop', 'assets/UI/shop.png');
+    scene.load.image('add-to-cart', 'assets/UI/add-to-cart.png');
+    scene.load.image('remove-from-cart', 'assets/UI/remove-from-cart.png');
+    scene.load.image('toggle-add-to-cart', 'assets/UI/toggle-add-to-cart.png');
+    scene.load.image('remove-button', 'assets/UI/remove-button.png');
+    scene.load.image('purchase', 'assets/UI/purchase.png');
+    scene.load.image('close', 'assets/UI/close.png');
 
     // Load Resource Tooltips
     scene.load.image('hose-tooltip', 'assets/resources/tooltips/fire-hose.png');
