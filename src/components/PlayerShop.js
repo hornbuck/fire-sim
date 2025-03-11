@@ -1,30 +1,159 @@
 import { bank } from "./ui.js";
-import { show_notification, getCoins, setCoins,  getHose, setHose } from "./DeploymentClickEvents.js";
+import { show_notification, getCoins, setCoins } from "./DeploymentClickEvents.js";
+import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setHelicopter, getFiretruck, setFiretruck, getAirtanker, setAirtanker, getHotshotCrew, setHotshotCrew, getSmokejumpers, setSmokejumpers} from "./assetValues.js";
 import { s_hose, s_extinguisher, s_helicopter, s_firetruck, s_airtanker, s_hotshotcrew, s_smokejumpers, s_total,
-    hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText,
-    hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper
+    hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText
  } from "./ui.js";
 
 let cart_toggle = true;
 
 let hose_counter = 0;
+let extinguisher_counter = 0;
+let helicopter_counter = 0;
+let firetruck_counter = 0;
+let airtanker_counter = 0;
+let hotshotcrew_counter = 0;
+let smokejumper_counter = 0;
 let total_cost = 0;
 
 export function manageShop(scene, purchase, no_funds, add_hose, add_extinguisher,
     add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers) {
     
+    // Buy Hoses
     add_hose.on(
         "pointerdown",
-        function (pointer, localX, localY, event) {
-            total_cost += 150;
-            hose_counter += 1;
-            s_hose.setText(`${hose_counter}`);   
-            s_total.setText(`${total_cost}`);
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 150;
+                hose_counter += 1;
+                s_hose.setText(`${hose_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (hose_counter > 0) {
+                total_cost -= 150;
+                hose_counter -= 1;
+                s_hose.setText(`${hose_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
                 
         },
         this
     );
 
+    // Buy Extinguishers
+    add_extinguisher.on(
+        "pointerdown",
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 25;
+                extinguisher_counter += 1;
+                s_extinguisher.setText(`${extinguisher_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (extinguisher_counter > 0) {
+                total_cost -= 25;
+                extinguisher_counter -= 1;
+                s_extinguisher.setText(`${extinguisher_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
+        },
+        this
+    );
+
+    // Buy Helicopters
+    add_helicopter.on(
+        "pointerdown",
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 300;
+                helicopter_counter += 1;
+                s_helicopter.setText(`${helicopter_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (helicopter_counter > 0) {
+                total_cost -= 300;
+                helicopter_counter -= 1;
+                s_helicopter.setText(`${helicopter_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
+        },
+        this
+    );
+
+    // Buy Firetrucks
+    add_firetruck.on(
+        "pointerdown",
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 250;
+                firetruck_counter += 1;
+                s_firetruck.setText(`${firetruck_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (firetruck_counter > 0) {
+                total_cost -= 250;
+                firetruck_counter -= 1;
+                s_firetruck.setText(`${firetruck_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
+        },
+        this
+    );
+
+    // Buy Airtankers
+    add_airtanker.on(
+        "pointerdown",
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 250;
+                airtanker_counter += 1;
+                s_airtanker.setText(`${airtanker_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (airtanker_counter > 0) {
+                total_cost -= 250;
+                airtanker_counter -= 1;
+                s_airtanker.setText(`${airtanker_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
+        },
+        this
+    );
+
+    // Buy Hotshot Crews
+    add_hotshotcrew.on(
+        "pointerdown",
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 700;
+                hotshotcrew_counter += 1;
+                s_hotshotcrew.setText(`${hotshotcrew_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (hotshotcrew_counter > 0) {
+                total_cost -= 700;
+                hotshotcrew_counter -= 1;
+                s_hotshotcrew.setText(`${hotshotcrew_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
+        },
+        this
+    );
+
+    // Buy Smokejumpers
+    add_smokejumpers.on(
+        "pointerdown",
+        function () {
+            if (cart_toggle == true) {
+                total_cost += 250;
+                smokejumper_counter += 1;
+                s_smokejumpers.setText(`${smokejumper_counter}`);   
+                s_total.setText(`${total_cost}`);
+            } else if (smokejumper_counter > 0) {
+                total_cost -= 250;
+                smokejumper_counter -= 1;
+                s_smokejumpers.setText(`${smokejumper_counter}`);   
+                s_total.setText(`${total_cost}`);
+            }
+        },
+        this
+    );
+
+    // Confirm Purchase
     purchase.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
@@ -38,8 +167,39 @@ export function manageShop(scene, purchase, no_funds, add_hose, add_extinguisher
 
             } else {
                 setHose(hose_counter);
+                setExtinguisher(extinguisher_counter);
+                setHelicopter(helicopter_counter);
+                setFiretruck(firetruck_counter);
+                setAirtanker(airtanker_counter);
+                setHotshotCrew(hotshotcrew_counter);
+                setSmokejumpers(smokejumper_counter);
+
                 hoseText.setText(getHose());
+                extinguisherText.setText(getExtinguisher());
+                helicopterText.setText(getHelicopter());
+                firetruckText.setText(getFiretruck());
+                airtankerText.setText(getAirtanker());
+                hotshotcrewText.setText(getHotshotCrew());
+                smokejumperText.setText(getSmokejumpers());
+
                 s_total.setText(`${total_cost}`);
+
+
+                // Reset all asset counters when the player makes a purchase
+                hose_counter = 0;
+                s_hose.setText(`${hose_counter}`); 
+                extinguisher_counter = 0;
+                s_extinguisher.setText(`${extinguisher_counter}`);  
+                helicopter_counter = 0;
+                s_helicopter.setText(`${helicopter_counter}`); 
+                firetruck_counter = 0;
+                s_firetruck.setText(`${firetruck_counter}`);
+                airtanker_counter = 0;
+                s_airtanker.setText(`${airtanker_counter}`);
+                hotshotcrew_counter = 0;
+                s_hotshotcrew.setText(`${hotshotcrew_counter}`);
+                smokejumper_counter = 0;
+                s_smokejumpers.setText(`${smokejumper_counter}`);
             
                 bank.setText(`${getCoins()}`);
                 s_total.setText("0");
@@ -56,6 +216,7 @@ export function manageShop(scene, purchase, no_funds, add_hose, add_extinguisher
     );
 }
 
+// Initialize Shop Menu
 export function setupShop (scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher,
     add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers) {
 
@@ -75,6 +236,7 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
     manageShop(scene, purchase, no_funds, add_hose, add_extinguisher,
         add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
 
+    // Opens shop on click
     open_shop.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
@@ -104,6 +266,7 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
         this
     );
 
+    // Hide Shop Screen on click
     close.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
@@ -133,6 +296,7 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
         this
     );
 
+    // Allow player to remove items from shopping cart (on click)
     remove_button.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
