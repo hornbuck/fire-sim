@@ -1,23 +1,30 @@
 export default class IntroScene extends Phaser.Scene {
     constructor() {
-        super({key: 'IntroScene'});
+        super({ key: 'IntroScene' });
     }
 
     preload() {
-        // Load logo image
-        this.load.image('logo', 'assets/temp-logo.png');
+        this.load.image('logo', 'assets/title-logo.jpeg');
     }
 
     create() {
-        // Centered logo
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
+        const gameWidth = this.cameras.main.width;
+        const gameHeight = this.cameras.main.height;
 
-        // Display logo
-        this.add.image(centerX, centerY, 'logo').setOrigin(0.5);
+        // Display logo and scale it to fit the screen
+        const logo = this.add.image(centerX, centerY, 'logo').setOrigin(0.5);
+        
+        // Scale the image to fit the width, maintaining aspect ratio
+        const scaleX = gameWidth / logo.width;
+        const scaleY = gameHeight / logo.height;
+        const scale = Math.max(scaleX, scaleY); // Choose max to cover the entire space
+
+        logo.setScale(scale);
 
         // Add start text
-        const startText = this.add.text(centerX, centerY + 100, 'Click to Start', { 
+        const startText = this.add.text(centerX, gameHeight * 0.8, 'Click to Start', {
             fontFamily: 'Courier, monospace',
             fontSize: '32px',
             color: '#ffffff',
@@ -25,7 +32,6 @@ export default class IntroScene extends Phaser.Scene {
             padding: { x: 10, y: 5 }
         }).setOrigin(0.5).setInteractive();
 
-        // Add interaction
         startText.on('pointerdown', () => {
             this.scene.start('MapScene');
             this.scene.launch('UIScene');
