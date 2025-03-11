@@ -3,6 +3,16 @@ import {activate_resource, deactivate, show_tooltip, set_text} from "./Deploymen
 // Initialize player coins text object
 export let bank;
 
+// Initialize gameplay notifications
+export let n_cooldown;
+export let out_hoses;
+export let out_extinguishers;
+export let out_helicopters;
+export let out_firetrucks;
+export let out_airtankers;
+export let out_hotshots;
+export let out_smokejumpers;
+
 // Initialize all asset sprite objects
 export let hose;
 export let extinguisher;
@@ -33,6 +43,16 @@ export function createHUD(scene) {
     const sidebar = scene.add.rectangle(800 - sidebarWidth / 2, 300, sidebarWidth, 600, 0x2d3436);
     sidebar.setDepth(-1);
     console.log("Sidebar created");
+
+    // Spawn Notifications
+    n_cooldown = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'cooldown').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_hoses = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-hoses').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_extinguishers = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-fire-extinguishers').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_helicopters = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-helicopters').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_firetrucks = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-firetrucks').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_airtankers = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-airtankers').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_hotshots = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-hotshots').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    out_smokejumpers = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'out-of-smokejumpers').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
 
     // Spawn default cursor (firefighter glove)
     scene.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');

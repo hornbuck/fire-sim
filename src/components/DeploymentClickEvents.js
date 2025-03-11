@@ -1,6 +1,6 @@
 import AnimatedSprite from '../components/AnimatedSprites.js';
-import { all_assets, bank } from './ui.js';
-import { t_hose, t_extinguisher, t_firetruck, t_helicopter, t_airtanker, t_hotshotcrew, t_smokejumpers_plane, t_smokejumpers_ground} from '../components/AnimatedSprites.js';
+import { all_assets, bank, n_cooldown, out_hoses, out_extinguishers, out_helicopters, out_firetrucks, out_airtankers, out_hotshots, out_smokejumpers } from './ui.js';
+import { t_hose, t_extinguisher, t_firetruck, t_helicopter, t_airtanker, t_hotshotcrew, t_smokejumpers_plane, t_smokejumpers_ground } from '../components/AnimatedSprites.js';
 
 // Global vars to track which technique is currently active and whether their cooldown is active
 export let technique = "";
@@ -104,12 +104,13 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
     });
 }
 
-export function show_notification (scene, resourceName) {
-    // Notification to player that they are out of specified asset
-     const notification = scene.add.image(scene.cameras.main.width / 2, scene.cameras.main.height / 2, resourceName).setScale(0.8).setOrigin(0.5, 0.5);
-     notification.setDepth(2);  // sends to top layer of scene
-     scene.time.delayedCall(1000, () => {
-         notification.destroy();
+// Notification to player that they are out of specified asset
+export function show_notification (scene, notification) {
+     
+    notification.setVisible(true);
+    
+    scene.time.delayedCall(1000, () => {
+         notification.setVisible(false);
      });
 }
 
@@ -155,7 +156,7 @@ export function use_resource (scene, x, y, fireSprite) {
                 coins += 100;
                 
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
             scene.time.delayedCall(t_hose, () => {
@@ -166,7 +167,7 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Sorry! You ran out!");
             
             // Notification to player that they are out of firehoses
-            show_notification(scene, 'out-of-hoses');
+            show_notification(scene, out_hoses);
         }
     }
     if (activated_resource === "extinguisher") {
@@ -179,14 +180,14 @@ export function use_resource (scene, x, y, fireSprite) {
                 coins += 50;
                 bank.setText(`${coins}`);
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
         } else {
             console.log("Sorry! You ran out!");
 
             // Notification to player that they are out of fire extinguishers
-            show_notification(scene, 'out-of-fire-extinguishers');
+            show_notification(scene, out_extinguishers);
         }
     }
     if (activated_resource === "helicopter") {
@@ -198,7 +199,7 @@ export function use_resource (scene, x, y, fireSprite) {
                 asset.startTimer(2, scene, c_helicopter, 750, 210);
                 coins += 300;
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
             scene.time.delayedCall(t_helicopter, () => {
@@ -210,7 +211,7 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Sorry! You ran out!");
 
             // Notification to player that they are out of helicopters
-            show_notification(scene, 'out-of-helicopters');
+            show_notification(scene, out_helicopters);
         }
     }
     if (activated_resource === "firetruck") {
@@ -222,7 +223,7 @@ export function use_resource (scene, x, y, fireSprite) {
                 asset.startTimer(3, scene, c_firetruck, 750, 290);
                 coins += 200;
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
             scene.time.delayedCall(t_firetruck, () => {
@@ -234,7 +235,7 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Sorry! You ran out!");
 
             // Notification to player that they are out of firetrucks
-            show_notification(scene, 'out-of-firetrucks');
+            show_notification(scene, out_firetrucks);
         }
     }
     if (activated_resource === "airtanker") {
@@ -246,7 +247,7 @@ export function use_resource (scene, x, y, fireSprite) {
                 asset.startTimer(4, scene, c_airtanker, 750, 370);
                 coins += 500;
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
             scene.time.delayedCall(t_airtanker, () => {
@@ -258,7 +259,7 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Sorry! You ran out!");
 
             // Notification to player that they are out of airtankers
-            show_notification(scene, 'out-of-airtankers');
+            show_notification(scene, out_airtankers);
         }
     }
     if (activated_resource === "hotshot-crew") {
@@ -270,7 +271,7 @@ export function use_resource (scene, x, y, fireSprite) {
                 asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
                 coins += 300;
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
             scene.time.delayedCall(t_hotshotcrew, () => {
@@ -282,7 +283,7 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Sorry! You ran out!");
 
             // Notification to player that they are out of hotshot crews
-            show_notification(scene, 'out-of-hotshots');
+            show_notification(scene, out_hotshots);
         }
     }
     if (activated_resource === "smokejumper") {
@@ -294,7 +295,7 @@ export function use_resource (scene, x, y, fireSprite) {
                 asset.startTimer(6, scene, 750, 530);
                 coins += 1000;
             } else {
-                show_notification(scene, 'cooldown');
+                show_notification(scene, n_cooldown);
             }
 
             scene.time.delayedCall(t_smokejumpers_plane + t_smokejumpers_ground, () => {
@@ -305,7 +306,7 @@ export function use_resource (scene, x, y, fireSprite) {
         } else {
             console.log("Sorry! You ran out!");
 
-            show_notification(scene, 'out-of-smokejumpers');
+            show_notification(scene, out_smokejumpers);
         }
     }
 }
