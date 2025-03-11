@@ -218,7 +218,9 @@ export function manageShop(scene, purchase, no_funds, add_hose, add_extinguisher
 
 // Initialize Shop Menu
 export function setupShop (scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher,
-    add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers) {
+    add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers,
+    price_hose, price_hose_text, price_extinguisher, price_extinguisher_text, price_helicopter, price_helicopter_text, price_firetruck, price_firetruck_text, price_airtanker, 
+    price_airtanker_text, price_hotshotcrew, price_hotshotcrew_text, price_smokejumpers, price_smokejumpers_text) {
 
     open_shop.setInteractive();
     close.setInteractive();
@@ -325,7 +327,7 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
         this
     );
 
-    // *** Button Glow Effects ***
+    // *** Button Glow Effects & Price Tags  ***
     open_shop.on('pointerover', () => {
         open_shop.setTint(0xf4c576);
     });
@@ -358,60 +360,103 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
         purchase.clearTint();
     });
 
+    // Price tags are detected starting here
     add_hose.on('pointerover', () => {
         add_hose.setTint(0x4eaf4c);
+        price_hose.angle = -35;
+        price_hose_text.angle = -35;
+        price_hose.setVisible(true);
+        price_hose_text.setVisible(true);
     });
 
     add_hose.on('pointerout', () => {
         add_hose.clearTint();
+        price_hose.setVisible(false);
+        price_hose_text.setVisible(false);
     });
 
     add_extinguisher.on('pointerover', () => {
         add_extinguisher.setTint(0x4eaf4c);
+        price_extinguisher.angle = -35;
+        price_extinguisher_text.angle = -35;
+        price_extinguisher.setVisible(true);
+        price_extinguisher_text.setVisible(true);
     });
 
     add_extinguisher.on('pointerout', () => {
         add_extinguisher.clearTint();
+        price_extinguisher.setVisible(false);
+        price_extinguisher_text.setVisible(false);
     });
 
     add_helicopter.on('pointerover', () => {
         add_helicopter.setTint(0x4eaf4c);
+        price_helicopter.angle = -35;
+        price_helicopter_text.angle = -35;
+        price_helicopter.setVisible(true);
+        price_helicopter_text.setVisible(true);
     });
 
     add_helicopter.on('pointerout', () => {
         add_helicopter.clearTint();
+        price_helicopter.setVisible(false);
+        price_helicopter_text.setVisible(false);
     });
 
     add_firetruck.on('pointerover', () => {
         add_firetruck.setTint(0x4eaf4c);
+        price_firetruck.angle = -35;
+        price_firetruck_text.angle = -35;
+        price_firetruck.setVisible(true);
+        price_firetruck_text.setVisible(true);
     });
 
     add_firetruck.on('pointerout', () => {
         add_firetruck.clearTint();
+        price_firetruck.setVisible(false);
+        price_firetruck_text.setVisible(false);
     });
 
     add_airtanker.on('pointerover', () => {
         add_airtanker.setTint(0x4eaf4c);
+        price_airtanker.angle = -35;
+        price_airtanker_text.angle = -35;
+        price_airtanker.setVisible(true);
+        price_airtanker_text.setVisible(true);
     });
 
     add_airtanker.on('pointerout', () => {
         add_airtanker.clearTint();
+        price_airtanker.setVisible(false);
+        price_airtanker_text.setVisible(false);
     });
 
     add_hotshotcrew.on('pointerover', () => {
         add_hotshotcrew.setTint(0x4eaf4c);
+        price_hotshotcrew.angle = -35;
+        price_hotshotcrew_text.angle = -35;
+        price_hotshotcrew.setVisible(true);
+        price_hotshotcrew_text.setVisible(true);
     });
 
     add_hotshotcrew.on('pointerout', () => {
         add_hotshotcrew.clearTint();
+        price_hotshotcrew.setVisible(false);
+        price_hotshotcrew_text.setVisible(false);
     });
 
     add_smokejumpers.on('pointerover', () => {
         add_smokejumpers.setTint(0x4eaf4c);
+        price_smokejumpers.angle = -35;
+        price_smokejumpers_text.angle = -35;
+        price_smokejumpers.setVisible(true);
+        price_smokejumpers_text.setVisible(true);
     });
 
     add_smokejumpers.on('pointerout', () => {
         add_smokejumpers.clearTint();
+        price_smokejumpers.setVisible(false);
+        price_smokejumpers_text.setVisible(false);
     });
     
 }

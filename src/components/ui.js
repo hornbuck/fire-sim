@@ -89,13 +89,64 @@ export function createHUD(scene) {
     let purchase = scene.add.sprite(570, 500, 'purchase').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let no_funds = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'no-funds').setScale(1).setDepth(1100).setOrigin(0.5, 0.5).setVisible(false);
     
-    let add_hose = scene.add.sprite(360, 210, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let add_extinguisher = scene.add.sprite(590, 210, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let add_helicopter = scene.add.sprite(360, 277, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let add_firetruck = scene.add.sprite(590, 277, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let add_airtanker = scene.add.sprite(360, 347, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let add_smokejumpers = scene.add.sprite(500, 413, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let add_hose = scene.add.sprite(360, 210, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_extinguisher = scene.add.sprite(590, 210, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_helicopter = scene.add.sprite(360, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_firetruck = scene.add.sprite(590, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_airtanker = scene.add.sprite(360, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_smokejumpers = scene.add.sprite(500, 413, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+
+    // Add Price Tag Sprites
+    let price_hose = scene.add.sprite(380, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_hose_text = scene.add.text(393, 170, '$150', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_extinguisher = scene.add.sprite(620, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_extinguisher_text = scene.add.text(633, 170, '$25', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_helicopter = scene.add.sprite(390, 250, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_helicopter_text = scene.add.text(403, 240, '$300', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_firetruck = scene.add.sprite(620, 250, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_firetruck_text = scene.add.text(633, 240, '$250', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_airtanker = scene.add.sprite(390, 320, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_airtanker_text = scene.add.text(403, 310, '$250', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_hotshotcrew = scene.add.sprite(620, 320, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_hotshotcrew_text = scene.add.text(633, 310, '$700', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_smokejumpers = scene.add.sprite(532, 390, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_smokejumpers_text = scene.add.text(545, 380, '$250', {
+        font: '22px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
 
     // Initialize asset shop amounts
     s_hose = scene.add.text(310, 210, '0', {
@@ -155,8 +206,9 @@ export function createHUD(scene) {
     }).setDepth(600).setVisible(false);
 
     // Load player shop
-    setupShop(scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
-
+    setupShop(scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers,
+        price_hose, price_hose_text, price_extinguisher, price_extinguisher_text, price_helicopter, price_helicopter_text, price_firetruck, price_firetruck_text, price_airtanker, 
+        price_airtanker_text, price_hotshotcrew, price_hotshotcrew_text, price_smokejumpers, price_smokejumpers_text);
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
@@ -268,6 +320,7 @@ export function preloadHUD(scene) {
     scene.load.image('purchase', 'assets/UI/purchase.png');
     scene.load.image('close', 'assets/UI/close.png');
     scene.load.image('no-funds', 'assets/UI/no-funds.png');
+    scene.load.image('price-tag', 'assets/UI/price-tag.png');
 
     // Load Resource Tooltips
     scene.load.image('hose-tooltip', 'assets/resources/tooltips/fire-hose.png');
