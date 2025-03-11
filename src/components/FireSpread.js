@@ -152,20 +152,27 @@ class FireSpread {
     spreadFire(tile, x, y, grid) {
         const neighbors = this.getNeighbors(x, y);
         let spreadCount = 0;
-    
+        
+        // If the burning tile is a tree, give it a bonus for fire spread.
+        let sourceBonus = 0;
+        if (tile.terrain === 'tree') {
+            sourceBonus = 30; // Adjust this bonus as needed.
+        }
+        
         for (const neighbor of neighbors) {
             const neighborTile = grid[neighbor.y][neighbor.x];
-    
+        
             if (neighborTile.burnStatus !== "unburned") continue; // Skip already burning/burnt tiles
-    
+        
             if (this.canIgnite(neighborTile)) {
                 const isDownwind = this.isTileDownwind({ x, y }, neighbor);
-                spreadCount += this.attemptIgnite(neighborTile, isDownwind);
+                spreadCount += this.attemptIgnite(neighborTile, isDownwind, sourceBonus);
             }
         }
-    
+        
         return spreadCount;
     }
+    
     
     /**
      * Determines if a neighboring tile is downwind of the given tile based on the current wind direction.
@@ -214,21 +221,24 @@ class FireSpread {
      *
      * @returns {number} - Returns 1 if the tile ignited, otherwise 0.
      */
-    attemptIgnite(neighborTile, isDownwind) {
+    attemptIgnite(neighborTile, isDownwind, sourceBonus = 0) {
         if (neighborTile.burnStatus !== "unburned") return 0; // Prevent re-ignition
-    
+        
         let ignitionChance = this.calculateIgnitionChance(neighborTile);
-    
+        
         if (isDownwind) {
-            ignitionChance += this.weather.windSpeed * 0.2;
+            ignitionChance += this.weather.windSpeed * 0.6;
         }
-    
-        if (ignitionChance > 75) {
+        
+        ignitionChance += sourceBonus;  // Add bonus if the burning tile is a tree (crown fire effect)
+        
+        if (ignitionChance > 70) {  // Threshold value; adjust as needed.
             neighborTile.burnStatus = "burning";
             return 1;
         }
         return 0;
     }
+    
     
     
     /**
@@ -266,13 +276,18 @@ class FireSpread {
      * @returns {number} - The total ignition chance as a percentage.
      */
     calculateIgnitionChance(tile) {
-        const baseChance = tile.flammability * 100; // Base chance from terrain
+        let baseChance = tile.flammability * 100; // Base chance from terrain
         const weatherInfluence = this.getWeatherInfluenceFromWeather();
-
-        const totalChance = baseChance + weatherInfluence;
-
+        let totalChance = baseChance + weatherInfluence;
+        
+        // Make trees harder to ignite when they are unburned.
+        if (tile.terrain === 'tree') {
+            totalChance *= 0.75;  // Adjust multiplier as needed.
+        }
         return totalChance;
     }
+    
+    
 
 
     /**
