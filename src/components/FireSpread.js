@@ -227,7 +227,7 @@ class FireSpread {
         let ignitionChance = this.calculateIgnitionChance(neighborTile);
         
         if (isDownwind) {
-            ignitionChance += this.weather.windSpeed * 0.6;
+            ignitionChance += this.weather.windSpeed * 0.7;
         }
         
         ignitionChance += sourceBonus;  // Add bonus if the burning tile is a tree (crown fire effect)
@@ -282,7 +282,7 @@ class FireSpread {
         
         // Make trees harder to ignite when they are unburned.
         if (tile.terrain === 'tree') {
-            totalChance *= 0.75;  // Adjust multiplier as needed.
+            totalChance *= 0.90;  // Adjust multiplier as needed.
         }
         return totalChance;
     }
