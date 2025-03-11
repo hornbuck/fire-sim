@@ -1,5 +1,5 @@
 import {activate_resource, deactivate, show_tooltip, set_text} from "./DeploymentClickEvents.js";
-import { setupShop } from "./PlayerShop.js";
+import { setupShop, manageShop } from "./PlayerShop.js";
 
 // Initialize player coins text object
 export let bank;
@@ -33,8 +33,24 @@ export let airtankerText;
 export let hotshotcrewText;
 export let smokejumperText;
 
+// Initialize purchase quantity for each asset
+export let s_hose;
+export let s_extinguisher;
+export let s_helicopter;
+export let s_firetruck;
+export let s_airtanker;
+export let s_hotshotcrew;
+export let s_smokejumpers;
+export let s_total = 0;
+
 // Initialize timer sprites for later rendering
 export let timerSprite;
+
+// Set the number of assets (useful for external files)
+export function setHose(value) {
+    hose += value;
+    hoseText.setText(`${hose}/10`);
+}
 
 export function createHUD(scene) {
     console.log("createHUD called");
@@ -71,7 +87,7 @@ export function createHUD(scene) {
          wordWrap: { width: 80 },
      }).setOrigin(0.5, 0.5).setDepth(2);
 
-     // Spawn player shop
+     // Spawn player shop sprites
     let open_shop = scene.add.sprite(180, 100, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5);
     let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
@@ -86,7 +102,66 @@ export function createHUD(scene) {
     let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let add_smokejumpers = scene.add.sprite(500, 413, 'add-to-cart').setScale(0.15).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
 
+    // Initialize asset shop amounts
+    s_hose = scene.add.text(310, 210, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_extinguisher = scene.add.text(535, 210, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_helicopter = scene.add.text(310, 277, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_firetruck = scene.add.text(535, 277, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_airtanker = scene.add.text(310, 347, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_hotshotcrew = scene.add.text(535, 347, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_smokejumpers = scene.add.text(405, 413, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_total = scene.add.text(210, 483, '0', {
+        font: '32px Arial',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setDepth(600).setVisible(false);
+
+    // Load player shop
     setupShop(open_shop, shop, close, remove_button, purchase, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers);
+
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);

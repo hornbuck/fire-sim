@@ -42,6 +42,16 @@ let c_airtanker = 10000;
 let c_hotshotcrew = 3000;
 let t_smokejumper = 15000;
 
+// Get the number of coins (useful for external files)
+export function getCoins() {
+    return coins;
+}
+
+// Set the number of coins (useful for external files)
+export function setCoins(value) {
+    coins -= value;
+}
+
 // Updates text of asset limits
 export function set_text(value, x, y, scene) {
     return scene.add.text(x, y, value, {
