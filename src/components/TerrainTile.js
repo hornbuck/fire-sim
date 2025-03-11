@@ -17,8 +17,8 @@ export default class TerrainTile {
     getTerrainAttributes(terrain) {
         const terrainData = {
             grass: { flammability: 0.9, fuel: 1 },
-            shrub: { flammability: 0.7, fuel: 2 },
-            tree: { flammability: 0.4, fuel: 3 },
+            shrub: { flammability: 0.8, fuel: 2 },
+            tree: { flammability: 0.6, fuel: 3 },
             water: { flammability: 0, fuel: 0 },
         };
         return terrainData[terrain] || { flammability: 0, fuel: 0 }; // Default to no flammability for unknown terrains

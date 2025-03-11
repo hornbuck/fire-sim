@@ -25,6 +25,7 @@ export default class MapScene extends Phaser.Scene {
 
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds
+
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
         
@@ -249,10 +250,11 @@ export default class MapScene extends Phaser.Scene {
         // Reset state variables
         this.elapsedTime = 0;
         this.lastFireSpreadTime = 0;
-        this.isFireSimRunning = false;
+        this.isFireSimRunning = true;
         
         // Restore zoom level while respecting the minimum constraint
         this.currentZoom = Math.max(previousZoom, this.MIN_ZOOM);
+
 
         // Initialize sprite groups
         if (this.mapGroup && !this.mapGroup.destroyed) {
@@ -278,6 +280,11 @@ export default class MapScene extends Phaser.Scene {
 
         // Start a fire
         this.startFire();
+
+        for (let i = 0; i < 4; i++) {
+            this.updateFireSpread();
+        }
+        this.isFireSimRunning = false;
 
         // Notify UI of initial state
         this.events.emit('weatherUpdated', this.weather);
