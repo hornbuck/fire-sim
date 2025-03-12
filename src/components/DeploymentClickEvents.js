@@ -164,6 +164,11 @@ export function use_resource (scene, x, y, fireSprite) {
                 show_notification(scene, n_cooldown);
             }
 
+            scene.time.delayedCall(t_extinguisher, () => {
+                scene.events.emit('extinguishFire', fireSprite);
+                bank.setText(`${coins}`);
+            })
+
         } else {
             console.log("Sorry! You ran out!");
 
