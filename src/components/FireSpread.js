@@ -65,20 +65,17 @@ class FireSpread {
 
 
     /**
-     * Updates the sprite of a tile to reflect its burnt status.
-     * 
-     * This method checks if the specified tile has a sprite and, if so, replaces the sprite's texture 
-     * with the corresponding texture for the burnt version of the tile's terrain.
+     * Updates the sprite of a tile to reflect its current status (burnt or extinguished).
      * 
      * @param {number} x - The x-coordinate of the tile to update.
      * @param {number} y - The y-coordinate of the tile to update.
      * @returns {void} This method does not return any value. It updates the sprite of the specified tile.
      */
-    updateBurntTileSprite(tileOrX, y) {
+    updateSprite(tileOrX, y) {
         let tile;
         
         // Support both calling patterns:
-        // updateBurntTileSprite(tile) or updateBurntTileSprite(x, y)
+        // updateSprite(tile) or updateSprite(x, y)
         if (typeof tileOrX === 'object') {
             // Called with a tile object
             tile = tileOrX;
@@ -89,7 +86,7 @@ class FireSpread {
                 tile = this.map.grid[y][tileOrX];
             } else {
                 // Invalid coordinates
-                console.warn("FireSpread: Invalid coordinates for updateBurntTileSprite");
+                console.warn("FireSpread: Invalid coordinates for updateSprite");
                 return;
             }
         }
@@ -97,7 +94,7 @@ class FireSpread {
         // Check if the tile, its sprite, and the sprite's scene are all valid
         if (tile && tile.sprite && tile.sprite.scene && tile.sprite.scene.sys) {
             try {
-                // Set the texture to the burnt version
+                // Set the texture based on the current terrain type
                 tile.sprite.setTexture(tile.terrain);
             } catch (error) {
                 console.warn("FireSpread: Error updating tile sprite texture", error);
@@ -134,7 +131,6 @@ class FireSpread {
     
             // Check if the tile has a fire sprite and extinguish it
             if (tile.fireS) {
-                // Remove fire sprite
                 setTimeout(() => { 
                     tile.fireS.extinguishFire(); 
                     
@@ -148,14 +144,14 @@ class FireSpread {
                     }
             
                     // Update the tile's sprite to show it burned
-                    this.updateBurntTileSprite(x, y);
+                    this.updateSprite(x, y);
             
                 }, 2000); // 2 second delay
             }
             
     
             // Call function to update tile sprite
-            this.updateBurntTileSprite(x, y);
+            this.updateSprite(x, y);
         }
         return spreadCount;
     }
