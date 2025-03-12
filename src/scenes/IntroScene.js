@@ -8,6 +8,18 @@ export default class IntroScene extends Phaser.Scene {
     }
 
     create() {
+        // Check if we should skip the intro and go directly to the game
+        if (sessionStorage.getItem('skipIntro') === 'true') {
+            // Clear the flag so it doesn't affect future game starts
+            sessionStorage.removeItem('skipIntro');
+            
+            // Start the game immediately
+            console.log("Skipping intro and starting game directly");
+            this.scene.start('MapScene');
+            this.scene.launch('UIScene');
+            return;
+        }
+
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
         const gameWidth = this.cameras.main.width;
