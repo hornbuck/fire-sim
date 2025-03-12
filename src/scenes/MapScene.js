@@ -278,17 +278,28 @@ export default class MapScene extends Phaser.Scene {
         // Render the map
         this.renderMap(this.map, this.TILE_SIZE);
 
-        // Start a fire
-        this.startFire();
-
-        for (let i = 0; i < 4; i++) {
-            this.updateFireSpread();
-        }
-        this.isFireSimRunning = false;
+        // Fire initialization with retry mechanism
+        this.time.delayedCall(500, () => {
+            console.log("Delayed fire start after map initialization");
+            if (!this.startFire()) {
+                console.warn("Initial fire start failed, retrying...");
+                this.time.delayedCall(1000, () => this.startFire());
+            }
+            
+            // Force some initial fire spread for visual effect
+            this.time.delayedCall(1000, () => {
+                for (let i = 0; i < 4; i++) {
+                    this.updateFireSpread();
+                }
+                this.isFireSimRunning = false;
+                
+                // Notify UI of fire state
+                this.events.emit('fireSimToggled', this.isFireSimRunning);
+            });
+        });
 
         // Notify UI of initial state
         this.events.emit('weatherUpdated', this.weather);
-        this.events.emit('fireSimToggled', this.isFireSimRunning);
         this.events.emit('updateGameClock', this.elapsedTime);
         this.events.emit('mapSizeChanged', {
             width: this.MAP_WIDTH,
@@ -361,33 +372,127 @@ export default class MapScene extends Phaser.Scene {
     }
 
     startFire() {
+        console.log("Starting fire initialization...");
+        
+        // Safety check to ensure map is properly initialized
+        if (!this.map || !this.map.grid || this.map.grid.length === 0) {
+            console.error("Map not properly initialized when starting fire!");
+            // Schedule another attempt after a short delay
+            this.time.delayedCall(500, () => this.startFire());
+            return;
+        }
+        
         let startX, startY, tile;
-
-        // Find a flammable tile
-        do {
+        let attempts = 0;
+        const maxAttempts = 200; // Increase max attempts
+        let foundFlammableTile = false;
+        
+        console.log("Searching for flammable tile...");
+        
+        // First approach: Random selection with increasing search intensity
+        while (!foundFlammableTile && attempts < maxAttempts) {
             startX = Math.floor(Math.random() * this.map.width);
             startY = Math.floor(Math.random() * this.map.height);
-            tile = this.map.grid[startY][startX];
-        } while (tile.flammability === 0);
+            
+            // Validate coordinates before accessing the grid
+            if (startY >= 0 && startY < this.map.grid.length && 
+                startX >= 0 && startX < this.map.grid[startY].length) {
+                
+                tile = this.map.grid[startY][startX];
+                
+                // Verify tile has necessary properties
+                if (tile && typeof tile.flammability !== 'undefined') {
+                    if (tile.flammability > 0) {
+                        foundFlammableTile = true;
+                        console.log(`Found flammable tile at (${startX}, ${startY}) after ${attempts} attempts`);
+                        break;
+                    }
+                } else {
+                    console.warn("Found invalid tile at", startX, startY);
+                }
+            }
+            
+            attempts++;
+        }
         
-        // Set it on fire
+        // Second approach: Systematic search if random fails
+        if (!foundFlammableTile) {
+            console.log("Random search failed, trying systematic search...");
+            for (let y = 0; y < this.map.height; y++) {
+                for (let x = 0; x < this.map.width; x++) {
+                    if (y < this.map.grid.length && x < this.map.grid[y].length) {
+                        const candidateTile = this.map.grid[y][x];
+                        if (candidateTile && 
+                            candidateTile.terrain && 
+                            (candidateTile.terrain === 'tree' || 
+                             candidateTile.terrain === 'shrub' || 
+                             candidateTile.terrain === 'grass')) {
+                            
+                            startX = x;
+                            startY = y;
+                            tile = candidateTile;
+                            
+                            // Force the tile to be flammable if needed
+                            if (tile.flammability === 0) {
+                                console.log(`Forcing tile at (${x}, ${y}) to be flammable`);
+                                tile.flammability = 1;
+                                tile.fuel = 10; // Ensure there's fuel to burn
+                            }
+                            
+                            foundFlammableTile = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundFlammableTile) break;
+            }
+        }
+        
+        // Final check - did we find something to burn?
+        if (!foundFlammableTile || !tile) {
+            console.error("CRITICAL: Could not find any flammable tile after exhaustive search");
+            console.log("Map data:", this.map);
+            
+            // Last resort: try again after a delay
+            this.time.delayedCall(1000, () => {
+                console.log("Attempting fire start again after delay");
+                this.startFire();
+            });
+            return;
+        }
+        
+        // We have a valid tile, let's set it on fire
+        console.log(`Setting fire at (${startX}, ${startY}) with terrain: ${tile.terrain}`);
         tile.burnStatus = "burning";
-        console.log(`Starting fire at (${startX}, ${startY})`);
-
+        
         // Add visual fire effect
         if (tile.sprite) {
-            let blaze = new AnimatedSprite(3);
-            blaze.lightFire(this, tile.sprite, this.flameGroup);
-            tile.fireS = blaze;
+            try {
+                let blaze = new AnimatedSprite(3);
+                blaze.lightFire(this, tile.sprite, this.flameGroup);
+                tile.fireS = blaze;
+                console.log("Fire sprite added successfully");
+            } catch (error) {
+                console.error("Failed to add fire sprite:", error);
+            }
+        } else {
+            console.warn("Tile has no sprite to attach fire effect to");
         }
         
         // Pan camera to fire location
-        this.cameras.main.pan(
-            startX * this.TILE_SIZE + this.TILE_SIZE / 2,
-            startY * this.TILE_SIZE + this.TILE_SIZE / 2,
-            1000,
-            'Power2'
-        );
+        try {
+            this.cameras.main.pan(
+                startX * this.TILE_SIZE + this.TILE_SIZE / 2,
+                startY * this.TILE_SIZE + this.TILE_SIZE / 2,
+                1000,
+                'Power2'
+            );
+            console.log("Camera panned to fire location");
+        } catch (error) {
+            console.error("Failed to pan camera:", error);
+        }
+        
+        return true; // Indicate successful fire start
     }
 
     updateFireSpread() {

@@ -74,12 +74,34 @@ class FireSpread {
      * @param {number} y - The y-coordinate of the tile to update.
      * @returns {void} This method does not return any value. It updates the sprite of the specified tile.
      */
-    updateBurntTileSprite(x, y) {
-        const tile = this.map.grid[y][x];
-    
-        if (tile && tile.sprite) { //set to && burn == true after fixing bug
-            // Replace the sprite texture with the burned version
-            tile.sprite.setTexture(tile.terrain);
+    updateBurntTileSprite(tileOrX, y) {
+        let tile;
+        
+        // Support both calling patterns:
+        // updateBurntTileSprite(tile) or updateBurntTileSprite(x, y)
+        if (typeof tileOrX === 'object') {
+            // Called with a tile object
+            tile = tileOrX;
+        } else {
+            // Called with x, y coordinates
+            if (this.map && this.map.grid && y >= 0 && y < this.map.grid.length && 
+                tileOrX >= 0 && tileOrX < this.map.grid[y].length) {
+                tile = this.map.grid[y][tileOrX];
+            } else {
+                // Invalid coordinates
+                console.warn("FireSpread: Invalid coordinates for updateBurntTileSprite");
+                return;
+            }
+        }
+        
+        // Check if the tile, its sprite, and the sprite's scene are all valid
+        if (tile && tile.sprite && tile.sprite.scene && tile.sprite.scene.sys) {
+            try {
+                // Set the texture to the burnt version
+                tile.sprite.setTexture(tile.terrain);
+            } catch (error) {
+                console.warn("FireSpread: Error updating tile sprite texture", error);
+            }
         }
     }
     

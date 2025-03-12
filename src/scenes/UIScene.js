@@ -129,7 +129,27 @@ export default class UIScene extends Phaser.Scene {
                 restartButton.clearTint(); // Clear the tint
             })
             .on('pointerdown', () => {
-                this.events.emit('restartGame'); // Emit event to MapScene
+                console.log("Restart button clicked");
+                
+                // First ensure fire simulation is stopped
+                const mapScene = this.scene.get('MapScene');
+                if (mapScene) {
+                    if (mapScene.isFireSimRunning) {
+                        mapScene.isFireSimRunning = false;
+                        this.events.emit('fireSimToggled', false);
+                    }
+                    
+                    // Clear any existing delayed calls that might interfere
+                    if (mapScene.time && mapScene.time.removeAllEvents) {
+                        mapScene.time.removeAllEvents();
+                    }
+                }
+                
+                // Add a short delay before actually restarting
+                this.time.delayedCall(100, () => {
+                    console.log("Emitting restartGame event");
+                    this.events.emit('restartGame'); // Emit event to MapScene
+                });
             });
 
 

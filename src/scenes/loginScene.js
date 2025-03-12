@@ -33,7 +33,6 @@ export default class LoginScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
-
         // Add a fun title text with a retro arcade feel.
         this.add.text(400, 100, 'Please Log In', {
             fontSize: '36px',
@@ -96,10 +95,8 @@ export default class LoginScene extends Phaser.Scene {
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     console.log('Login successful:', userCredential);
-                    // Transition: stop LoginScene, start MapScene and launch UIScene.
-                    this.scene.stop('LoginScene');
-                    this.scene.start('MapScene');
-                    this.scene.launch('UIScene');
+                    // Transition to game after successful login
+                    this.startGame();
                 })
                 .catch((error) => {
                     console.error('Login error:', error);
@@ -126,21 +123,37 @@ export default class LoginScene extends Phaser.Scene {
             this.scene.start('SignupScene');
         });
 
-        // Optional: Create a button to go back to the Login scene.
+        // Create a PLAY button to bypass login and go directly to the game
         const toGame = this.add.dom(700, 20, 'button', {
             width: '130px',
             height: '40px',
             fontSize: '16px',
+            color: '#fff',
+            backgroundColor: '#4169E1',
+            border: '3px solid #FFD700',
+            borderRadius: '10px',
+            cursor: 'pointer',
         }, 'PLAY').setOrigin(0.5);
 
         toGame.addListener('click');
         toGame.on('click', () => {
-            // Stop SignupScene
-            this.scene.stop('SignupScene');
-
-            // Start MapScene and launch UIScene
-            this.scene.start('MapScene');
-            this.scene.launch('UIScene');
+            console.log("PLAY button clicked - starting game");
+            this.startGame();
         });
+    }
+
+    /**
+     * Start the game from the beginning by reloading the page
+     * This ensures a clean state for all scenes
+     */
+    startGame() {
+        console.log("Restarting game...");
+        
+        // Store a flag in sessionStorage to indicate we want to skip intro
+        // and go directly to the game after reload
+        sessionStorage.setItem('skipIntro', 'true');
+        
+        // Force a complete reload of the page
+        window.location.reload();
     }
 }
