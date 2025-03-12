@@ -123,7 +123,14 @@ export default class SignupScene extends Phaser.Scene {
                     updateProfile(user, { displayName: name })
                         .then(() => {
                             console.log('Login successful:', userCredential);
-                            this.startGame();
+
+                            // Stop SignupScene
+                            this.scene.stop('SignupScene');
+
+                            // Start MapScene and UIScene
+                            this.scene.start('MapScene');
+                            this.scene.launch('UIScene');
+
                         })
                         .catch((error) => {
                             console.error('Profile update error:', error);
@@ -166,22 +173,11 @@ export default class SignupScene extends Phaser.Scene {
         toGame.addListener('click');
         toGame.on('click', () => {
             // Stop SignupScene
-            this.startGame();
+            this.scene.stop('SignupScene');
+
+            // Start MapScene and UIScene
+            this.scene.start('MapScene');
+            this.scene.launch('UIScene');
         });
-    }
-    
-    /**
-     * Start the game from the beginning by reloading the page
-     * This ensures a clean state for all scenes
-     */
-    startGame() {
-        console.log("Restarting game...");
-        
-        // Store a flag in sessionStorage to indicate we want to skip intro
-        // and go directly to the game after reload
-        sessionStorage.setItem('skipIntro', 'true');
-        
-        // Force a complete reload of the page
-        window.location.reload();
     }
 }
