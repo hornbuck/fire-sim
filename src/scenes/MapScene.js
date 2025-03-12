@@ -47,6 +47,11 @@ export default class MapScene extends Phaser.Scene {
         this.load.image('burned-grass', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass.png');
         this.load.image('burned-shrub', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-shrubs-on-sand.png');
         this.load.image('burned-tree', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-trees-on-light-dirt.png');
+
+        // Preload extinguished terrain assets
+        this.load.image('extinguished-grass', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/grass.png');
+        this.load.image('extinguished-shrub', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/shrub.png');
+        this.load.image('extinguished-tree', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/tree.png');
         
         // Preload animation assets
         this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
@@ -77,6 +82,9 @@ export default class MapScene extends Phaser.Scene {
 
         // Set up event listeners for UI scene communication
         this.setupEventListeners();
+
+        // Add event listener for fire extinguishing
+        this.events.on('extinguishFire', this.handleFireExtinguish, this);
 
         console.log("MapScene Create Finished");
     }
@@ -605,6 +613,56 @@ export default class MapScene extends Phaser.Scene {
         if (zoomChanged) {
             this.events.emit('zoomChanged', this.currentZoom);
             this.centerMapIfNeeded();
+        }
+    }
+
+    handleFireExtinguish(fireSprite) {
+        // Convert fire sprite position to tile coordinates
+        const startX = (this.cameras.main.width - this.mapPixelWidth) / 2;
+        const startY = (this.cameras.main.height - this.mapPixelHeight) / 2;
+
+        let tileX = Math.floor((fireSprite.x) / this.TILE_SIZE);
+        let tileY = Math.floor((fireSprite.y) / this.TILE_SIZE);
+
+        console.log(`Attempting to extinguish fire at (${tileX}, ${tileY})`);
+
+        // Ensure the tile is within bounds
+        if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
+            let tile = this.map.grid[tileY][tileX];
+            
+            if (tile) {
+                console.log(`Current tile terrain: ${tile.terrain}, burnStatus: ${tile.burnStatus}`);
+                
+                // Update burn status
+                tile.burnStatus = 'extinguished';
+                
+                // Update tile terrain in order to show extinguished sprite
+                let originalTerrain = tile.terrain;
+                if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
+                    tile.terrain = 'extinguished-grass';
+                } else if (tile.terrain.includes('shrub') || tile.terrain === 'shrub') {
+                    tile.terrain = 'extinguished-shrub';
+                } else if (tile.terrain.includes('tree') || tile.terrain === 'tree') {
+                    tile.terrain = 'extinguished-tree';
+                }
+                
+                console.log(`Changed terrain from ${originalTerrain} to ${tile.terrain}`);
+        
+                // Update the tile's sprite to show it extinguished
+                this.fireSpread.updateSprite(tileX, tileY);
+                
+                // Remove fire sprite if it exists
+                if (tile.fireS) {
+                    tile.fireS.extinguishFire();
+                    tile.fireS = null;
+                }
+
+                console.log(`Fire extinguished successfully at (${tileX}, ${tileY})`);
+            } else {
+                console.warn(`No tile found at coordinates (${tileX}, ${tileY})`);
+            }
+        } else {
+            console.warn(`Coordinates out of bounds: (${tileX}, ${tileY})`);
         }
     }
 }

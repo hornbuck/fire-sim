@@ -123,41 +123,14 @@ export function show_notification (scene, notification) {
      });
 }
 
-// Assuming you already have this method for handling tile clicks
-function handleFireExtinguish(fireSprite) {
-    // Convert fire sprite position to tile coordinates using the same method as handleTileClick
-    const startX = (this.cameras.main.width - this.map.width * this.tileSize) / 2;
-    const startY = (this.cameras.main.height - this.map.height * this.tileSize) / 2;
-
-    let tileX = Math.floor((fireSprite.x - startX) / this.tileSize);
-    let tileY = Math.floor((fireSprite.y - startY) / this.tileSize);
-
-    console.warn(`Fire at tile coordinates: (${tileX}, ${tileY})`);
-
-    // Ensure the tile is within bounds
-    if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
-        let clickedTile = this.map.getTile(tileX, tileY);
-        console.log(clickedTile ? `Tile found: ${clickedTile.toString()}` : "No tile found at this position!");
-
-        // If tile exists, update its burn status
-        if (clickedTile) {
-            clickedTile.burnStatus = 'extinguished';
-            console.log(`Tile at (${tileX}, ${tileY}) burn status updated to: ${clickedTile.burnStatus}`);
-        }
-    }
-}
-
-
 // This function allows the player to deploy an asset
 export function use_resource (scene, x, y, fireSprite) {
-
     // Create an object that controls deployment graphics
     let asset = new AnimatedSprite(3);
 
     // Deploy animations
     if (activated_resource === "hose") {
         if (getHose() > 0) {
-            // Start timer
             if (cooldown[0] == 0) {
                 setHose(-1);
                 asset.useHose(scene, x, y, fireSprite);
@@ -169,7 +142,7 @@ export function use_resource (scene, x, y, fireSprite) {
             }
 
             scene.time.delayedCall(t_hose, () => {
-                handleFireExtinguish.call(scene, fireSprite)
+                scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
             })
         } else {
@@ -181,7 +154,6 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "extinguisher") {
         if (getExtinguisher() > 0) {
-            // Start timer
             if (cooldown[1] == 0) {
                 setExtinguisher(-1);
                 asset.useFireExtinguisher(scene, x, y, fireSprite);
@@ -201,7 +173,6 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "helicopter") {
         if (getHelicopter() > 0) {
-            // Start timer
             if (cooldown[2] == 0) {
                 setHelicopter(-1);
                 asset.useHelicopter(scene, x, y, fireSprite);
@@ -212,7 +183,7 @@ export function use_resource (scene, x, y, fireSprite) {
             }
 
             scene.time.delayedCall(t_helicopter, () => {
-                handleFireExtinguish.call(scene, fireSprite)
+                scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
             })
             
@@ -225,7 +196,6 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "firetruck") {
         if (getFiretruck() > 0) {
-            // Start timer
             if (cooldown[3] == 0) {
                 setFiretruck(-1);
                 asset.useFiretruck(scene, x, y, fireSprite);
@@ -236,7 +206,7 @@ export function use_resource (scene, x, y, fireSprite) {
             }
 
             scene.time.delayedCall(t_firetruck, () => {
-                handleFireExtinguish.call(scene, fireSprite)
+                scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
             })
 
@@ -249,7 +219,6 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "airtanker") {
         if (getAirtanker() > 0) {
-            // Start timer
             if (cooldown[4] == 0) {
                 setAirtanker(-1);
                 asset.useAirtanker(scene, x, y, fireSprite);
@@ -260,7 +229,7 @@ export function use_resource (scene, x, y, fireSprite) {
             }
 
             scene.time.delayedCall(t_airtanker, () => {
-                handleFireExtinguish.call(scene, fireSprite)
+                scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
             })
 
@@ -273,7 +242,6 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "hotshot-crew") {
         if (getHotshotCrew() > 0) {
-            // Start timer
             if (cooldown[5] == 0) {
                 setHotshotCrew(-1);
                 asset.useHotshotCrew(scene, x, y, fireSprite);
@@ -284,7 +252,7 @@ export function use_resource (scene, x, y, fireSprite) {
             }
 
             scene.time.delayedCall(t_hotshotcrew, () => {
-                handleFireExtinguish.call(scene, fireSprite)
+                scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
             })
 
@@ -297,7 +265,6 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "smokejumper") {
         if (getSmokejumpers() > 0) {
-            // Start timer
             if (cooldown[6] == 0) {
                 setSmokejumpers(-1);
                 asset.useSmokejumpers(scene, x, y, fireSprite);
@@ -308,7 +275,7 @@ export function use_resource (scene, x, y, fireSprite) {
             }
 
             scene.time.delayedCall(t_smokejumpers_plane + t_smokejumpers_ground, () => {
-                handleFireExtinguish.call(scene, fireSprite)
+                scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
             })
 
