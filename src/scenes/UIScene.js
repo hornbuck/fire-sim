@@ -16,13 +16,13 @@ export default class UIScene extends Phaser.Scene {
         this.TITLE_X = 40;
         this.TITLE_Y = 40;
         this.LOGIN_BUTTON_X = 600;
-        this.LOGIN_BUTTON_Y = 10;
+        this.LOGIN_BUTTON_Y = 50;
         this.RESTART_BUTTON_X = 140;
         this.RESTART_BUTTON_Y = 50;
         this.GAME_CLOCK_X = 300;
         this.GAME_CLOCK_Y = 10;
-        this.WEATHER_X = 10;
-        this.WEATHER_Y = 550;
+        this.WEATHER_X = 150;
+        this.WEATHER_Y = 560;
         this.FIRE_BUTTON_X = 600;
         this.FIRE_BUTTON_Y = 550;
         this.TILE_INFO_X = 10;
@@ -104,7 +104,7 @@ export default class UIScene extends Phaser.Scene {
         this.add.image(40, 40, 'Title');
 
         // Login Button via MainScene
-        const loginMenuButton = this.add.image(600, 30, 'login')
+        const loginMenuButton = this.add.image(this.LOGIN_BUTTON_X, this.LOGIN_BUTTON_Y, 'login')
             .setInteractive()
             .on('pointerover', () => {  // Hover effect
                 loginMenuButton.setTint(0x8B4513); // Apply tint on hover
