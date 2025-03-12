@@ -86,7 +86,7 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
     // When water hose is deactivated, fire sprites can no longer be destroyed.
     resource.on(
         "pointerdown",
-        function (pointer, localX, localY, event) {
+        function () {
             if (active === true) {
                 // Check for already-activated resources
                 deactivate(all_assets);
