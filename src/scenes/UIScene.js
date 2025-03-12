@@ -61,10 +61,10 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('wind_1arrow', 'assets/UI/wind_1arrow.png')
         this.load.image('wind_2arrow', 'assets/UI/wind_2arrow.png')
         this.load.image('wind_3arrow', 'assets/UI/wind_3arrow.png')
-        this.load.image('north', '/assets/UI/north.png')
-        this.load.image('east', '/assets/UI/east.png')
-        this.load.image('south', '/assets/UI/south.png')
-        this.load.image('west', '/assets/UI/west.png')
+        this.load.image('north', 'assets/UI/north.png')
+        this.load.image('east', 'assets/UI/east.png')
+        this.load.image('south', 'assets/UI/south.png')
+        this.load.image('west', 'assets/UI/west.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
     }
 
