@@ -131,7 +131,6 @@ class FireSpread {
     
             // Check if the tile has a fire sprite and extinguish it
             if (tile.fireS) {
-                setTimeout(() => { 
                     tile.fireS.extinguishFire(); 
                     
                     // Update tile terrain in order to show burnt sprite
@@ -145,8 +144,6 @@ class FireSpread {
             
                     // Update the tile's sprite to show it burned
                     this.updateSprite(x, y);
-            
-                }, 2000); // 2 second delay
             }
             
     

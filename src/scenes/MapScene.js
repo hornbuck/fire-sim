@@ -28,6 +28,11 @@ export default class MapScene extends Phaser.Scene {
 
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
+
+        this.selectedTile = null; // Track the currently selected tile
+        this.lastTileSnapshot = null; // Track the last tile snapshot for undo functionality
+        this.tileInfoUpdateInterval = 500; // Interval for tile info updates in milliseconds
+        this.lastTileInfoUpdate = 0; // Track the last tile info update time
         
         // Camera state variables
         this.currentZoom = 1;
@@ -85,6 +90,12 @@ export default class MapScene extends Phaser.Scene {
 
         // Add event listener for fire extinguishing
         this.events.on('extinguishFire', this.handleFireExtinguish, this);
+
+        this.selectionMarker = this.add.graphics();
+        this.selectionMarker.lineStyle(3, 0x00ffff, 1); // Cyan border
+        this.selectionMarker.strokeRect(0, 0, this.TILE_SIZE, this.TILE_SIZE);
+        this.selectionMarker.setVisible(false);
+
 
         console.log("MapScene Create Finished");
     }
@@ -296,14 +307,11 @@ export default class MapScene extends Phaser.Scene {
             
             // Force some initial fire spread for visual effect
             this.time.delayedCall(1000, () => {
-                for (let i = 0; i < 4; i++) {
-                    this.updateFireSpread();
-                }
+                this.simulateInitialSpread(4);
                 this.isFireSimRunning = false;
-                
-                // Notify UI of fire state
                 this.events.emit('fireSimToggled', this.isFireSimRunning);
             });
+            
         });
 
         // Notify UI of initial state
@@ -368,6 +376,10 @@ export default class MapScene extends Phaser.Scene {
             
             if (clickedTile) {
                 console.log(`Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})`);
+                this.selectedTile = clickedTile;
+                this.selectionMarker.setVisible(true);
+                this.selectionMarker.setPosition(tileX * this.TILE_SIZE, tileY * this.TILE_SIZE);
+                this.lastTileInfoSnapshot = {...clickedTile}; // Store a snapshot of the tile info via shallow copy
                 
                 // Send tile info to UIScene
                 this.events.emit('tileInfo', {
@@ -503,6 +515,53 @@ export default class MapScene extends Phaser.Scene {
         return true; // Indicate successful fire start
     }
 
+    simulateInitialSpread(rounds = 4) {
+        let burningCoords = [];
+    
+        // Collect all current burning tiles
+        for (let y = 0; y < this.map.height; y++) {
+            for (let x = 0; x < this.map.width; x++) {
+                const tile = this.map.grid[y][x];
+                if (tile.burnStatus === "burning") {
+                    burningCoords.push({ x, y });
+                }
+            }
+        }
+    
+        let visited = new Set(burningCoords.map(c => `${c.x},${c.y}`));
+    
+        for (let i = 0; i < rounds; i++) {
+            let newCoords = [];
+    
+            burningCoords.forEach(({ x, y }) => {
+                const neighbors = this.fireSpread.getNeighbors(x, y);
+    
+                neighbors.forEach(({ x: nx, y: ny }) => {
+                    const neighbor = this.map.grid[ny][nx];
+                    const key = `${nx},${ny}`;
+    
+                    if (!visited.has(key) && this.fireSpread.canIgnite(neighbor)) {
+                        neighbor.burnStatus = "burning";
+    
+                        if (!neighbor.fireS && neighbor.sprite) {
+                            const blaze = new AnimatedSprite(3);
+                            blaze.lightFire(this, neighbor.sprite, this.flameGroup);
+                            neighbor.fireS = blaze;
+                        }
+    
+                        newCoords.push({ x: nx, y: ny });
+                        visited.add(key);
+                    }
+                });
+            });
+    
+            burningCoords = newCoords;
+        }
+    
+        console.log("Simulated initial non-burning fire burst.");
+    }
+    
+
     updateFireSpread() {
         console.log("Simulating fire step...");
         this.fireSpread.simulateFireStep();
@@ -554,6 +613,9 @@ export default class MapScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        
+    if (this.isFireSimRunning) {
+
         // Update game time
         this.elapsedTime += delta / 1000;
         
@@ -561,12 +623,18 @@ export default class MapScene extends Phaser.Scene {
         this.events.emit('updateGameClock', this.elapsedTime);
         
         // Handle fire spread at interval
-        if (this.isFireSimRunning && 
-            this.elapsedTime - this.lastFireSpreadTime >= this.FIRE_SPREAD_INTERVAL / 1000) {
-            this.lastFireSpreadTime = this.elapsedTime;
-            this.updateFireSpread();
-            this.updateWeatherOverTime();
+            const timeSinceLastStep = this.elapsedTime - this.lastFireSpreadTime;
+            const stepDuration = this.FIRE_SPREAD_INTERVAL / 1000;
+            const stepProgress = (timeSinceLastStep / stepDuration) * 100;
+            this.scene.get('UIScene').updateFireProgress(stepProgress);
+        
+            if (timeSinceLastStep >= stepDuration) {
+                this.lastFireSpreadTime = this.elapsedTime;
+                this.updateFireSpread();
+                this.updateWeatherOverTime();
+            }
         }
+        
         
         // Handle keyboard camera controls
         this.handleCameraControls(delta);
@@ -578,6 +646,31 @@ export default class MapScene extends Phaser.Scene {
                 flameSprite.setScale(1 / this.currentZoom);
             });
         }
+
+        if (this.selectedTile) {
+            this.lastTileInfoUpdate += delta;
+            if (this.lastTileInfoUpdate >= this.tileInfoUpdateInterval) {
+                this.lastTileInfoUpdate = 0;
+        
+                const currentSnapshot = {
+                    fuel: this.selectedTile.fuel,
+                    burnStatus: this.selectedTile.burnStatus,
+                    terrain: this.selectedTile.terrain
+                };
+        
+                const hasChanged = JSON.stringify(currentSnapshot) !== JSON.stringify(this.lastTileSnapshot);
+                if (hasChanged) {
+                    this.events.emit('tileInfo', {
+                        ...this.selectedTile,
+                        screenX: this.input.activePointer.x,
+                        screenY: this.input.activePointer.y
+                    });
+        
+                    this.lastTileSnapshot = { ...currentSnapshot };
+                }
+            }
+        }
+        
     }
     
     handleCameraControls(delta) {

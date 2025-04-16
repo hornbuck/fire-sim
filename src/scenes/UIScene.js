@@ -203,6 +203,16 @@ export default class UIScene extends Phaser.Scene {
         })
         .setScrollFactor(0)
         .setDepth(10);
+
+        // Fire progress bar foreground (starts at 0 width)
+        this.fireStepBar = this.add.rectangle(
+            this.GAME_CLOCK_X,
+            this.GAME_CLOCK_Y + 28,
+            0,
+            8,
+            0xff4500
+        ).setOrigin(0, 0).setScrollFactor(0);
+
         
         // Zoom level display - new addition for pan/zoom feature
         this.zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
@@ -333,6 +343,21 @@ export default class UIScene extends Phaser.Scene {
         }
     }
 
+    updateFireProgress(percent) {
+        if (!this.fireStepBar) return;
+    
+        const maxWidth = 150;
+        const width = Phaser.Math.Clamp((percent / 100) * maxWidth, 0, maxWidth);
+        this.fireStepBar.width = width;
+    
+        // Optional color logic if you want it
+        let color = 0x00ff00;
+        if (percent > 66) color = 0xff0000;
+        else if (percent > 33) color = 0xffff00;
+        this.fireStepBar.fillColor = color;
+    }
+       
+
     // Handler for game clock updates
     updateGameClock(elapsedTime) {
         let minutes = Math.floor(elapsedTime / 60);
@@ -442,22 +467,22 @@ export default class UIScene extends Phaser.Scene {
         console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
         
         if (this.tileInfoText) {
-            this.tileInfoText.setText(`Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`);
+            this.tileInfoText.setText(
+                `Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`
+            );
             this.tileInfoText.setVisible(true);
             this.tileInfoText.setDepth(100);
-            
-            // If using temporary display, set up a timer to hide
+
+            // Remove any hide timer if one exists (so info stays visible while selected)
             if (this.tileInfoHideTimer) {
                 this.tileInfoHideTimer.remove();
+                this.tileInfoHideTimer = null;
             }
-            
-            this.tileInfoHideTimer = this.time.delayedCall(this.TILE_INFO_DISPLAY_TIME, () => {
-                this.tileInfoText.setVisible(false);
-            });
         } else {
             console.warn("tileInfoText is not defined in UIScene!");
         }
     }
+
 
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
