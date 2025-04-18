@@ -1,6 +1,5 @@
-import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText } from '../components/ui.js';
+import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
-import Weather from '../components/Weather.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -17,14 +16,16 @@ export default class UIScene extends Phaser.Scene {
         this.TITLE_Y = 40;
         this.LOGIN_BUTTON_X = 600;
         this.LOGIN_BUTTON_Y = 50;
-        this.RESTART_BUTTON_X = 140;
+        this.RESTART_BUTTON_X = 90;
         this.RESTART_BUTTON_Y = 50;
         this.GAME_CLOCK_X = 300;
         this.GAME_CLOCK_Y = 10;
-        this.WEATHER_X = 150;
-        this.WEATHER_Y = 560;
-        this.FIRE_BUTTON_X = 600;
-        this.FIRE_BUTTON_Y = 550;
+        this.WEATHER_X = 400;
+        this.WEATHER_Y = 200;
+        this.WEATHER_PANEL_X = 360;
+        this.WEATHER_PANEL_Y = 200;
+        this.FIRE_BUTTON_X = 140;
+        this.FIRE_BUTTON_Y = 50;
         this.TILE_INFO_X = 10;
         this.TILE_INFO_Y = 200;
         
@@ -51,6 +52,9 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('Title', 'assets/UI/Title.png')
         this.load.image('Restart Button', 'assets/UI/restartButton.png')
         this.load.image('login', 'assets/UI/login.png')
+        this.load.image('start_sim', 'assets/UI/start_sim.png');
+        this.load.image('stop_sim', 'assets/UI/stop_sim.png');
+
 
         // Preload Weather UI elements
         this.load.image('weather_title_closed', 'assets/UI/weather_title_closed.png')
@@ -68,8 +72,16 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
     }
 
+    toggleUI(show=true) {
+        this.uiContainer.setVisible(show);
+      }
+      
+
     create() {
         console.log("UIScene Created");
+
+        // Create container to hold ALL UI elements, enbaling toggling of UI visibility
+        this.uiContainer = this.add.container(0,0);
 
         // Create UI Elements
         this.createUIElements();
@@ -79,6 +91,12 @@ export default class UIScene extends Phaser.Scene {
 
         // Ensure HUD is created
         createHUD(this);
+
+        this.uiContainer.add([ coins, bank, open_shop ]);
+
+        this.input.keyboard.on('keydown-U', () => {
+            this.toggleUI(!this.uiContainer.visible);
+        })
 
         // Initialize resource text references
         this.hoseText = hoseText;
@@ -98,10 +116,33 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
     }
 
+    _createTooltip(target, text, offsetY = -20) {
+        const tt = this.add.text(0, 0, text, {
+        font: '14px Arial',
+        fill: '#fff',
+        backgroundColor: '#000',
+        padding: { x: 6, y: 4 },
+        })
+        .setOrigin(0.5, 1)
+        .setDepth(1000)
+        .setScrollFactor(0)
+        .setVisible(false);
+    
+        target
+        .on('pointerover', () => {
+            tt.setPosition(target.x, target.y + offsetY).setVisible(true);
+        })
+        .on('pointerout', () => tt.setVisible(false));
+    
+        return tt;
+    }
+  
+
     createUIElements() {
         // Game title
 
-        this.add.image(40, 40, 'Title');
+        const logo = this.add.image(40, 40, 'Title');
+        this.uiContainer.add(logo);
 
         // Login Button via MainScene
         const loginMenuButton = this.add.image(this.LOGIN_BUTTON_X, this.LOGIN_BUTTON_Y, 'login')
@@ -117,6 +158,7 @@ export default class UIScene extends Phaser.Scene {
                 this.scene.remove('MainScene');
                 this.scene.start('LoginScene');
             });
+        this.uiContainer.add(loginMenuButton);
 
         // Restart Game button
         const restartButton = this.add.image(this.RESTART_BUTTON_X, this.RESTART_BUTTON_Y, 'Restart Button')
@@ -151,36 +193,38 @@ export default class UIScene extends Phaser.Scene {
                     this.events.emit('restartGame'); // Emit event to MapScene
                 });
             });
+        this._createTooltip(restartButton, 'Restart Game');
+        this.uiContainer.add(restartButton);
 
 
         // Fire toggle button
-        this.fireButton = this.add.text(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'Start Fire', {
-            font: '16px Georgia',
-            color: '#FFF',
-            backgroundColor: this.BUTTON_COLORS.FIRE_BUTTON,
-            padding: { x: 15, y: 10 }
-        })
-            .setScrollFactor(0)
+        this.fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
             .setInteractive()
             .on('pointerdown', () => {
-                console.log("Fire button clicked!");
+                console.log("Fire image button clicked!");
                 this.events.emit('toggleFire');
             });
+        this._createTooltip(this.fireButton, 'Start or Stop Fire Simulation')
+        this.uiContainer.add(this.fireButton);
 
         // Weather Toggle Button
         this.weatherButton = this.add.image(this.WEATHER_X, this.WEATHER_Y, 'weather_title_closed')
         .setInteractive()
         .on('pointerdown', () => this.toggleWeatherPanel());
 
+        this.uiContainer.add(this.weatherButton);
+
         // Weather Panel (Initially Hidden)
-        this.weatherPanel = this.add.container(10, 530);
+        this.weatherPanel = this.add.container(this.WEATHER_PANEL_X, this.WEATHER_PANEL_Y);
         this.weatherPanel.setVisible(false); // Start hidden
+        this.uiContainer.add(this.weatherPanel)
 
         let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(1);
         this.weatherStats = this.add.text(10, 10, "Temp: --°F\nHumidity: --%");
         this.windStats = this.add.text(150, 10, "Wind: -- mph\nDirection: --");
 
         this.weatherPanel.add([panelBg, this.weatherStats, this.windStats]);
+        this.uiContainer.add(this.weatherPanel);
 
         this.isWeatherVisible = false;
 
@@ -203,6 +247,7 @@ export default class UIScene extends Phaser.Scene {
         })
         .setScrollFactor(0)
         .setDepth(10);
+        this.uiContainer.add(this.gameClockText);
 
         // Fire progress bar foreground (starts at 0 width)
         this.fireStepBar = this.add.rectangle(
@@ -212,7 +257,7 @@ export default class UIScene extends Phaser.Scene {
             8,
             0xff4500
         ).setOrigin(0, 0).setScrollFactor(0);
-
+        this.uiContainer.add(this.fireStepBar);
         
         // Zoom level display - new addition for pan/zoom feature
         this.zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
@@ -221,6 +266,7 @@ export default class UIScene extends Phaser.Scene {
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0);
+        this.uiContainer.add(this.zoomText);
         
         // Controls info - new addition for pan/zoom feature
         this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
@@ -229,10 +275,11 @@ export default class UIScene extends Phaser.Scene {
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0);
+        this.uiContainer.add(this.controlsText);
 
         // Tile Info
         this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
-            "Select tile\nCoordinates: n/a\nTerrain: n/a\nFlammability: n/a\nFuel: n/a\nBurn Status: n/a", {
+            "Select tile", {
                 fill: "#ffffff",
                 backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
                 padding: { x: 14, y: 10 },
@@ -250,6 +297,7 @@ export default class UIScene extends Phaser.Scene {
             .setScrollFactor(0)
             .setOrigin(0)
             .setStyle({ borderRadius: "8px" });
+        this.uiContainer.add(this.tileInfoText);
     }
     
     createZoomControls() {
@@ -288,22 +336,26 @@ export default class UIScene extends Phaser.Scene {
                 .setOrigin(0)
                 .setStrokeStyle(2, 0xffffff)
                 .setScrollFactor(0);
+            this.uiContainer.add(this.zoomInButton);    
                 
-            this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_IN_Y + BUTTON_SIZE/2, "+", {
+            const zoom_in_text = this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_IN_Y + BUTTON_SIZE/2, "+", {
                 fontSize: "24px",
                 fill: "#fff"
             }).setOrigin(0.5).setScrollFactor(0);
+            this.uiContainer.add(zoom_in_text); 
             
             // Zoom out button
             this.zoomOutButton = this.add.rectangle(BUTTON_X, ZOOM_OUT_Y, BUTTON_SIZE, BUTTON_SIZE, 0x666666)
                 .setOrigin(0)
                 .setStrokeStyle(2, 0xffffff)
                 .setScrollFactor(0);
+            this.uiContainer.add(this.zoomOutButton);
                 
-            this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_OUT_Y + BUTTON_SIZE/2, "-", {
+            const zoom_out_text = this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_OUT_Y + BUTTON_SIZE/2, "-", {
                 fontSize: "24px",
                 fill: "#fff"
             }).setOrigin(0.5).setScrollFactor(0);
+            this.uiContainer.add(zoom_out_text);
         }
         
         // Make buttons interactive
@@ -483,10 +535,11 @@ export default class UIScene extends Phaser.Scene {
         }
     }
 
-
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
-        this.fireButton.setText(isRunning ? 'Stop Fire' : 'Start Fire');
+        if (this.fireButtonImage) {
+            this.fireButtonImage.setTexture(isRunning ? 'stop_sim' : 'start_sim');
+        }
     }
     
     // Handler for zoom changes

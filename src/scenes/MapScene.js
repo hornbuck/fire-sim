@@ -71,6 +71,8 @@ export default class MapScene extends Phaser.Scene {
     create() {
         console.log("MapScene Create Starting");
 
+        this.input.mouse.disableContextMenu();
+
         // Generate and render the map
         this.initializeMap();
         

@@ -46,6 +46,9 @@ export let s_total = 0;
 // Initialize timer sprites for later rendering
 export let timerSprite;
 
+export let coins;
+export let open_shop;
+
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -73,8 +76,8 @@ export function createHUD(scene) {
     const iconSize = 0.8; // Scale of each icon
 
      // Player Coins Block to UI
-     let coins = scene.add.sprite(80, 100, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5);
-     bank = scene.add.text(100, 100, '0', {
+     coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
+     bank = scene.add.text(580, 560, '0', { // I NEED ADDRESSED
          font: '24px Arial',
          fill: '#ffffff',
          align: 'center',
@@ -82,7 +85,8 @@ export function createHUD(scene) {
      }).setOrigin(0.5, 0.5).setDepth(2);
 
      // Spawn player shop sprites
-    let open_shop = scene.add.sprite(180, 100, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5);
+    open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
+
     let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let remove_button = scene.add.sprite(400, 540, 'remove-button').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
