@@ -153,34 +153,34 @@ export default class UIScene extends Phaser.Scene {
     createUIElements() {
         // Game title
 
-        const logo = this.add.image(40, 40, 'Title');
-        this.uiContainer.add(logo);
+        this.logo = this.add.image(40, 40, 'Title');
+        this.uiContainer.add(this.logo);
 
         // Login Button via MainScene
-        const loginMenuButton = this.add.image(this.LOGIN_BUTTON_X, this.LOGIN_BUTTON_Y, 'login')
+        this.loginMenuButton = this.add.image(this.LOGIN_BUTTON_X, this.LOGIN_BUTTON_Y, 'login')
             .setInteractive()
             .on('pointerover', () => {  // Hover effect
-                loginMenuButton.setTint(0x8B4513); // Apply tint on hover
+                this.loginMenuButton.setTint(0x8B4513); // Apply tint on hover
             })
             .on('pointerout', () => {  // Reset when not hovering
-                loginMenuButton.clearTint(); // Clear the tint
+                this.loginMenuButton.clearTint(); // Clear the tint
             })
             .on('pointerdown', () => {
                 this.events.removeAllListeners();
                 this.scene.remove('MainScene');
                 this.scene.start('LoginScene');
             });
-        this.uiContainer.add(loginMenuButton);
+        this.uiContainer.add(this.loginMenuButton);
 
         // Restart Game button
-        const restartButton = this.add.image(this.RESTART_BUTTON_X, this.RESTART_BUTTON_Y, 'Restart Button')
+        this.restartButton = this.add.image(this.RESTART_BUTTON_X, this.RESTART_BUTTON_Y, 'Restart Button')
             .setInteractive()
             .setScale(0.20)
             .on('pointerover', () => {  
-                restartButton.setTint(0x8B4513); // Apply tint on hover
+                this.restartButton.setTint(0x8B4513); // Apply tint on hover
             })
             .on('pointerout', () => {  
-                restartButton.clearTint(); // Clear the tint
+                this.restartButton.clearTint(); // Clear the tint
             })
             .on('pointerdown', () => {
                 console.log("Restart button clicked");
@@ -205,20 +205,20 @@ export default class UIScene extends Phaser.Scene {
                     this.events.emit('restartGame'); // Emit event to MapScene
                 });
             });
-        this._createTooltip(restartButton, 'Restart Game');
-        this.uiContainer.add(restartButton);
+        this._createTooltip(this.restartButton, 'Restart Game');
+        this.uiContainer.add(this.restartButton);
 
 
         // Fire toggle button
-        const fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
+        this.fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
             .setInteractive()
             .setScale(0.20)
             .on('pointerdown', () => {
                 console.log("Fire image button clicked!");
                 this.events.emit('toggleFire');
             });
-        this._createTooltip(fireButton, 'Start or Stop Fire Simulation')
-        this.uiContainer.add(fireButton);
+        this._createTooltip(this.fireButton, 'Start or Stop Fire Simulation')
+        this.uiContainer.add(this.fireButton);
 
         // Weather Toggle Button
         // this.weatherButton = this.add.image(this.WEATHER_X, this.WEATHER_Y, 'weather_title_closed')
@@ -243,7 +243,7 @@ export default class UIScene extends Phaser.Scene {
 
 
         // Game Clock
-        const gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
+        this.gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
             fontSize: "20px",
             fill: "#ffffff",
             backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -260,26 +260,26 @@ export default class UIScene extends Phaser.Scene {
         })
         .setScrollFactor(0)
         .setDepth(10);
-        this.uiContainer.add(gameClockText);
+        this.uiContainer.add(this.gameClockText);
 
         // Fire progress bar foreground (starts at 0 width)
-        const fireStepBar = this.add.rectangle(
+        this.fireStepBar = this.add.rectangle(
             this.GAME_CLOCK_X,
             this.GAME_CLOCK_Y + 28,
             0,
             8,
             0xff4500
         ).setOrigin(0, 0).setScrollFactor(0);
-        this.uiContainer.add(fireStepBar);
+        this.uiContainer.add(this.fireStepBar);
         
         // Zoom level display - new addition for pan/zoom feature
-        const zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
+        this.zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
             fontSize: "16px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0);
-        this.uiContainer.add(zoomText);
+        this.uiContainer.add(this.zoomText);
         
         // Controls info - new addition for pan/zoom feature
         // this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
@@ -290,7 +290,7 @@ export default class UIScene extends Phaser.Scene {
         // }).setScrollFactor(0);
         // this.uiContainer.add(this.controlsText);
 
-        const controlsButton = this.add.text(80, 550, 'Controls', {
+        this.controlsButton = this.add.text(80, 550, 'Controls', {
             fontSize: '16px',
             fill: '#fff',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -299,30 +299,30 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0, 0)
             .setScrollFactor(0)
             .setInteractive();
-          this.uiContainer.add(controlsButton);
+          this.uiContainer.add(this.controlsButton);
 
-          const controlsPanel = this.add.container(80, 466)
+          this.controlsPanel = this.add.container(80, 466)
     .setScrollFactor(0)
     .setVisible(false);
   
         // optional background for readability
-        const controlpanelBg = this.add
+        this.controlpanelBg = this.add
             .rectangle(0, 0, 200, 80, 0x000000, 0.7)
             .setOrigin(0);
-        const controlpanelText = this.add.text(10, 10,
+        this.controlpanelText = this.add.text(10, 10,
             'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
             { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } }
         );
-        controlsPanel.add([ controlpanelBg, controlpanelText ]);
-        this.uiContainer.add(controlsPanel);
+        this.controlsPanel.add([ this.controlpanelBg, this.controlpanelText ]);
+        this.uiContainer.add(this.controlsPanel);
 
         // 3) Hook up show/hide on click (or swap to pointerover/pointerout for hover)
-        controlsButton.on('pointerdown', () => {
+        this.controlsButton.on('pointerdown', () => {
             this.controlsPanel.setVisible(!this.controlsPanel.visible);
         });
 
         // Tile Info
-        const tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
+        this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
             "Select tile", {
                 fill: "#ffffff",
                 backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
@@ -341,7 +341,7 @@ export default class UIScene extends Phaser.Scene {
             .setScrollFactor(0)
             .setOrigin(0)
             .setStyle({ borderRadius: "8px" });
-        this.uiContainer.add(tileInfoText);
+        this.uiContainer.add(this.tileInfoText);
     }
     
     createZoomControls() {
@@ -520,27 +520,27 @@ export default class UIScene extends Phaser.Scene {
         }
     
         // Remove previous icons from the container, if they exist
-        if (this.humidityIcon) {
-            this.weatherPanel.remove(this.humidityIcon, true);
-        }
-        if (this.windSpeedIcon) {
-            this.weatherPanel.remove(this.windSpeedIcon, true);
-        }
-        if (this.windDirectionIcon) {
-            this.weatherPanel.remove(this.windDirectionIcon, true);
-        }
+        // if (this.humidityIcon) {
+        //     this.weatherPanel.remove(this.humidityIcon, true);
+        // }
+        // if (this.windSpeedIcon) {
+        //     this.weatherPanel.remove(this.windSpeedIcon, true);
+        // }
+        // if (this.windDirectionIcon) {
+        //     this.weatherPanel.remove(this.windDirectionIcon, true);
+        // }
     
         // Update the weather text inside the panel
-        this.weatherStats.setText(`Temp: ${weather.temperature}°F\n\nHumidity:`);
-        this.windStats.setText(`Wind:\n\nDirection:`);
+        // this.weatherStats.setText(`Temp: ${weather.temperature}°F\n\nHumidity:`);
+        // this.windStats.setText(`Wind:\n\nDirection:`);
     
         // Create new icons and add them as children of the weatherPanel
         // Note: The positions here are relative to the weatherPanel container.
-        this.humidityIcon = this.add.image(114, 46, humidityIconKey).setScale(0.3);
-        this.windSpeedIcon = this.add.image(215, 18, windSpeedIconKey).setScale(0.4);
-        this.windDirectionIcon = this.add.image(256, 44, windDirectionIconKey).setScale(0.3);
+        // this.humidityIcon = this.add.image(114, 46, humidityIconKey).setScale(0.3);
+        // this.windSpeedIcon = this.add.image(215, 18, windSpeedIconKey).setScale(0.4);
+        // this.windDirectionIcon = this.add.image(256, 44, windDirectionIconKey).setScale(0.3);
     
-        this.weatherPanel.add([this.humidityIcon, this.windSpeedIcon, this.windDirectionIcon]);
+        // this.weatherPanel.add([this.humidityIcon, this.windSpeedIcon, this.windDirectionIcon]);
     }
     
     // Handler for tile information updates
