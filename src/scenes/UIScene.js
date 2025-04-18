@@ -14,20 +14,20 @@ export default class UIScene extends Phaser.Scene {
         // UI Element positions
         this.TITLE_X = 40;
         this.TITLE_Y = 40;
-        this.LOGIN_BUTTON_X = 600;
-        this.LOGIN_BUTTON_Y = 50;
+        this.LOGIN_BUTTON_X = 40;
+        this.LOGIN_BUTTON_Y = 560;
         this.RESTART_BUTTON_X = 90;
         this.RESTART_BUTTON_Y = 50;
         this.GAME_CLOCK_X = 300;
         this.GAME_CLOCK_Y = 10;
-        this.WEATHER_X = 400;
-        this.WEATHER_Y = 200;
+        this.WEATHER_X = 540;
+        this.WEATHER_Y = 40;
         this.WEATHER_PANEL_X = 360;
         this.WEATHER_PANEL_Y = 200;
         this.FIRE_BUTTON_X = 140;
         this.FIRE_BUTTON_Y = 50;
         this.TILE_INFO_X = 10;
-        this.TILE_INFO_Y = 200;
+        this.TILE_INFO_Y = 80;
         
         // Style constants
         this.BUTTON_COLORS = {
@@ -163,7 +163,7 @@ export default class UIScene extends Phaser.Scene {
         // Restart Game button
         const restartButton = this.add.image(this.RESTART_BUTTON_X, this.RESTART_BUTTON_Y, 'Restart Button')
             .setInteractive()
-            .setScale(1)
+            .setScale(0.20)
             .on('pointerover', () => {  
                 restartButton.setTint(0x8B4513); // Apply tint on hover
             })
@@ -200,6 +200,7 @@ export default class UIScene extends Phaser.Scene {
         // Fire toggle button
         this.fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
             .setInteractive()
+            .setScale(0.20)
             .on('pointerdown', () => {
                 console.log("Fire image button clicked!");
                 this.events.emit('toggleFire');
@@ -208,25 +209,25 @@ export default class UIScene extends Phaser.Scene {
         this.uiContainer.add(this.fireButton);
 
         // Weather Toggle Button
-        this.weatherButton = this.add.image(this.WEATHER_X, this.WEATHER_Y, 'weather_title_closed')
-        .setInteractive()
-        .on('pointerdown', () => this.toggleWeatherPanel());
+        // this.weatherButton = this.add.image(this.WEATHER_X, this.WEATHER_Y, 'weather_title_closed')
+        // .setInteractive()
+        // .on('pointerdown', () => this.toggleWeatherPanel());
 
-        this.uiContainer.add(this.weatherButton);
+        // this.uiContainer.add(this.weatherButton);
 
         // Weather Panel (Initially Hidden)
-        this.weatherPanel = this.add.container(this.WEATHER_PANEL_X, this.WEATHER_PANEL_Y);
-        this.weatherPanel.setVisible(false); // Start hidden
-        this.uiContainer.add(this.weatherPanel)
+        // this.weatherPanel = this.add.container(this.WEATHER_PANEL_X, this.WEATHER_PANEL_Y);
+        // this.weatherPanel.setVisible(false); // Start hidden
+        // this.uiContainer.add(this.weatherPanel)
 
-        let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(1);
-        this.weatherStats = this.add.text(10, 10, "Temp: --°F\nHumidity: --%");
-        this.windStats = this.add.text(150, 10, "Wind: -- mph\nDirection: --");
+        // let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(1);
+        // this.weatherStats = this.add.text(10, 10, "Temp: --°F\nHumidity: --%");
+        // this.windStats = this.add.text(150, 10, "Wind: -- mph\nDirection: --");
 
-        this.weatherPanel.add([panelBg, this.weatherStats, this.windStats]);
-        this.uiContainer.add(this.weatherPanel);
+        // this.weatherPanel.add([panelBg, this.weatherStats, this.windStats]);
+        // this.uiContainer.add(this.weatherPanel);
 
-        this.isWeatherVisible = false;
+        // this.isWeatherVisible = false;
 
 
         // Game Clock
@@ -269,13 +270,44 @@ export default class UIScene extends Phaser.Scene {
         this.uiContainer.add(this.zoomText);
         
         // Controls info - new addition for pan/zoom feature
-        this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
-            fontSize: "14px",
-            fill: "#fff",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            padding: { x: 5, y: 5 }
-        }).setScrollFactor(0);
-        this.uiContainer.add(this.controlsText);
+        // this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
+        //     fontSize: "14px",
+        //     fill: "#fff",
+        //     backgroundColor: "rgba(0, 0, 0, 0.5)",
+        //     padding: { x: 5, y: 5 }
+        // }).setScrollFactor(0);
+        // this.uiContainer.add(this.controlsText);
+
+        const controlsButton = this.add.text(80, 550, 'Controls', {
+            fontSize: '16px',
+            fill: '#fff',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            padding: { x: 5, y: 5 },
+          })
+            .setOrigin(0, 0)
+            .setScrollFactor(0)
+            .setInteractive();
+          this.uiContainer.add(controlsButton);
+
+          this.controlsPanel = this.add.container(80, 466)
+    .setScrollFactor(0)
+    .setVisible(false);
+  
+        // optional background for readability
+        const controlpanelBg = this.add
+            .rectangle(0, 0, 200, 80, 0x000000, 0.7)
+            .setOrigin(0);
+        const controlpanelText = this.add.text(10, 10,
+            'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
+            { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } }
+        );
+        this.controlsPanel.add([ controlpanelBg, controlpanelText ]);
+        this.uiContainer.add(this.controlsPanel);
+
+        // 3) Hook up show/hide on click (or swap to pointerover/pointerout for hover)
+        controlsButton.on('pointerdown', () => {
+            this.controlsPanel.setVisible(!this.controlsPanel.visible);
+        });
 
         // Tile Info
         this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
@@ -537,8 +569,8 @@ export default class UIScene extends Phaser.Scene {
 
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
-        if (this.fireButtonImage) {
-            this.fireButtonImage.setTexture(isRunning ? 'stop_sim' : 'start_sim');
+        if (this.fireButton) {
+            this.fireButton.setTexture(isRunning ? 'stop_sim' : 'start_sim');
         }
     }
     
