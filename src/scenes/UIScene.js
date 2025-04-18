@@ -71,12 +71,7 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('west', 'assets/UI/west.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
     }
-
-    toggleUI(show=true) {
-        this.uiContainer.setVisible(show);
-      }
       
-
     create() {
         console.log("UIScene Created");
 
@@ -116,6 +111,24 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
     }
 
+    // update function
+    update() {
+        // Update resource counts
+        if (this.hoseText) {
+            this.hoseText.setText(`${getHose()} left`);
+            this.extinguisherText.setText(`${getExtinguisher()} left`);
+            this.helicopterText.setText(`${getHelicopter()} left`);
+            this.firetruckText.setText(`${getFiretruck()} left`);
+            this.airtankerText.setText(`${getAirtanker()} left`);
+            this.hotshotcrewText.setText(`${getHotshotCrew()} left`);
+            this.smokejumperText.setText(`${getSmokejumpers()} left`);
+        }
+    }
+
+    toggleUI(show=true) {
+        this.uiContainer.setVisible(show);
+    }
+
     _createTooltip(target, text, offsetY = -20) {
         const tt = this.add.text(0, 0, text, {
         font: '14px Arial',
@@ -137,7 +150,6 @@ export default class UIScene extends Phaser.Scene {
         return tt;
     }
   
-
     createUIElements() {
         // Game title
 
@@ -198,15 +210,15 @@ export default class UIScene extends Phaser.Scene {
 
 
         // Fire toggle button
-        this.fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
+        const fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
             .setInteractive()
             .setScale(0.20)
             .on('pointerdown', () => {
                 console.log("Fire image button clicked!");
                 this.events.emit('toggleFire');
             });
-        this._createTooltip(this.fireButton, 'Start or Stop Fire Simulation')
-        this.uiContainer.add(this.fireButton);
+        this._createTooltip(fireButton, 'Start or Stop Fire Simulation')
+        this.uiContainer.add(fireButton);
 
         // Weather Toggle Button
         // this.weatherButton = this.add.image(this.WEATHER_X, this.WEATHER_Y, 'weather_title_closed')
@@ -231,7 +243,7 @@ export default class UIScene extends Phaser.Scene {
 
 
         // Game Clock
-        this.gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
+        const gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
             fontSize: "20px",
             fill: "#ffffff",
             backgroundColor: "rgba(0, 0, 0, 0.6)",
@@ -248,26 +260,26 @@ export default class UIScene extends Phaser.Scene {
         })
         .setScrollFactor(0)
         .setDepth(10);
-        this.uiContainer.add(this.gameClockText);
+        this.uiContainer.add(gameClockText);
 
         // Fire progress bar foreground (starts at 0 width)
-        this.fireStepBar = this.add.rectangle(
+        const fireStepBar = this.add.rectangle(
             this.GAME_CLOCK_X,
             this.GAME_CLOCK_Y + 28,
             0,
             8,
             0xff4500
         ).setOrigin(0, 0).setScrollFactor(0);
-        this.uiContainer.add(this.fireStepBar);
+        this.uiContainer.add(fireStepBar);
         
         // Zoom level display - new addition for pan/zoom feature
-        this.zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
+        const zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
             fontSize: "16px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0);
-        this.uiContainer.add(this.zoomText);
+        this.uiContainer.add(zoomText);
         
         // Controls info - new addition for pan/zoom feature
         // this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
@@ -289,7 +301,7 @@ export default class UIScene extends Phaser.Scene {
             .setInteractive();
           this.uiContainer.add(controlsButton);
 
-          this.controlsPanel = this.add.container(80, 466)
+          const controlsPanel = this.add.container(80, 466)
     .setScrollFactor(0)
     .setVisible(false);
   
@@ -301,8 +313,8 @@ export default class UIScene extends Phaser.Scene {
             'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
             { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } }
         );
-        this.controlsPanel.add([ controlpanelBg, controlpanelText ]);
-        this.uiContainer.add(this.controlsPanel);
+        controlsPanel.add([ controlpanelBg, controlpanelText ]);
+        this.uiContainer.add(controlsPanel);
 
         // 3) Hook up show/hide on click (or swap to pointerover/pointerout for hover)
         controlsButton.on('pointerdown', () => {
@@ -310,7 +322,7 @@ export default class UIScene extends Phaser.Scene {
         });
 
         // Tile Info
-        this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
+        const tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
             "Select tile", {
                 fill: "#ffffff",
                 backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
@@ -329,7 +341,7 @@ export default class UIScene extends Phaser.Scene {
             .setScrollFactor(0)
             .setOrigin(0)
             .setStyle({ borderRadius: "8px" });
-        this.uiContainer.add(this.tileInfoText);
+        this.uiContainer.add(tileInfoText);
     }
     
     createZoomControls() {
@@ -414,19 +426,7 @@ export default class UIScene extends Phaser.Scene {
         });
     }
 
-    update() {
-        // Update resource counts
-        if (this.hoseText) {
-            this.hoseText.setText(`${getHose()} left`);
-            this.extinguisherText.setText(`${getExtinguisher()} left`);
-            this.helicopterText.setText(`${getHelicopter()} left`);
-            this.firetruckText.setText(`${getFiretruck()} left`);
-            this.airtankerText.setText(`${getAirtanker()} left`);
-            this.hotshotcrewText.setText(`${getHotshotCrew()} left`);
-            this.smokejumperText.setText(`${getSmokejumpers()} left`);
-        }
-    }
-
+    // Handler to update fire spread progress indicator
     updateFireProgress(percent) {
         if (!this.fireStepBar) return;
     
@@ -441,7 +441,6 @@ export default class UIScene extends Phaser.Scene {
         this.fireStepBar.fillColor = color;
     }
        
-
     // Handler for game clock updates
     updateGameClock(elapsedTime) {
         let minutes = Math.floor(elapsedTime / 60);
@@ -453,6 +452,7 @@ export default class UIScene extends Phaser.Scene {
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
+    // Handler to toggle weather panel visibility
     toggleWeatherPanel() {
         this.isWeatherVisible = !this.isWeatherVisible;
     
@@ -493,7 +493,7 @@ export default class UIScene extends Phaser.Scene {
         }
     }
 
-
+    // Handler for weather display updates
     updateWeatherDisplay(weather) {
         // Determine icons based on weather values
         let humidityIconKey = 'humidity_low';
@@ -542,9 +542,6 @@ export default class UIScene extends Phaser.Scene {
     
         this.weatherPanel.add([this.humidityIcon, this.windSpeedIcon, this.windDirectionIcon]);
     }
-    
-    
-    
     
     // Handler for tile information updates
     updateTileInfo(tile) {
