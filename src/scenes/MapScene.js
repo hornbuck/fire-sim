@@ -2,6 +2,7 @@ import Map from '../components/MapGenerator.js';
 import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
+import { use_resource, activated_resource } from '../components/DeploymentClickEvents.js';
 
 export default class MapScene extends Phaser.Scene {
     constructor() {
@@ -415,45 +416,56 @@ export default class MapScene extends Phaser.Scene {
         });
     }
 
-    handleTileClick(pointer) {
-        // Ignore clicks if in panning mode
-        if (this.isPanning) {
-            return;
-        }
-        
-        // Ignore clicks in the UI area
-        const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
-        if (pointer.x > viewportWidth) {
-            return;
-        }
-        
-        // Convert screen coordinates to world coordinates
-        const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-        
-        // Calculate tile coordinates based on world point
-        let tileX = Math.floor(worldPoint.x / this.TILE_SIZE);
-        let tileY = Math.floor(worldPoint.y / this.TILE_SIZE);
-
-        // Ensure click is within map bounds
-        if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
-            let clickedTile = this.map.getTile(tileX, tileY);
-            
-            if (clickedTile) {
-                console.log(`Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})`);
-                this.selectedTile = clickedTile;
-                this.selectionMarker.setVisible(true);
-                this.selectionMarker.setPosition(tileX * this.TILE_SIZE, tileY * this.TILE_SIZE);
-                this.lastTileInfoSnapshot = {...clickedTile}; // Store a snapshot of the tile info via shallow copy
-                
-                // Send tile info to UIScene
-                this.events.emit('tileInfo', {
-                    ...clickedTile,
-                    screenX: pointer.x,
-                    screenY: pointer.y
-                });
-            }
-        }
+handleTileClick(pointer) {
+    // Ignore clicks if in panning mode
+    if (this.isPanning) {
+        return;
     }
+    
+    // Ignore clicks in the UI area
+    const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
+    if (pointer.x > viewportWidth) {
+        return;
+    }
+    
+    // Convert screen coordinates to world coordinates
+    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+    
+    // Calculate tile coordinates based on world point
+    const tileX = Math.floor(worldPoint.x / this.TILE_SIZE);
+    const tileY = Math.floor(worldPoint.y / this.TILE_SIZE);
+
+    // Ensure click is within map bounds
+    if (tileX < 0 || tileX >= this.map.width || tileY < 0 || tileY >= this.map.height) {
+        return;
+    }
+
+    const clickedTile = this.map.getTile(tileX, tileY);
+    if (!clickedTile) return;
+
+    console.log(`Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})`);
+    this.selectedTile = clickedTile;
+    this.selectionMarker
+        .setVisible(true)
+        .setPosition(tileX * this.TILE_SIZE, tileY * this.TILE_SIZE);
+    this.lastTileInfoSnapshot = { ...clickedTile };
+
+    // Send tile info to UIScene
+    this.events.emit('tileInfo', {
+        ...clickedTile,
+        screenX: pointer.x,
+        screenY: pointer.y
+    });
+
+    // DEPLOY LOGIC:
+    // - Hotshot crews can cut line on any (unburnt or burnt) tile
+    // - All other tools only work on burning tiles
+    if (activated_resource === 'hotshot-crew'
+        || clickedTile.burnStatus === 'burning') {
+        use_resource(this, pointer.x, pointer.y, clickedTile.sprite);
+    }
+}
+
 
     startFire() {
         console.log("Starting fire initialization...");

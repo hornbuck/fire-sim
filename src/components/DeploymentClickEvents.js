@@ -7,6 +7,8 @@ import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setH
 export let technique = "";
 export let activated_resource = "none";
 
+export let dropDirection = 'horizontal'; // default
+
 // Global cooldown variable
 // --> This is an array where each index represents an asset, in the following order:
 // -----> 0: firehose
@@ -178,27 +180,55 @@ export function use_resource (scene, x, y, fireSprite) {
     }
     if (activated_resource === "helicopter") {
         if (getHelicopter() > 0) {
-            if (cooldown[2] == 0) {
-                setHelicopter(-1);
-                asset.useHelicopter(scene, x, y, fireSprite);
-                asset.startTimer(2, scene, c_helicopter, 750, 210);
-                coins += 300;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
-
-            scene.time.delayedCall(t_helicopter, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-            
+          if (cooldown[2] === 0) {
+            setHelicopter(-1);
+            asset.useHelicopter(scene, x, y, fireSprite);
+            asset.startTimer(2, scene, c_helicopter, 750, 210);
+            coins += 300;
+          } else {
+            show_notification(scene, n_cooldown);
+          }
+      
+          // ==== CROSS‑SHAPED DROP: center + N, S, E, W ====
+          scene.time.delayedCall(t_helicopter, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const size    = mapScene.TILE_SIZE;
+            const tileX   = Math.floor(fireSprite.x / size);
+            const tileY   = Math.floor(fireSprite.y / size);
+      
+            // offsets: center, north, south, east, west
+            const deltas = [
+              [ 0,  0],  // center
+              [ 0, -1],  // north
+              [ 0,  1],  // south
+              [ 1,  0],  // east
+              [-1,  0],  // west
+            ];
+      
+            deltas.forEach(([dx, dy]) => {
+              const nx = tileX + dx;
+              const ny = tileY + dy;
+              if (
+                nx >= 0 && nx < mapScene.map.width &&
+                ny >= 0 && ny < mapScene.map.height
+              ) {
+                const neighbor = mapScene.map.grid[ny][nx];
+                if (neighbor && neighbor.sprite) {
+                  mapScene.events.emit('extinguishFire', neighbor.sprite);
+                }
+              }
+            });
+      
+            bank.setText(`${coins}`);
+          });
+          // =============================================
+      
         } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of helicopters
-            show_notification(scene, out_helicopters);
+          console.log("Sorry! You ran out!");
+          show_notification(scene, out_helicopters);
         }
-    }
+      }
+      
     if (activated_resource === "firetruck") {
         if (getFiretruck() > 0) {
             if (cooldown[3] == 0) {
@@ -222,52 +252,96 @@ export function use_resource (scene, x, y, fireSprite) {
             show_notification(scene, out_firetrucks);
         }
     }
+
     if (activated_resource === "airtanker") {
         if (getAirtanker() > 0) {
-            if (cooldown[4] == 0) {
-                setAirtanker(-1);
-                asset.useAirtanker(scene, x, y, fireSprite);
-                asset.startTimer(4, scene, c_airtanker, 750, 370);
-                coins += 500;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
-
-            scene.time.delayedCall(t_airtanker, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-
+        if (cooldown[4] == 0) {
+            setAirtanker(-1);
+            asset.useAirtanker(scene, x, y, fireSprite);
+            asset.startTimer(4, scene, c_airtanker, 750, 370);
+            coins += 500;
         } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of airtankers
-            show_notification(scene, out_airtankers);
+            show_notification(scene, n_cooldown);
+        }
+    
+        // === REPLACED SINGLE‑TILE EXTINCTION WITH A 5‑TILE LOOP ===
+        scene.time.delayedCall(t_airtanker, () => {
+            // grab the MapScene so we can index into its grid
+            const mapScene = scene.scene.get('MapScene');
+            const size    = mapScene.TILE_SIZE;
+            const tileX   = Math.floor(fireSprite.x / size);
+            const tileY   = Math.floor(fireSprite.y / size);
+    
+            // extinguish from tileX‑2 up to tileX+2
+            for (let dx = -2; dx <= 2; dx++) {
+            const nx = tileX + dx;
+            if (nx >= 0 && nx < mapScene.map.width) {
+                const neighbor = mapScene.map.grid[tileY][nx];
+                if (neighbor && neighbor.sprite) {
+                mapScene.events.emit('extinguishFire', neighbor.sprite);
+                }
+            }
+            }
+    
+            // update your coin display
+            bank.setText(`${coins}`);
+        });
+        // =========================================================
+    
+        } else {
+        console.log("Sorry! You ran out!");
+        show_notification(scene, out_airtankers);
         }
     }
     if (activated_resource === "hotshot-crew") {
-        if (getHotshotCrew() > 0) {
-            if (cooldown[5] == 0) {
-                setHotshotCrew(-1);
-                asset.useHotshotCrew(scene, x, y, fireSprite);
-                asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
-                coins += 300;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
-
-            scene.time.delayedCall(t_hotshotcrew, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-
+    if (getHotshotCrew() > 0) {
+        if (cooldown[5] === 0) {
+        setHotshotCrew(-1);
+        asset.useHotshotCrew(scene, x, y, fireSprite);
+        asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
+        coins += 300;
         } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of hotshot crews
-            show_notification(scene, out_hotshots);
+        show_notification(scene, n_cooldown);
         }
+
+        // ==== DEFENSIVE LINE: carve through 5 tiles of unburnt terrain ====
+        scene.time.delayedCall(t_hotshotcrew, () => {
+        const mapScene = scene.scene.get('MapScene');
+        const size    = mapScene.TILE_SIZE;
+        const tileX   = Math.floor(fireSprite.x / size);
+        const tileY   = Math.floor(fireSprite.y / size);
+
+        for (let i = -2; i <= 2; i++) {
+            const nx = tileX + (dropDirection === 'horizontal' ? i : 0);
+            const ny = tileY + (dropDirection === 'vertical'   ? i : 0);
+
+            if (
+            nx >= 0 && nx < mapScene.map.width &&
+            ny >= 0 && ny < mapScene.map.height
+            ) {
+            const tile = mapScene.map.grid[ny][nx];
+            // only cut through normal, unburnt terrain
+            if (tile.burnStatus === 'unburned') {
+                tile.burnStatus    = 'firebreak';
+                tile.flammability  = 0;
+                // update its sprite to show a firebreak line
+                // (you can swap to a special texture or tint it)
+                tile.terrain       = 'burned-grass';  // or your custom 'firebreak' asset
+                mapScene.fireSpread.updateSprite(nx, ny);
+            }
+            }
+        }
+
+        bank.setText(`${coins}`);
+        });
+        // ==================================================================
+
+    } else {
+        console.log("Sorry! You ran out!");
+        show_notification(scene, out_hotshots);
     }
+    }
+
     if (activated_resource === "smokejumper") {
         if (getSmokejumpers() > 0) {
             if (cooldown[6] == 0) {
