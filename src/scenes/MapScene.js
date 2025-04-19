@@ -21,11 +21,12 @@ export default class MapScene extends Phaser.Scene {
         this.UI_WIDTH = 100;      // Width of UI area on right side
         
         // Fire simulation settings
-        this.FIRE_SPREAD_INTERVAL = 8000; // Fire spread frequency in milliseconds
-
+        this.MIN_SPREAD = 30000;   // Increased from 9000ms to 30 seconds
+        this.MAX_SPREAD = 120000;  // Increased from 36000ms to 2 minutes
+        this.FIRE_SPREAD_INTERVAL = this.MIN_SPREAD; // Initialize with minimum value
+        
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds
-
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
 
@@ -37,6 +38,13 @@ export default class MapScene extends Phaser.Scene {
         // Camera state variables
         this.currentZoom = 1;
         this.isPanning = false;
+    }
+
+    _recalcSpreadInterval() {
+        const risk = this.weather.getGlobalRisk();
+        // Make the interval more sensitive to risk changes
+        this.FIRE_SPREAD_INTERVAL = this.MAX_SPREAD - (this.MAX_SPREAD - this.MIN_SPREAD) * (risk * 1.5);
+        console.log(`Recalculated fire spread interval: ${this.FIRE_SPREAD_INTERVAL/1000}s (risk: ${risk})`);
     }
 
     preload() {
@@ -70,6 +78,14 @@ export default class MapScene extends Phaser.Scene {
 
     create() {
         console.log("MapScene Create Starting");
+        
+        // Initialize weather overlay graphics
+        this.windOverlay = this.add.graphics().setDepth(2).setVisible(false);
+
+        this.events.on('toggleWindOverlay', visible => {
+            this.windOverlay.setVisible(visible);
+            if (visible) this.updateWindOverlay();
+        });
 
         this.input.mouse.disableContextMenu();
 
@@ -98,8 +114,54 @@ export default class MapScene extends Phaser.Scene {
         this.selectionMarker.strokeRect(0, 0, this.TILE_SIZE, this.TILE_SIZE);
         this.selectionMarker.setVisible(false);
 
-
         console.log("MapScene Create Finished");
+    }
+
+    updateWindOverlay() {
+        this.windOverlay.clear();
+        const ARROW_LENGTH = 20;
+        const ARROW_WIDTH = 4;
+        
+        // Draw wind vectors every 10 tiles
+        for (let y = 5; y < this.map.height; y += 10) {
+            for (let x = 5; x < this.map.width; x += 10) {
+                const { windSpeed, windDirection } = this.weather.getLocalWeather(x, y);
+                const length = (windSpeed / 30) * ARROW_LENGTH;
+                
+                const centerX = x * this.TILE_SIZE + this.TILE_SIZE/2;
+                const centerY = y * this.TILE_SIZE + this.TILE_SIZE/2;
+                
+                let endX = centerX;
+                let endY = centerY;
+                
+                // Calculate arrow end point based on wind direction
+                switch(windDirection) {
+                    case 'N': endY -= length; break;
+                    case 'S': endY += length; break;
+                    case 'E': endX += length; break;
+                    case 'W': endX -= length; break;
+                }
+                
+                // Draw arrow
+                this.windOverlay.lineStyle(ARROW_WIDTH, 0xffff00, 0.8)
+                    .lineBetween(centerX, centerY, endX, endY);
+                
+                // Draw arrowhead
+                const headLength = ARROW_WIDTH * 2;
+                const angle = Math.atan2(endY - centerY, endX - centerX);
+                this.windOverlay.lineStyle(ARROW_WIDTH, 0xffff00, 0.8)
+                    .lineBetween(
+                        endX, endY,
+                        endX - headLength * Math.cos(angle - Math.PI/6),
+                        endY - headLength * Math.sin(angle - Math.PI/6)
+                    )
+                    .lineBetween(
+                        endX, endY,
+                        endX - headLength * Math.cos(angle + Math.PI/6),
+                        endY - headLength * Math.sin(angle + Math.PI/6)
+                    );
+            }
+        }
     }
 
     setupEventListeners() {
@@ -265,7 +327,7 @@ export default class MapScene extends Phaser.Scene {
         });
 
         // Initialize weather and fire simulation
-        this.weather = new Weather(68, 30, 15, 'N');
+        this.weather = new Weather(this.MAP_WIDTH, this.MAP_HEIGHT);
         this.fireSpread = new FireSpread(this.map, this.weather);
 
         // Reset state variables
@@ -565,10 +627,9 @@ export default class MapScene extends Phaser.Scene {
     
 
     updateFireSpread() {
-        console.log("Simulating fire step...");
-        this.fireSpread.simulateFireStep();
+        const spreadCount = this.fireSpread.simulateFireStep();
 
-        // Update burning tiles with visual effects
+        // Only update burning tiles that need visual effects
         this.map.grid.forEach((row) => {
             row.forEach((tile) => {
                 if (tile.burnStatus === "burning" && !tile.fireS) {
@@ -578,6 +639,11 @@ export default class MapScene extends Phaser.Scene {
                 }
             });
         });
+
+        // Update weather visualizations only if visible
+        if (this.windOverlay.visible) {
+            this.updateWindOverlay();
+        }
     }
 
     toggleFireSimulation() {
@@ -589,42 +655,39 @@ export default class MapScene extends Phaser.Scene {
         this.events.emit('fireSimToggled', this.isFireSimRunning);
     }
 
-    updateWeatherOverTime() {
-        // Random adjustments for dynamic weather
-        let tempChange = Phaser.Math.Between(-2, 2);
-        let windChange = Phaser.Math.Between(-1, 1);
-        let humidityChange = Phaser.Math.Between(-3, 3);
-    
-        // Apply changes within limits
-        let newTemp = this.weather.temperature + tempChange;
-        let newWind = Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100);
-        let newHumidity = Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100);
-    
-        // Occasional wind direction change
-        let newWindDirection = this.weather.windDirection;
-        if (Phaser.Math.Between(1, 10) === 1) {
-            const directions = ["N", "E", "S", "W"];
-            newWindDirection = Phaser.Utils.Array.GetRandom(directions);
-        }
-    
-        // Update weather object
-        this.weather.updateWeather(newTemp, newHumidity, newWind, newWindDirection);
-    
-        // Notify UI about weather change
+    updateWeatherOverTime(delta) {
+        this.weather.tick(delta);
+        this._recalcSpreadInterval();
         this.events.emit('weatherUpdated', this.weather);
     }
 
     update(time, delta) {
-        
-    if (this.isFireSimRunning) {
-
-        // Update game time
-        this.elapsedTime += delta / 1000;
-        
-        // Notify UI about time update
-        this.events.emit('updateGameClock', this.elapsedTime);
-        
-        // Handle fire spread at interval
+        if (this.isFireSimRunning) {
+            // Update game time
+            this.elapsedTime += delta / 1000;
+            
+            // Notify UI about time update
+            this.events.emit('updateGameClock', this.elapsedTime);
+            
+            // Update weather
+            this.weather.tick(delta / 1000);
+            
+            // Get center weather for UI updates
+            const centerWeather = this.weather.getLocalWeather(this.MAP_WIDTH/2, this.MAP_HEIGHT/2);
+            
+            // Update global risk and notify UI
+            const risk = this.weather.getGlobalRisk();
+            this.events.emit('updateGlobalRisk', risk);
+            
+            // Update wind direction in UI
+            this.events.emit('updateWindDirection', centerWeather.windDirection, centerWeather.windSpeed);
+            
+            // Update weather visualizations only if visible
+            if (this.windOverlay.visible) {
+                this.updateWindOverlay();
+            }
+            
+            // Handle fire spread at interval
             const timeSinceLastStep = this.elapsedTime - this.lastFireSpreadTime;
             const stepDuration = this.FIRE_SPREAD_INTERVAL / 1000;
             const stepProgress = (timeSinceLastStep / stepDuration) * 100;
@@ -633,10 +696,8 @@ export default class MapScene extends Phaser.Scene {
             if (timeSinceLastStep >= stepDuration) {
                 this.lastFireSpreadTime = this.elapsedTime;
                 this.updateFireSpread();
-                this.updateWeatherOverTime();
             }
         }
-        
         
         // Handle keyboard camera controls
         this.handleCameraControls(delta);
@@ -644,11 +705,11 @@ export default class MapScene extends Phaser.Scene {
         // Scale fire sprites based on camera zoom
         if (this.flameGroup && this.flameGroup.getChildren().length > 0) {
             this.flameGroup.getChildren().forEach(flameSprite => {
-                // Apply inverse zoom scale to maintain visual size
                 flameSprite.setScale(1 / this.currentZoom);
             });
         }
 
+        // Update selected tile info less frequently
         if (this.selectedTile) {
             this.lastTileInfoUpdate += delta;
             if (this.lastTileInfoUpdate >= this.tileInfoUpdateInterval) {
@@ -672,7 +733,6 @@ export default class MapScene extends Phaser.Scene {
                 }
             }
         }
-        
     }
     
     handleCameraControls(delta) {
@@ -719,15 +779,11 @@ export default class MapScene extends Phaser.Scene {
         let tileX = Math.floor((fireSprite.x) / this.TILE_SIZE);
         let tileY = Math.floor((fireSprite.y) / this.TILE_SIZE);
 
-        console.log(`Attempting to extinguish fire at (${tileX}, ${tileY})`);
-
         // Ensure the tile is within bounds
         if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
             let tile = this.map.grid[tileY][tileX];
             
             if (tile) {
-                console.log(`Current tile terrain: ${tile.terrain}, burnStatus: ${tile.burnStatus}`);
-                
                 // Update burn status
                 tile.burnStatus = 'extinguished';
                 
@@ -740,8 +796,6 @@ export default class MapScene extends Phaser.Scene {
                 } else if (tile.terrain.includes('tree') || tile.terrain === 'tree') {
                     tile.terrain = 'extinguished-tree';
                 }
-                
-                console.log(`Changed terrain from ${originalTerrain} to ${tile.terrain}`);
         
                 // Update the tile's sprite to show it extinguished
                 this.fireSpread.updateSprite(tileX, tileY);
@@ -751,13 +805,7 @@ export default class MapScene extends Phaser.Scene {
                     tile.fireS.extinguishFire();
                     tile.fireS = null;
                 }
-
-                console.log(`Fire extinguished successfully at (${tileX}, ${tileY})`);
-            } else {
-                console.warn(`No tile found at coordinates (${tileX}, ${tileY})`);
             }
-        } else {
-            console.warn(`Coordinates out of bounds: (${tileX}, ${tileY})`);
         }
     }
 }

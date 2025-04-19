@@ -1,5 +1,4 @@
 import TerrainTile from "./TerrainTile.js";
-import { burn } from "./AnimatedSprites.js";
 
 class FireSpread {
     /**
@@ -32,7 +31,7 @@ class FireSpread {
                 const tile = this.map.grid[y][x];
     
                 if (tile.burnStatus === "burning") {
-                    burningTiles.push({ tile, x, y }); // Collect tiles that were burning
+                    burningTiles.push({ tile, x, y });
                 }
             }
         }
@@ -41,9 +40,12 @@ class FireSpread {
     
         // Process only tiles that were burning at the start of this step
         burningTiles.forEach(({ tile, x, y }) => {
-            spreadCount += this.processBurningTile(tile, this.map.grid, x, y);
+            const localWeather = this.weather.getLocalWeather(x, y);
+            const newSpreads = this.processBurningTile(tile, this.map.grid, x, y, localWeather);
+            spreadCount += newSpreads;
         });
     
+        return spreadCount;
     }
     
 
@@ -116,40 +118,43 @@ class FireSpread {
      *
      * @returns {number} - The number of neighboring tiles ignited as a result of the fire spreading from this tile.
      */
-    processBurningTile(tile, newGrid, x, y) {
-        let spreadCount = this.spreadFire(tile, x, y, newGrid);
-    
-        let curTile = newGrid[y][x];
+    processBurningTile(tile, grid, x, y, localWeather) {
+        let spreadCount = this.spreadFire(tile, x, y, grid, localWeather);
     
         // Decrease fuel and check for burnt status
-        tile.fuel = Math.max(0, curTile.fuel - 1); // Prevent negative fuel
-    
+        tile.fuel = Math.max(0, tile.fuel - 1);
+        console.log(`Tile at (${x}, ${y}) fuel reduced to ${tile.fuel}`);
     
         // If fuel is depleted, mark the tile as burnt
         if (tile.fuel === 0) {
+            console.log(`Tile at (${x}, ${y}) fuel depleted, marking as burnt`);
             tile.burnStatus = "burnt";
     
-            // Check if the tile has a fire sprite and extinguish it
             if (tile.fireS) {
-                    tile.fireS.extinguishFire(); 
-                    
-                    // Update tile terrain in order to show burnt sprite
-                    if (tile.terrain === 'grass') {
-                        tile.terrain = 'burned-grass';
-                    } else if (tile.terrain === 'shrub') {
-                        tile.terrain = 'burned-shrub';
-                    } else if (tile.terrain === 'tree') {
-                        tile.terrain = 'burned-tree';
-                    }
-            
-                    // Update the tile's sprite to show it burned
-                    this.updateSprite(x, y);
+                tile.fireS.extinguishFire(); 
+                
+                if (tile.terrain === 'grass') {
+                    tile.terrain = 'burned-grass';
+                } else if (tile.terrain === 'shrub') {
+                    tile.terrain = 'burned-shrub';
+                } else if (tile.terrain === 'tree') {
+                    tile.terrain = 'burned-tree';
+                }
+        
+                this.updateSprite(x, y);
             }
-            
-    
-            // Call function to update tile sprite
-            this.updateSprite(x, y);
         }
+
+        // Check for crown fire in trees
+        if (tile.terrain === 'tree' && 
+            tile.fuel <= (tile.initialFuel/2) && 
+            !tile._crownFired) {
+            console.log(`Crown fire triggered at (${x}, ${y})`);
+            tile._crownFired = true;
+            // 2-tile radius burst
+            spreadCount += this.spreadFire(tile, x, y, grid, localWeather, 2, 50);
+        }
+    
         return spreadCount;
     }
     
@@ -164,24 +169,27 @@ class FireSpread {
      *
      * @returns {number} - The number of neighboring tiles that caught fire.
      */
-    spreadFire(tile, x, y, grid) {
-        const neighbors = this.getNeighbors(x, y);
+    spreadFire(tile, x, y, grid, localWeather, radius = 1, sourceBonus = 0) {
+        const neighbors = this.getNeighbors(x, y, radius);
+        console.log(`Found ${neighbors.length} neighbors within radius ${radius} of (${x}, ${y})`);
         let spreadCount = 0;
-        
-        // If the burning tile is a tree, give it a bonus for fire spread.
-        let sourceBonus = 0;
-        if (tile.terrain === 'tree') {
-            sourceBonus = 30; // Adjust this bonus as needed.
-        }
         
         for (const neighbor of neighbors) {
             const neighborTile = grid[neighbor.y][neighbor.x];
         
-            if (neighborTile.burnStatus !== "unburned") continue; // Skip already burning/burnt tiles
+            if (neighborTile.burnStatus !== "unburned") {
+                console.log(`Skipping already burning/burnt tile at (${neighbor.x}, ${neighbor.y})`);
+                continue;
+            }
         
             if (this.canIgnite(neighborTile)) {
-                const isDownwind = this.isTileDownwind({ x, y }, neighbor);
-                spreadCount += this.attemptIgnite(neighborTile, isDownwind, sourceBonus);
+                const isDownwind = this.isTileDownwind({ x, y }, neighbor, localWeather.windDirection);
+                console.log(`Attempting to ignite tile at (${neighbor.x}, ${neighbor.y}), downwind: ${isDownwind}`);
+                const ignited = this.attemptIgnite(neighborTile, isDownwind, sourceBonus, localWeather);
+                if (ignited) {
+                    console.log(`Successfully ignited tile at (${neighbor.x}, ${neighbor.y})`);
+                    spreadCount++;
+                }
             }
         }
         
@@ -201,14 +209,11 @@ class FireSpread {
      * @returns {boolean} `true` if the neighboring tile is downwind and fire spreads faster toward it, 
      *          `false` otherwise.
      */
-    isTileDownwind(tile, neighbor) {
-        const { windDirection } = this.weather;
-    
-        if (windDirection === 'N' && neighbor.y < tile.y) return true; // Fire spreads faster southward
-        if (windDirection === 'S' && neighbor.y > tile.y) return true; // Fire spreads faster northward
-        if (windDirection === 'E' && neighbor.x > tile.x) return true; // Fire spreads faster westward
-        if (windDirection === 'W' && neighbor.x < tile.x) return true; // Fire spreads faster eastward
-    
+    isTileDownwind(src, nbr, windDirection) {
+        if (windDirection === 'N' && nbr.y < src.y) return true;
+        if (windDirection === 'S' && nbr.y > src.y) return true;
+        if (windDirection === 'E' && nbr.x > src.x) return true;
+        if (windDirection === 'W' && nbr.x < src.x) return true;
         return false;
     }
     
@@ -236,24 +241,32 @@ class FireSpread {
      *
      * @returns {number} - Returns 1 if the tile ignited, otherwise 0.
      */
-    attemptIgnite(neighborTile, isDownwind, sourceBonus = 0) {
-        if (neighborTile.burnStatus !== "unburned") return 0; // Prevent re-ignition
+    attemptIgnite(neighborTile, isDownwind, sourceBonus, localWeather) {
+        let base = this.calculateIgnitionChance(neighborTile, localWeather);
         
-        let ignitionChance = this.calculateIgnitionChance(neighborTile);
-        
+        // Apply downwind bonus (reduced from 0.2 to 0.1)
         if (isDownwind) {
-            ignitionChance += this.weather.windSpeed * 0.7;
+            base += localWeather.windSpeed * 0.1;
         }
         
-        ignitionChance += sourceBonus;  // Add bonus if the burning tile is a tree (crown fire effect)
+        // Apply source bonus (reduced from 20 to 10 for crown fires)
+        base += sourceBonus * 0.5;
         
-        if (ignitionChance > 70) {  // Threshold value; adjust as needed.
+        // Tree penalty (increased from 40 to 50)
+        if (neighborTile.terrain === 'tree') {
+            base = Math.max(0, base - 50);
+        }
+        
+        // Add random variation to make spread less predictable
+        base *= (0.8 + Math.random() * 0.4);
+        
+        const roll = Math.random() * 100;
+        if (roll < base) {
             neighborTile.burnStatus = "burning";
             return 1;
         }
         return 0;
     }
-    
     
     
     /**
@@ -262,23 +275,21 @@ class FireSpread {
      * @param {number} y - The Y coordinate of the tile.
      * @returns {Array} - An array of neighbor coordinates (objects with x and y properties).
      */
-    getNeighbors(x, y) {
-        const directions = [
-            { x: -1, y: 0 }, // Left (West)
-            { x: 1, y: 0 },  // Right (East)
-            { x: 0, y: -1 }, // Up (North)
-            { x: 0, y: 1 },  // Down (South)
-        ];
-    
-        return directions
-            .map(dir => ({ x: x + dir.x, y: y + dir.y }))
-            .filter(
-                neighbor =>
-                    neighbor.x >= 0 &&
-                    neighbor.x < this.map.width &&
-                    neighbor.y >= 0 &&
-                    neighbor.y < this.map.height
-            );
+    getNeighbors(x, y, radius = 1) {
+        const neighbors = [];
+        for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                if (dx === 0 && dy === 0) continue; // Skip center tile
+                
+                const nx = x + dx;
+                const ny = y + dy;
+                
+                if (nx >= 0 && nx < this.map.width && ny >= 0 && ny < this.map.height) {
+                    neighbors.push({ x: nx, y: ny });
+                }
+            }
+        }
+        return neighbors;
     }
     
 
@@ -290,16 +301,10 @@ class FireSpread {
      *
      * @returns {number} - The total ignition chance as a percentage.
      */
-    calculateIgnitionChance(tile) {
-        let baseChance = tile.flammability * 100; // Base chance from terrain
-        const weatherInfluence = this.getWeatherInfluenceFromWeather();
-        let totalChance = baseChance + weatherInfluence;
-        
-        // Make trees harder to ignite when they are unburned.
-        if (tile.terrain === 'tree') {
-            totalChance *= 0.90;  // Adjust multiplier as needed.
-        }
-        return totalChance;
+    calculateIgnitionChance(tile, localWeather) {
+        let total = tile.flammability * 30; // Reduced from 50 to 30
+        total += this.weather.getWeatherInfluence(localWeather) * 0.3; // Reduced from 0.5 to 0.3
+        return total;
     }
     
     

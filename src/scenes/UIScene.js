@@ -75,7 +75,7 @@ export default class UIScene extends Phaser.Scene {
     create() {
         console.log("UIScene Created");
 
-        // Create container to hold ALL UI elements, enbaling toggling of UI visibility
+        // Create container to hold ALL UI elements, enabling toggling of UI visibility
         this.uiContainer = this.add.container(0,0);
 
         // Create UI Elements
@@ -91,7 +91,7 @@ export default class UIScene extends Phaser.Scene {
 
         this.input.keyboard.on('keydown-U', () => {
             this.toggleUI(!this.uiContainer.visible);
-        })
+        });
 
         // Initialize resource text references
         this.hoseText = hoseText;
@@ -109,6 +109,8 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
+        this.scene.get('MapScene').events.on('updateGlobalRisk', this.updateGlobalRisk, this);
+        this.scene.get('MapScene').events.on('updateWindDirection', this.updateWindDirection, this);
     }
 
     // update function
@@ -151,8 +153,14 @@ export default class UIScene extends Phaser.Scene {
     }
   
     createUIElements() {
+    // near the top of your HUD
+    this.riskBadge = this.add.text(550, 10, 'Risk: LOW', {
+        fontSize: '18px',
+        backgroundColor: '#000',
+        padding: { x: 6, y: 4 },
+    }).setScrollFactor(0);
+  
         // Game title
-
         this.logo = this.add.image(40, 40, 'Title');
         this.uiContainer.add(this.logo);
 
@@ -220,28 +228,6 @@ export default class UIScene extends Phaser.Scene {
         this._createTooltip(this.fireButton, 'Start or Stop Fire Simulation')
         this.uiContainer.add(this.fireButton);
 
-        // Weather Toggle Button
-        // this.weatherButton = this.add.image(this.WEATHER_X, this.WEATHER_Y, 'weather_title_closed')
-        // .setInteractive()
-        // .on('pointerdown', () => this.toggleWeatherPanel());
-
-        // this.uiContainer.add(this.weatherButton);
-
-        // Weather Panel (Initially Hidden)
-        // this.weatherPanel = this.add.container(this.WEATHER_PANEL_X, this.WEATHER_PANEL_Y);
-        // this.weatherPanel.setVisible(false); // Start hidden
-        // this.uiContainer.add(this.weatherPanel)
-
-        // let panelBg = this.add.image(0, 0, 'weather_panel').setOrigin(0, 0).setScale(1);
-        // this.weatherStats = this.add.text(10, 10, "Temp: --°F\nHumidity: --%");
-        // this.windStats = this.add.text(150, 10, "Wind: -- mph\nDirection: --");
-
-        // this.weatherPanel.add([panelBg, this.weatherStats, this.windStats]);
-        // this.uiContainer.add(this.weatherPanel);
-
-        // this.isWeatherVisible = false;
-
-
         // Game Clock
         this.gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
             fontSize: "20px",
@@ -272,7 +258,7 @@ export default class UIScene extends Phaser.Scene {
         ).setOrigin(0, 0).setScrollFactor(0);
         this.uiContainer.add(this.fireStepBar);
         
-        // Zoom level display - new addition for pan/zoom feature
+        // Zoom level display
         this.zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
             fontSize: "16px",
             fill: "#fff",
@@ -280,31 +266,22 @@ export default class UIScene extends Phaser.Scene {
             padding: { x: 5, y: 5 }
         }).setScrollFactor(0);
         this.uiContainer.add(this.zoomText);
-        
-        // Controls info - new addition for pan/zoom feature
-        // this.controlsText = this.add.text(10, 120, "Controls:\nWASD/Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan", {
-        //     fontSize: "14px",
-        //     fill: "#fff",
-        //     backgroundColor: "rgba(0, 0, 0, 0.5)",
-        //     padding: { x: 5, y: 5 }
-        // }).setScrollFactor(0);
-        // this.uiContainer.add(this.controlsText);
 
         this.controlsButton = this.add.text(80, 550, 'Controls', {
             fontSize: '16px',
             fill: '#fff',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             padding: { x: 5, y: 5 },
-          })
-            .setOrigin(0, 0)
-            .setScrollFactor(0)
-            .setInteractive();
-          this.uiContainer.add(this.controlsButton);
+        })
+        .setOrigin(0, 0)
+        .setScrollFactor(0)
+        .setInteractive();
+        this.uiContainer.add(this.controlsButton);
 
-          this.controlsPanel = this.add.container(80, 466)
-    .setScrollFactor(0)
-    .setVisible(false);
-  
+        this.controlsPanel = this.add.container(80, 466)
+            .setScrollFactor(0)
+            .setVisible(false);
+      
         // optional background for readability
         this.controlpanelBg = this.add
             .rectangle(0, 0, 200, 80, 0x000000, 0.7)
@@ -316,7 +293,7 @@ export default class UIScene extends Phaser.Scene {
         this.controlsPanel.add([ this.controlpanelBg, this.controlpanelText ]);
         this.uiContainer.add(this.controlsPanel);
 
-        // 3) Hook up show/hide on click (or swap to pointerover/pointerout for hover)
+        // Hook up show/hide on click
         this.controlsButton.on('pointerdown', () => {
             this.controlsPanel.setVisible(!this.controlsPanel.visible);
         });
@@ -342,6 +319,28 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0)
             .setStyle({ borderRadius: "8px" });
         this.uiContainer.add(this.tileInfoText);
+
+        // Global Risk Badge
+        this.riskBadge = this.add.text(550, 10, 'Risk: LOW', {
+            fontSize: '18px',
+            backgroundColor: '#000',
+            padding: { x: 6, y: 4 },
+        }).setScrollFactor(0);
+        this.uiContainer.add(this.riskBadge);
+
+        // Wind Direction Indicator
+        this.windDirectionText = this.add.text(550, 100, 'Wind: --', {
+            fontSize: '16px',
+            fill: '#fff',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            padding: { x: 5, y: 5 }
+        }).setScrollFactor(0);
+        this.uiContainer.add(this.windDirectionText);
+
+        // Wind Arrow (initially hidden)
+        this.windArrow = this.add.graphics();
+        this.windArrow.setScrollFactor(0);
+        this.uiContainer.add(this.windArrow);
     }
     
     createZoomControls() {
@@ -452,97 +451,29 @@ export default class UIScene extends Phaser.Scene {
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
-    // Handler to toggle weather panel visibility
-    toggleWeatherPanel() {
-        this.isWeatherVisible = !this.isWeatherVisible;
-    
-        if (this.isWeatherVisible) {
-            this.weatherPanel.setVisible(true);
-    
-            // Move weather title up & change image to "open"
-            this.weatherButton.setTexture('weather_title_opened');
-            this.tweens.add({
-                targets: this.weatherButton,
-                y: this.weatherButton.y - 50, // Adjust this value as needed
-                duration: 300,
-                ease: 'Power2'
-            });
-    
-            this.tweens.add({
-                targets: this.weatherPanel,
-                alpha: { from: 0, to: 1 },
-                duration: 300,
-            });
-    
-        } else {
-            this.tweens.add({
-                targets: this.weatherPanel,
-                alpha: { from: 1, to: 0 },
-                duration: 300,
-                onComplete: () => this.weatherPanel.setVisible(false),
-            });
-    
-            // Move weather title down & change image to "closed"
-            this.weatherButton.setTexture('weather_title_closed');
-            this.tweens.add({
-                targets: this.weatherButton,
-                y: this.weatherButton.y + 50, // Adjust this value as needed
-                duration: 300,
-                ease: 'Power2'
-            });
-        }
-    }
-
     // Handler for weather display updates
     updateWeatherDisplay(weather) {
-        // Determine icons based on weather values
-        let humidityIconKey = 'humidity_low';
-        if (weather.humidity > 70) {
-            humidityIconKey = 'humidity_full';
-        } else if (weather.humidity > 30) {
-            humidityIconKey = 'humidity_half';
-        }
-    
-        let windSpeedIconKey = 'wind_1arrow';
-        if (weather.windSpeed > 15) {
-            windSpeedIconKey = 'wind_3arrow';
-        } else if (weather.windSpeed > 5) {
-            windSpeedIconKey = 'wind_2arrow';
-        }
-    
-        let windDirectionIconKey;
-        switch (weather.windDirection) {
-            case 'N': windDirectionIconKey = 'north'; break;
-            case 'E': windDirectionIconKey = 'east'; break;
-            case 'S': windDirectionIconKey = 'south'; break;
-            case 'W': windDirectionIconKey = 'west'; break;
-            default: windDirectionIconKey = 'north'; // Default if invalid
-        }
-    
-        // Remove previous icons from the container, if they exist
-        // if (this.humidityIcon) {
-        //     this.weatherPanel.remove(this.humidityIcon, true);
-        // }
-        // if (this.windSpeedIcon) {
-        //     this.weatherPanel.remove(this.windSpeedIcon, true);
-        // }
-        // if (this.windDirectionIcon) {
-        //     this.weatherPanel.remove(this.windDirectionIcon, true);
-        // }
-    
-        // Update the weather text inside the panel
-        // this.weatherStats.setText(`Temp: ${weather.temperature}°F\n\nHumidity:`);
-        // this.windStats.setText(`Wind:\n\nDirection:`);
-    
-        // Create new icons and add them as children of the weatherPanel
-        // Note: The positions here are relative to the weatherPanel container.
-        // this.humidityIcon = this.add.image(114, 46, humidityIconKey).setScale(0.3);
-        // this.windSpeedIcon = this.add.image(215, 18, windSpeedIconKey).setScale(0.4);
-        // this.windDirectionIcon = this.add.image(256, 44, windDirectionIconKey).setScale(0.3);
-    
-        // this.weatherPanel.add([this.humidityIcon, this.windSpeedIcon, this.windDirectionIcon]);
+        const centerWeather = weather.getLocalWeather(this.scene.get('MapScene').MAP_WIDTH/2, this.scene.get('MapScene').MAP_HEIGHT/2);
+        this.weatherText.setText(
+            `Temperature: ${Math.round(centerWeather.temperature)}°F\n` +
+            `Wind Speed: ${Math.round(centerWeather.windSpeed)} mph\n` +
+            `Wind Direction: ${Math.round(centerWeather.windDirection)}°`
+        );
+        
+        // Update risk badge
+        const risk = weather.getGlobalRisk();
+        const pct = Math.round(risk * 100);
+        
+        let label, color;
+        if (pct > 66) { label = 'HIGH'; color = '#f00'; }
+        else if (pct > 33) { label = 'MED'; color = '#ff0'; }
+        else { label = 'LOW'; color = '#0f0'; }
+        
+        this.riskBadge
+            .setText(`Risk: ${label}`)
+            .setStyle({ color });
     }
-    
+      
     // Handler for tile information updates
     updateTileInfo(tile) {
         console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
@@ -580,5 +511,61 @@ export default class UIScene extends Phaser.Scene {
     // Handler for map size changes
     updateMapInfo(mapInfo) {
         console.log(`Map size changed: ${mapInfo.width}x${mapInfo.height} tiles, ${mapInfo.pixelWidth}x${mapInfo.pixelHeight} pixels`);
+    }
+
+    updateGlobalRisk(risk) {
+        let label, color;
+        if (risk > 0.66) { label = 'HIGH'; color = '#f00'; }
+        else if (risk > 0.33) { label = 'MED'; color = '#ff0'; }
+        else { label = 'LOW'; color = '#0f0'; }
+      
+        this.riskBadge
+            .setText(`Risk: ${label}`)
+            .setStyle({ color });
+    }
+
+    updateWindDirection(windDirection, windSpeed) {
+        if (!this.windDirectionText || !this.windArrow) return;
+
+        // Update wind direction text with formatted values
+        this.windDirectionText.setText(`Wind: ${windDirection} ${Math.round(windSpeed)}mph`);
+
+        // Clear previous arrow
+        this.windArrow.clear();
+
+        // Draw new arrow
+        const arrowX = 550;
+        const arrowY = 130;
+        const arrowLength = 30;
+        const arrowWidth = 3;
+
+        // Set arrow color based on wind speed
+        const color = windSpeed > 15 ? 0xff0000 : (windSpeed > 8 ? 0xffff00 : 0x00ff00);
+
+        // Draw arrow based on wind direction
+        this.windArrow.lineStyle(arrowWidth, color);
+        
+        switch(windDirection) {
+            case 'N':
+                this.windArrow.lineBetween(arrowX, arrowY + arrowLength, arrowX, arrowY);
+                this.windArrow.lineBetween(arrowX - 5, arrowY + 5, arrowX, arrowY);
+                this.windArrow.lineBetween(arrowX + 5, arrowY + 5, arrowX, arrowY);
+                break;
+            case 'S':
+                this.windArrow.lineBetween(arrowX, arrowY, arrowX, arrowY + arrowLength);
+                this.windArrow.lineBetween(arrowX - 5, arrowY + arrowLength - 5, arrowX, arrowY + arrowLength);
+                this.windArrow.lineBetween(arrowX + 5, arrowY + arrowLength - 5, arrowX, arrowY + arrowLength);
+                break;
+            case 'E':
+                this.windArrow.lineBetween(arrowX, arrowY, arrowX + arrowLength, arrowY);
+                this.windArrow.lineBetween(arrowX + arrowLength - 5, arrowY - 5, arrowX + arrowLength, arrowY);
+                this.windArrow.lineBetween(arrowX + arrowLength - 5, arrowY + 5, arrowX + arrowLength, arrowY);
+                break;
+            case 'W':
+                this.windArrow.lineBetween(arrowX + arrowLength, arrowY, arrowX, arrowY);
+                this.windArrow.lineBetween(arrowX + 5, arrowY - 5, arrowX, arrowY);
+                this.windArrow.lineBetween(arrowX + 5, arrowY + 5, arrowX, arrowY);
+                break;
+        }
     }
 }

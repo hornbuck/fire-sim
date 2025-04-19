@@ -1,25 +1,37 @@
 import AnimatedSprite from "./AnimatedSprites.js";
 
 export default class TerrainTile {
+    // Static constants for terrain attributes
+    static FLAM_GRASS = 0.4;
+    static FUEL_GRASS = 2;
+    static FLAM_SHRUB = 0.3;
+    static FUEL_SHRUB = 4;
+    static FLAM_TREE = 0.2;
+    static FUEL_TREE = 6;
+    static FLAM_WATER = 0;
+    static FUEL_WATER = 0;
+
     constructor(x, y, terrain) {
         this.x = x;          // Tile's X coordinate in the grid
         this.y = y;          // Tile's Y coordinate in the grid
         this.terrain = terrain;  // Terrain type (grass, shrub, tree, water)
         this.burnStatus = "unburned"; // Burn status: unburned, burning, burnt
+        this._crownFired = false; // Track if tree has had crown fire burst
 
         // Set terrain-specific attributes
         const attributes = this.getTerrainAttributes(terrain);
         this.flammability = attributes.flammability;
         this.fuel = attributes.fuel;
+        this.initialFuel = this.fuel; // Store initial fuel for crown fire check
     }
 
     // Return terrain-specific attributes based on the terrain type
     getTerrainAttributes(terrain) {
         const terrainData = {
-            grass: { flammability: 0.9, fuel: 1 },
-            shrub: { flammability: 0.8, fuel: 2 },
-            tree: { flammability: 0.6, fuel: 3 },
-            water: { flammability: 0, fuel: 0 },
+            grass: { flammability: TerrainTile.FLAM_GRASS, fuel: TerrainTile.FUEL_GRASS },
+            shrub: { flammability: TerrainTile.FLAM_SHRUB, fuel: TerrainTile.FUEL_SHRUB },
+            tree:  { flammability: TerrainTile.FLAM_TREE, fuel: TerrainTile.FUEL_TREE },
+            water: { flammability: TerrainTile.FLAM_WATER, fuel: TerrainTile.FUEL_WATER },
         };
         return terrainData[terrain] || { flammability: 0, fuel: 0 }; // Default to no flammability for unknown terrains
     }
