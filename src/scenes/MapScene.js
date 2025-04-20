@@ -22,9 +22,7 @@ export default class MapScene extends Phaser.Scene {
         this.UI_WIDTH = 100;      // Width of UI area on right side
         
         // Fire simulation settings
-        this.MIN_SPREAD = 30000;   // Increased from 9000ms to 30 seconds
-        this.MAX_SPREAD = 120000;  // Increased from 36000ms to 2 minutes
-        this.FIRE_SPREAD_INTERVAL = this.MIN_SPREAD; // Initialize with minimum value
+        this.FIRE_SPREAD_INTERVAL = 7000; // Fire step interval (ms)
         
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds
@@ -39,13 +37,6 @@ export default class MapScene extends Phaser.Scene {
         // Camera state variables
         this.currentZoom = 1;
         this.isPanning = false;
-    }
-
-    _recalcSpreadInterval() {
-        const risk = this.weather.getGlobalRisk();
-        // Make the interval more sensitive to risk changes
-        this.FIRE_SPREAD_INTERVAL = this.MAX_SPREAD - (this.MAX_SPREAD - this.MIN_SPREAD) * (risk * 1.5);
-        console.log(`Recalculated fire spread interval: ${this.FIRE_SPREAD_INTERVAL/1000}s (risk: ${risk})`);
     }
 
     preload() {
@@ -79,14 +70,6 @@ export default class MapScene extends Phaser.Scene {
 
     create() {
         console.log("MapScene Create Starting");
-        
-        // Initialize weather overlay graphics
-        this.windOverlay = this.add.graphics().setDepth(2).setVisible(false);
-
-        this.events.on('toggleWindOverlay', visible => {
-            this.windOverlay.setVisible(visible);
-            if (visible) this.updateWindOverlay();
-        });
 
         this.input.mouse.disableContextMenu();
 
@@ -110,59 +93,13 @@ export default class MapScene extends Phaser.Scene {
         // Add event listener for fire extinguishing
         this.events.on('extinguishFire', this.handleFireExtinguish, this);
 
+        // Tile stats highlight
         this.selectionMarker = this.add.graphics();
         this.selectionMarker.lineStyle(3, 0x00ffff, 1); // Cyan border
         this.selectionMarker.strokeRect(0, 0, this.TILE_SIZE, this.TILE_SIZE);
         this.selectionMarker.setVisible(false);
 
         console.log("MapScene Create Finished");
-    }
-
-    updateWindOverlay() {
-        this.windOverlay.clear();
-        const ARROW_LENGTH = 20;
-        const ARROW_WIDTH = 4;
-        
-        // Draw wind vectors every 10 tiles
-        for (let y = 5; y < this.map.height; y += 10) {
-            for (let x = 5; x < this.map.width; x += 10) {
-                const { windSpeed, windDirection } = this.weather.getLocalWeather(x, y);
-                const length = (windSpeed / 30) * ARROW_LENGTH;
-                
-                const centerX = x * this.TILE_SIZE + this.TILE_SIZE/2;
-                const centerY = y * this.TILE_SIZE + this.TILE_SIZE/2;
-                
-                let endX = centerX;
-                let endY = centerY;
-                
-                // Calculate arrow end point based on wind direction
-                switch(windDirection) {
-                    case 'N': endY -= length; break;
-                    case 'S': endY += length; break;
-                    case 'E': endX += length; break;
-                    case 'W': endX -= length; break;
-                }
-                
-                // Draw arrow
-                this.windOverlay.lineStyle(ARROW_WIDTH, 0xffff00, 0.8)
-                    .lineBetween(centerX, centerY, endX, endY);
-                
-                // Draw arrowhead
-                const headLength = ARROW_WIDTH * 2;
-                const angle = Math.atan2(endY - centerY, endX - centerX);
-                this.windOverlay.lineStyle(ARROW_WIDTH, 0xffff00, 0.8)
-                    .lineBetween(
-                        endX, endY,
-                        endX - headLength * Math.cos(angle - Math.PI/6),
-                        endY - headLength * Math.sin(angle - Math.PI/6)
-                    )
-                    .lineBetween(
-                        endX, endY,
-                        endX - headLength * Math.cos(angle + Math.PI/6),
-                        endY - headLength * Math.sin(angle + Math.PI/6)
-                    );
-            }
-        }
     }
 
     setupEventListeners() {
@@ -651,11 +588,6 @@ handleTileClick(pointer) {
                 }
             });
         });
-
-        // Update weather visualizations only if visible
-        if (this.windOverlay.visible) {
-            this.updateWindOverlay();
-        }
     }
 
     toggleFireSimulation() {
@@ -667,49 +599,31 @@ handleTileClick(pointer) {
         this.events.emit('fireSimToggled', this.isFireSimRunning);
     }
 
-    updateWeatherOverTime(delta) {
-        this.weather.tick(delta);
-        this._recalcSpreadInterval();
-        this.events.emit('weatherUpdated', this.weather);
-    }
-
     update(time, delta) {
         if (this.isFireSimRunning) {
-            // Update game time
-            this.elapsedTime += delta / 1000;
-            
-            // Notify UI about time update
-            this.events.emit('updateGameClock', this.elapsedTime);
-            
-            // Update weather
-            this.weather.tick(delta / 1000);
-            
-            // Get center weather for UI updates
-            const centerWeather = this.weather.getLocalWeather(this.MAP_WIDTH/2, this.MAP_HEIGHT/2);
-            
-            // Update global risk and notify UI
-            const risk = this.weather.getGlobalRisk();
-            this.events.emit('updateGlobalRisk', risk);
-            
-            // Update wind direction in UI
-            this.events.emit('updateWindDirection', centerWeather.windDirection, centerWeather.windSpeed);
-            
-            // Update weather visualizations only if visible
-            if (this.windOverlay.visible) {
-                this.updateWindOverlay();
-            }
-            
-            // Handle fire spread at interval
-            const timeSinceLastStep = this.elapsedTime - this.lastFireSpreadTime;
-            const stepDuration = this.FIRE_SPREAD_INTERVAL / 1000;
-            const stepProgress = (timeSinceLastStep / stepDuration) * 100;
-            this.scene.get('UIScene').updateFireProgress(stepProgress);
-        
-            if (timeSinceLastStep >= stepDuration) {
-                this.lastFireSpreadTime = this.elapsedTime;
-                this.updateFireSpread();
-            }
+          // 1) Advance game clock
+          this.elapsedTime += delta / 1000;
+          this.events.emit('updateGameClock', this.elapsedTime);
+      
+          // 2) Compute progress toward next fire step
+          const timeSinceLastStep = this.elapsedTime - this.lastFireSpreadTime;
+          const stepDuration   = this.FIRE_SPREAD_INTERVAL / 1000;
+          const stepProgress   = (timeSinceLastStep / stepDuration) * 100;
+          this.scene.get('UIScene').updateFireProgress(stepProgress);
+      
+          // 3) When it’s time for the next spread:
+          if (timeSinceLastStep >= stepDuration) {
+            // a) “Catch up” weather by the same elapsed milliseconds
+            this.weather.updateOverTime(stepDuration * 1000);
+            this.events.emit('weatherUpdated', this.weather);
+      
+            // b) Reset timer and actually spread fire
+            this.lastFireSpreadTime = this.elapsedTime;
+            this.updateFireSpread();
+          }
         }
+      
+      
         
         // Handle keyboard camera controls
         this.handleCameraControls(delta);
@@ -784,10 +698,6 @@ handleTileClick(pointer) {
     }
 
     handleFireExtinguish(fireSprite) {
-        // Convert fire sprite position to tile coordinates
-        const startX = (this.cameras.main.width - this.mapPixelWidth) / 2;
-        const startY = (this.cameras.main.height - this.mapPixelHeight) / 2;
-
         let tileX = Math.floor((fireSprite.x) / this.TILE_SIZE);
         let tileY = Math.floor((fireSprite.y) / this.TILE_SIZE);
 
@@ -800,7 +710,6 @@ handleTileClick(pointer) {
                 tile.burnStatus = 'extinguished';
                 
                 // Update tile terrain in order to show extinguished sprite
-                let originalTerrain = tile.terrain;
                 if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
                     tile.terrain = 'extinguished-grass';
                 } else if (tile.terrain.includes('shrub') || tile.terrain === 'shrub') {

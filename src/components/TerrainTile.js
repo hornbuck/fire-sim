@@ -1,8 +1,6 @@
-import AnimatedSprite from "./AnimatedSprites.js";
-
 export default class TerrainTile {
     // Static constants for terrain attributes
-    static FLAM_GRASS = 0.4;
+    static FLAM_GRASS = 0.8;
     static FUEL_GRASS = 2;
     static FLAM_SHRUB = 0.3;
     static FUEL_SHRUB = 4;

@@ -28,6 +28,12 @@ export default class UIScene extends Phaser.Scene {
         this.FIRE_BUTTON_Y = 50;
         this.TILE_INFO_X = 10;
         this.TILE_INFO_Y = 80;
+
+        // Wind intensity indicator
+        this.WIND_GAUGE_X = 540;
+        this.WIND_GAUGE_Y = 60;
+        this.WIND_GAUGE_WIDTH = 100;   // full width represents 50 mph
+        this.WIND_GAUGE_HEIGHT = 12;
         
         // Style constants
         this.BUTTON_COLORS = {
@@ -65,7 +71,7 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('wind_1arrow', 'assets/UI/wind_1arrow.png')
         this.load.image('wind_2arrow', 'assets/UI/wind_2arrow.png')
         this.load.image('wind_3arrow', 'assets/UI/wind_3arrow.png')
-        this.load.image('north', 'assets/UI/north.png')
+        this.load.image('wind-arrow', 'assets/UI/north.png')
         this.load.image('east', 'assets/UI/east.png')
         this.load.image('south', 'assets/UI/south.png')
         this.load.image('west', 'assets/UI/west.png')
@@ -109,8 +115,8 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
-        this.scene.get('MapScene').events.on('updateGlobalRisk', this.updateGlobalRisk, this);
-        this.scene.get('MapScene').events.on('updateWindDirection', this.updateWindDirection, this);
+        // this.scene.get('MapScene').events.on('updateGlobalRisk', this.updateGlobalRisk, this);
+        // this.scene.get('MapScene').events.on('updateWindDirection', this.updateWindDirection, this);
     }
 
     // update function
@@ -153,16 +159,58 @@ export default class UIScene extends Phaser.Scene {
     }
   
     createUIElements() {
-    // near the top of your HUD
-    this.riskBadge = this.add.text(550, 10, 'Risk: LOW', {
-        fontSize: '18px',
-        backgroundColor: '#000',
-        padding: { x: 6, y: 4 },
-    }).setScrollFactor(0);
-  
         // Game title
         this.logo = this.add.image(40, 40, 'Title');
         this.uiContainer.add(this.logo);
+
+        // Gauge background (gray outline)
+        this.windGaugeBg = this.add.rectangle(
+            this.WIND_GAUGE_X,
+            this.WIND_GAUGE_Y,
+            this.WIND_GAUGE_WIDTH,
+            this.WIND_GAUGE_HEIGHT,
+            0x333333
+        )
+        .setOrigin(0, 0)
+        .setScrollFactor(0);
+        this.uiContainer.add(this.windGaugeBg);
+        
+        // Fill bar (starts at 0 width)
+        this.windGaugeFill = this.add.rectangle(
+            this.WIND_GAUGE_X,
+            this.WIND_GAUGE_Y,
+            0,
+            this.WIND_GAUGE_HEIGHT,
+            0x00aaff
+        )
+        .setOrigin(0, 0)
+        .setScrollFactor(0);
+        this.uiContainer.add(this.windGaugeFill);
+        
+        // Arrow for direction
+        this.windArrow = this.add.image(
+            this.WIND_GAUGE_X + this.WIND_GAUGE_WIDTH + 16,
+            this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT / 2,
+            'wind-arrow'
+        )
+        .setDisplaySize(16, 16)
+        .setOrigin(0.5)
+        .setScrollFactor(0);
+        this.uiContainer.add(this.windArrow);
+        this._createTooltip(this.windGaugeBg, 'Wind Speed & Direction');
+
+        // Risk text
+        this.riskText = this.add
+        .text(this.WIND_GAUGE_X, this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT - 40, 
+            'Risk: Low', {
+        fontSize: '16px',
+        fill: '#00ff00', // start green
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: { x: 4, y: 2 }
+        })
+        .setScrollFactor(0);
+        this.uiContainer.add(this.riskText);
+
 
         // Login Button via MainScene
         this.loginMenuButton = this.add.image(this.LOGIN_BUTTON_X, this.LOGIN_BUTTON_Y, 'login')
@@ -319,28 +367,6 @@ export default class UIScene extends Phaser.Scene {
             .setOrigin(0)
             .setStyle({ borderRadius: "8px" });
         this.uiContainer.add(this.tileInfoText);
-
-        // Global Risk Badge
-        this.riskBadge = this.add.text(550, 10, 'Risk: LOW', {
-            fontSize: '18px',
-            backgroundColor: '#000',
-            padding: { x: 6, y: 4 },
-        }).setScrollFactor(0);
-        this.uiContainer.add(this.riskBadge);
-
-        // Wind Direction Indicator
-        this.windDirectionText = this.add.text(550, 100, 'Wind: --', {
-            fontSize: '16px',
-            fill: '#fff',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            padding: { x: 5, y: 5 }
-        }).setScrollFactor(0);
-        this.uiContainer.add(this.windDirectionText);
-
-        // Wind Arrow (initially hidden)
-        this.windArrow = this.add.graphics();
-        this.windArrow.setScrollFactor(0);
-        this.uiContainer.add(this.windArrow);
     }
     
     createZoomControls() {
@@ -450,29 +476,6 @@ export default class UIScene extends Phaser.Scene {
         
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
-
-    // Handler for weather display updates
-    updateWeatherDisplay(weather) {
-        const centerWeather = weather.getLocalWeather(this.scene.get('MapScene').MAP_WIDTH/2, this.scene.get('MapScene').MAP_HEIGHT/2);
-        this.weatherText.setText(
-            `Temperature: ${Math.round(centerWeather.temperature)}°F\n` +
-            `Wind Speed: ${Math.round(centerWeather.windSpeed)} mph\n` +
-            `Wind Direction: ${Math.round(centerWeather.windDirection)}°`
-        );
-        
-        // Update risk badge
-        const risk = weather.getGlobalRisk();
-        const pct = Math.round(risk * 100);
-        
-        let label, color;
-        if (pct > 66) { label = 'HIGH'; color = '#f00'; }
-        else if (pct > 33) { label = 'MED'; color = '#ff0'; }
-        else { label = 'LOW'; color = '#0f0'; }
-        
-        this.riskBadge
-            .setText(`Risk: ${label}`)
-            .setStyle({ color });
-    }
       
     // Handler for tile information updates
     updateTileInfo(tile) {
@@ -495,12 +498,41 @@ export default class UIScene extends Phaser.Scene {
         }
     }
 
+    updateWindDisplay(weather) {
+        // 1) Fill proportionally: max 50 mph = full width
+        const pct = Phaser.Math.Clamp(weather.windSpeed / 50, 0, 1);
+        this.windGaugeFill.width = this.WIND_GAUGE_WIDTH * pct;
+        
+        // 2) Rotate arrow: map N/E/S/W to angles
+        const dirToAngle = { N: -90, E: 0, S: 90, W: 180 };
+        this.windArrow.setRotation(Phaser.Math.DegToRad(dirToAngle[weather.windDirection] || 0));
+        
+        // 3) Tint fill based on intensity
+        if (pct < 0.33) this.windGaugeFill.fillColor = 0x00ff00;
+        else if (pct < 0.66) this.windGaugeFill.fillColor = 0xffff00;
+        else this.windGaugeFill.fillColor = 0xff0000;
+    }
+
+    updateWeatherDisplay(weather) {
+        this.updateWindDisplay(weather);
+        this.updateRiskDisplay(weather.getRiskCategory());
+    }
+      
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
         if (this.fireButton) {
             this.fireButton.setTexture(isRunning ? 'stop_sim' : 'start_sim');
         }
     }
+
+    updateRiskDisplay(risk) {
+        const colorMap = { low:   '#00ff00',
+                           medium:'#ffff00',
+                           high:  '#ff0000' };
+        this.riskText
+          .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
+          .setStyle({ fill: colorMap[risk] });
+        }      
     
     // Handler for zoom changes
     handleZoomChange(zoomLevel) {
@@ -511,61 +543,5 @@ export default class UIScene extends Phaser.Scene {
     // Handler for map size changes
     updateMapInfo(mapInfo) {
         console.log(`Map size changed: ${mapInfo.width}x${mapInfo.height} tiles, ${mapInfo.pixelWidth}x${mapInfo.pixelHeight} pixels`);
-    }
-
-    updateGlobalRisk(risk) {
-        let label, color;
-        if (risk > 0.66) { label = 'HIGH'; color = '#f00'; }
-        else if (risk > 0.33) { label = 'MED'; color = '#ff0'; }
-        else { label = 'LOW'; color = '#0f0'; }
-      
-        this.riskBadge
-            .setText(`Risk: ${label}`)
-            .setStyle({ color });
-    }
-
-    updateWindDirection(windDirection, windSpeed) {
-        if (!this.windDirectionText || !this.windArrow) return;
-
-        // Update wind direction text with formatted values
-        this.windDirectionText.setText(`Wind: ${windDirection} ${Math.round(windSpeed)}mph`);
-
-        // Clear previous arrow
-        this.windArrow.clear();
-
-        // Draw new arrow
-        const arrowX = 550;
-        const arrowY = 130;
-        const arrowLength = 30;
-        const arrowWidth = 3;
-
-        // Set arrow color based on wind speed
-        const color = windSpeed > 15 ? 0xff0000 : (windSpeed > 8 ? 0xffff00 : 0x00ff00);
-
-        // Draw arrow based on wind direction
-        this.windArrow.lineStyle(arrowWidth, color);
-        
-        switch(windDirection) {
-            case 'N':
-                this.windArrow.lineBetween(arrowX, arrowY + arrowLength, arrowX, arrowY);
-                this.windArrow.lineBetween(arrowX - 5, arrowY + 5, arrowX, arrowY);
-                this.windArrow.lineBetween(arrowX + 5, arrowY + 5, arrowX, arrowY);
-                break;
-            case 'S':
-                this.windArrow.lineBetween(arrowX, arrowY, arrowX, arrowY + arrowLength);
-                this.windArrow.lineBetween(arrowX - 5, arrowY + arrowLength - 5, arrowX, arrowY + arrowLength);
-                this.windArrow.lineBetween(arrowX + 5, arrowY + arrowLength - 5, arrowX, arrowY + arrowLength);
-                break;
-            case 'E':
-                this.windArrow.lineBetween(arrowX, arrowY, arrowX + arrowLength, arrowY);
-                this.windArrow.lineBetween(arrowX + arrowLength - 5, arrowY - 5, arrowX + arrowLength, arrowY);
-                this.windArrow.lineBetween(arrowX + arrowLength - 5, arrowY + 5, arrowX + arrowLength, arrowY);
-                break;
-            case 'W':
-                this.windArrow.lineBetween(arrowX + arrowLength, arrowY, arrowX, arrowY);
-                this.windArrow.lineBetween(arrowX + 5, arrowY - 5, arrowX, arrowY);
-                this.windArrow.lineBetween(arrowX + 5, arrowY + 5, arrowX, arrowY);
-                break;
-        }
     }
 }
