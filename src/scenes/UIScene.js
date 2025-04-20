@@ -28,6 +28,8 @@ export default class UIScene extends Phaser.Scene {
         this.FIRE_BUTTON_Y = 50;
         this.TILE_INFO_X = 10;
         this.TILE_INFO_Y = 80;
+        this.ZOOM_PERCENT_TEXT_X = 176;
+        this.ZOOM_PERCENT_TEXT_Y = 550;
 
         // Wind intensity indicator
         this.WIND_GAUGE_X = 540;
@@ -307,7 +309,7 @@ export default class UIScene extends Phaser.Scene {
         this.uiContainer.add(this.fireStepBar);
         
         // Zoom level display
-        this.zoomText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y + 30, "Zoom: 100%", {
+        this.zoomText = this.add.text(this.ZOOM_PERCENT_TEXT_X, this.ZOOM_PERCENT_TEXT_Y, "Zoom: 100%", {
             fontSize: "16px",
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
