@@ -79,29 +79,84 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('west', 'assets/UI/west.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
     }
-      
+
     create() {
         console.log("UIScene Created");
-
-        // Create container to hold ALL UI elements, enabling toggling of UI visibility
-        this.uiContainer = this.add.container(0,0);
-
-        // Create UI Elements
-        this.createUIElements();
-        
+    
+        // Create container to hold ALL UI elements
+        this.uiContainer = this.add.container(0, 0);
+    
+        // Create UI elements
+        this.createUIElements(); // (this still sets up logo, buttons, etc.)
+    
+        // Top bar background
+        const topBarHeight = 60;
+        const topBar = this.add.rectangle(
+            this.SCREEN_WIDTH / 2,
+            topBarHeight / 2,
+            this.SCREEN_WIDTH,
+            topBarHeight,
+            0x2d3436 // Dark gray
+        );
+        topBar.setScrollFactor(0);
+        topBar.setDepth(5);
+        this.uiContainer.add(topBar);
+    
+        // Top bar container
+        this.topBarContainer = this.add.container(0, 0);
+        this.topBarContainer.setDepth(10);
+        this.uiContainer.add(this.topBarContainer);
+    
+        // Add and position UI elements in the top bar container
+    
+        // Logo
+        this.logo.setPosition(40, 30);
+        this.logo.setScale(0.4);
+        this.topBarContainer.add(this.logo);
+    
+        // Restart Button
+        this.restartButton.setPosition(120, 30).setScale(0.2);
+        this.topBarContainer.add(this.restartButton);
+    
+        // Fire Start/Stop Button
+        this.fireButton.setPosition(200, 30).setScale(0.2);
+        this.topBarContainer.add(this.fireButton);
+    
+        // Timer Text
+        this.gameClockText.setPosition(this.SCREEN_WIDTH / 2, 20);
+        this.gameClockText.setStyle({
+            fontFamily: 'Press Start 2P',
+            fontSize: '16px',
+            color: '#FFFFFF'
+        });
+        this.topBarContainer.add(this.gameClockText);
+    
+        // Wind Gauge and Risk Text
+        this.windGaugeBg.setPosition(600, 20);
+        this.windGaugeFill.setPosition(600, 20);
+        this.windArrow.setPosition(700, 26);
+        this.riskText.setPosition(600, 40);
+    
+        this.topBarContainer.add([
+            this.windGaugeBg,
+            this.windGaugeFill,
+            this.windArrow,
+            this.riskText
+        ]);
+    
         // Create zoom controls
         this.createZoomControls();
-
-        // Ensure HUD is created
+    
+        // HUD elements
         createHUD(this);
-
-        this.uiContainer.add([ coins, bank, open_shop ]);
-
+        this.uiContainer.add([coins, bank, open_shop]);
+    
+        // Key to doggle HUD
         this.input.keyboard.on('keydown-U', () => {
             this.toggleUI(!this.uiContainer.visible);
         });
-
-        // Initialize resource text references
+    
+        // Resource text elements
         this.hoseText = hoseText;
         this.extinguisherText = extinguisherText;
         this.helicopterText = helicopterText;
@@ -109,7 +164,7 @@ export default class UIScene extends Phaser.Scene {
         this.airtankerText = airtankerText;
         this.hotshotcrewText = hotshotcrewText;
         this.smokejumperText = smokejumperText;
-
+    
         // Listen for events from MapScene
         this.scene.get('MapScene').events.on('updateGameClock', this.updateGameClock, this);
         this.scene.get('MapScene').events.on('weatherUpdated', this.updateWeatherDisplay, this);
@@ -117,9 +172,8 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
-        // this.scene.get('MapScene').events.on('updateGlobalRisk', this.updateGlobalRisk, this);
-        // this.scene.get('MapScene').events.on('updateWindDirection', this.updateWindDirection, this);
     }
+    
 
     // update function
     update() {
