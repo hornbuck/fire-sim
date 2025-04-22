@@ -1,5 +1,6 @@
 import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
+import { createDrawnButton } from '../components/ButtonManager.js';
 import WebFontFile from '../utils/WebFontFile.js';
 
 export default class UIScene extends Phaser.Scene {
@@ -114,35 +115,37 @@ export default class UIScene extends Phaser.Scene {
         this.topBarContainer.add(this.logo);
     
         // Create Restart Button
-        const restart = this.createDrawnButton(
-            this,           // scene
-            120, 30,        // x, y position
-            80, 30,         // width, height
-            0x8B0000,       // background color (dark red)
-            0xA52A2A,       // hover color (lighter red)
-            'Restart',      // button text
-            '10px',         // font size
-            () => {
-                console.log("Restart clicked");
-                this.events.emit('restartGame');
+        const restart = createDrawnButton(this, {
+            x: 120,
+            y: 30,
+            width: 80,
+            height: 30,
+            backgroundColor: 0x8B0000,
+            hoverColor: 0xA52A2A,
+            text: 'Restart',
+            fontSize: '10px',
+            onClick: () => {
+              console.log("Restart clicked");
+              this.events.emit('restartGame');
             }
-        );
-        this.topBarContainer.add([restart.button, restart.buttonText]);
-    
-        // Create Start/Stop Fire Button
-        const fireButton = this.createDrawnButton(
-            this,
-            200, 30,
-            80, 30,
-            0x228B22, // forest green
-            0x2E8B57, // sea green hover
-            'Start',  // text (can swap later depending on fire status)
-            '10px',
-            () => {
-                console.log("Start Fire clicked");
-                this.events.emit('toggleFire');
+          });
+          this.topBarContainer.add([restart.button, restart.buttonText]);
+          
+        // Create fire sart/stop button
+        const fireButton = createDrawnButton(this, {
+            x: 200,
+            y: 30,
+            width: 80,
+            height: 30,
+            backgroundColor: 0x228B22,
+            hoverColor: 0x2E8B57,
+            text: 'Start',
+            fontSize: '10px',
+            onClick: () => {
+            console.log("Start Fire clicked");
+            this.events.emit('toggleFire');
             }
-        );
+        });
         this.topBarContainer.add([fireButton.button, fireButton.buttonText]);
 
     
