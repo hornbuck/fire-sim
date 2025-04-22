@@ -114,19 +114,44 @@ export default class UIScene extends Phaser.Scene {
         this.logo.setScale(0.4);
         this.topBarContainer.add(this.logo);
     
-        // Restart Button
-        this.restartButton.setPosition(120, 30).setScale(0.2);
-        this.topBarContainer.add(this.restartButton);
+        // Create Restart Button
+        const restart = this.createDrawnButton(
+            this,           // scene
+            120, 30,        // x, y position
+            80, 30,         // width, height
+            0x8B0000,       // background color (dark red)
+            0xA52A2A,       // hover color (lighter red)
+            'Restart',      // button text
+            '10px',         // font size
+            () => {
+                console.log("Restart clicked");
+                this.events.emit('restartGame');
+            }
+        );
+        this.topBarContainer.add([restart.button, restart.buttonText]);
     
-        // Fire Start/Stop Button
-        this.fireButton.setPosition(200, 30).setScale(0.2);
-        this.topBarContainer.add(this.fireButton);
+        // Create Start/Stop Fire Button
+        const fireButton = this.createDrawnButton(
+            this,
+            200, 30,
+            80, 30,
+            0x228B22, // forest green
+            0x2E8B57, // sea green hover
+            'Start',  // text (can swap later depending on fire status)
+            '10px',
+            () => {
+                console.log("Start Fire clicked");
+                this.events.emit('toggleFire');
+            }
+        );
+        this.topBarContainer.add([fireButton.button, fireButton.buttonText]);
+
     
         // Timer Text
         this.gameClockText.setPosition(this.SCREEN_WIDTH / 2, 20);
         this.gameClockText.setStyle({
             fontFamily: 'Press Start 2P',
-            fontSize: '16px',
+            fontSize: '24px',
             color: '#FFFFFF'
         });
         this.topBarContainer.add(this.gameClockText);
@@ -173,7 +198,40 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
     }
+
+    createDrawnButton(scene, x, y, width, height, backgroundColor, hoverColor, text, fontSize, callback) {
+        // Create rectangle button
+        const button = scene.add.rectangle(x, y, width, height, backgroundColor)
+        .setOrigin(0.5)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(10);
     
+        // Create button text
+        const buttonText = scene.add.text(x, y, text, {
+            fontFamily: 'Press Start 2P',
+            fontSize: fontSize,
+            color: '#FFFFFF',
+            align: 'center'
+        }).setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(11);
+    
+        // Hover effect
+        button.on('pointerover', () => {
+            button.setFillStyle(hoverColor);
+        });
+    
+        button.on('pointerout', () => {
+            button.setFillStyle(backgroundColor);
+        });
+    
+        // Click action
+        button.on('pointerdown', callback);
+    
+        // Return both so you can add them together into containers
+        return { button, buttonText };
+    }    
 
     // update function
     update() {
@@ -213,7 +271,7 @@ export default class UIScene extends Phaser.Scene {
     
         return tt;
     }
-  
+
     createUIElements() {
         // Game title
         this.logo = this.add.image(40, 40, 'Title');
@@ -385,7 +443,7 @@ export default class UIScene extends Phaser.Scene {
         this.controlsPanel = this.add.container(80, 466)
             .setScrollFactor(0)
             .setVisible(false);
-      
+
         // optional background for readability
         this.controlpanelBg = this.add
             .rectangle(0, 0, 200, 80, 0x000000, 0.7)
@@ -521,7 +579,7 @@ export default class UIScene extends Phaser.Scene {
         else if (percent > 33) color = 0xffff00;
         this.fireStepBar.fillColor = color;
     }
-       
+
     // Handler for game clock updates
     updateGameClock(elapsedTime) {
         let minutes = Math.floor(elapsedTime / 60);
@@ -532,7 +590,7 @@ export default class UIScene extends Phaser.Scene {
         
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
-      
+
     // Handler for tile information updates
     updateTileInfo(tile) {
         console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
@@ -573,7 +631,7 @@ export default class UIScene extends Phaser.Scene {
         this.updateWindDisplay(weather);
         this.updateRiskDisplay(weather.getRiskCategory());
     }
-      
+
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
         if (this.fireButton) {
@@ -583,11 +641,11 @@ export default class UIScene extends Phaser.Scene {
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
-                           medium:'#ffff00',
-                           high:  '#ff0000' };
+                        medium:'#ffff00',
+                        high:  '#ff0000' };
         this.riskText
-          .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
-          .setStyle({ fill: colorMap[risk] });
+        .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
+        .setStyle({ fill: colorMap[risk] });
         }      
     
     // Handler for zoom changes
