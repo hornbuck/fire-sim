@@ -182,22 +182,34 @@ export default class UIScene extends Phaser.Scene {
         this.createZoomControls();
 
         // Controls panel
+        const controlsButtonX = this.zoomText.x + this.zoomText.width + 80; // 40px padding after zoom text
+
         this.controlsButton = createDrawnButton(this, {
-            x: 200,
-            y: this.scale.height - 30,
+            x: controlsButtonX,
+            y: 20, // Same Y as zoom buttons
             width: 140,
             height: 40,
             backgroundColor: 0x555555,
             hoverColor: 0x777777,
             text: 'Controls',
-            fontSize: '10px',
+            fontSize: '14px',
             onClick: () => console.log('Show controls')
         });
         this.bottomBarContainer.add([this.controlsButton.button, this.controlsButton.buttonText]);
-    
+
+        this.controlsButton.button.setInteractive().on('pointerdown', () => {
+            this.controlsPanel.setVisible(!this.controlsPanel.visible);
+        });
+
         // HUD elements
         createHUD(this); // Assumes you have createHUD() ready
         this.bottomBarContainer.add([coins, bank, open_shop]);
+
+        // Move them cleanly into the bottom bar layout
+        coins.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
+        bank.setPosition(coins.x + 30, 20); // 100px gap between coins and bank
+        open_shop.setPosition(bank.x + 75, 20); // 100px gap between bank and shop button
+
 
         // Main UI Container
         this.uiContainer.add([this.topBarContainer, this.bottomBarContainer]);
@@ -364,32 +376,8 @@ export default class UIScene extends Phaser.Scene {
             0xff4500
         ).setOrigin(0, 0).setScrollFactor(0);
         this.uiContainer.add(this.fireStepBar);
-        
-        // Zoom level display
-        this.zoomText = this.add.text(this.ZOOM_PERCENT_TEXT_X, this.ZOOM_PERCENT_TEXT_Y, "Zoom: 100%", {
-            fontFamily: '"Press Start 2P"',
-            fontSize: "16px",
-            fontStyle: 'normal',
-            fill: "#fff",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            padding: { x: 5, y: 5 }
-        })
-        this.uiContainer.add(this.zoomText);
 
-        this.controlsButton = this.add.text(80, 550, 'Controls', {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '14px',
-            fontStyle: 'normal',
-            fill: '#fff',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            padding: { x: 5, y: 5 },
-        })        
-        .setOrigin(0, 0)
-        .setScrollFactor(0)
-        .setInteractive();
-        this.uiContainer.add(this.controlsButton);
-
-        this.controlsPanel = this.add.container(80, 466)
+        this.controlsPanel = this.add.container(315, 455)
             .setScrollFactor(0)
             .setVisible(false);
 
@@ -409,11 +397,6 @@ export default class UIScene extends Phaser.Scene {
             );
         this.controlsPanel.add([ this.controlpanelBg, this.controlpanelText ]);
         this.uiContainer.add(this.controlsPanel);
-
-        // Hook up show/hide on click
-        this.controlsButton.on('pointerdown', () => {
-            this.controlsPanel.setVisible(!this.controlsPanel.visible);
-        });
 
         // Tile Info
         this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
@@ -491,9 +474,24 @@ export default class UIScene extends Phaser.Scene {
             }
         });
 
+        this.zoomText = this.add.text(
+            baseX + (BUTTON_SIZE + BUTTON_SPACING) * 1.75,
+            20, // same Y as zoom buttons
+            'Zoom: 100%',
+            {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '16px',
+                fontStyle: 'normal',
+                color: '#FFFFFF'
+            })
+            .setOrigin(0, 0.5)
+            .setScrollFactor(0);
+
         // Store the button references if you need later
         this.zoomInButton = zoomIn.button;
         this.zoomOutButton = zoomOut.button;
+        this.bottomBarContainer.add(this.zoomText);
+
 
         // Add drawn buttons to bottomBarContainer
         this.bottomBarContainer.add([zoomIn.button, zoomIn.buttonText, zoomOut.button, zoomOut.buttonText]);
