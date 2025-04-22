@@ -57,13 +57,6 @@ export default class UIScene extends Phaser.Scene {
 
         // Preload UI Elements
 
-        // Load zoom control assets
-        this.load.image('zoom-in', 'assets/zoom-in.png');
-        this.load.image('zoom-out', 'assets/zoom-out.png');
-
-        this.load.image('Title', 'assets/UI/Title.png')
-        this.load.image('login', 'assets/UI/login.png')
-
         // Preload Weather UI elements
         this.load.image('weather_title_closed', 'assets/UI/weather_title_closed.png')
         this.load.image('weather_title_opened', 'assets/UI/weather_title_opened.png')
@@ -85,6 +78,10 @@ export default class UIScene extends Phaser.Scene {
 
         // Create container to hold ALL UI elements
         this.uiContainer = this.add.container(0, 0);
+
+        this.topBarContainer = this.add.container(0, 0);
+
+        this.bottomBarContainer = this.add.container(0, this.scale.height - 60);
     
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
@@ -103,7 +100,6 @@ export default class UIScene extends Phaser.Scene {
         this.uiContainer.add(topBar);
     
         // Top bar container
-        this.topBarContainer = this.add.container(0, 0);
         this.topBarContainer.setDepth(10);
         this.uiContainer.add(this.topBarContainer);
     
@@ -125,12 +121,12 @@ export default class UIScene extends Phaser.Scene {
             text: 'Restart',
             fontSize: '10px',
             onClick: () => {
-              console.log("Restart clicked");
-              this.events.emit('restartGame');
+                console.log("Restart clicked");
+                this.events.emit('restartGame');
             }
-          });
-          this.topBarContainer.add([restart.button, restart.buttonText]);
-          
+        });
+        this.topBarContainer.add([restart.button, restart.buttonText]);
+
         // Create fire sart/stop button
         const fireButton = createDrawnButton(this, {
             x: 200,
@@ -150,10 +146,10 @@ export default class UIScene extends Phaser.Scene {
 
     
         // Timer Text
-        this.gameClockText.setPosition(this.SCREEN_WIDTH / 2, 20);
+        this.gameClockText.setPosition(300, 15, 'Time: 00:00');
         this.gameClockText.setStyle({
             fontFamily: '"Press Start 2P"',
-            fontSize: '12px',
+            fontSize: '14px',
             fontStyle: 'normal',
             color: '#FFFFFF'
         });
@@ -161,10 +157,10 @@ export default class UIScene extends Phaser.Scene {
         this.topBarContainer.add(this.gameClockText);
     
         // Wind Gauge and Risk Text
-        this.windGaugeBg.setPosition(600, 20);
-        this.windGaugeFill.setPosition(600, 20);
-        this.windArrow.setPosition(700, 26);
-        this.riskText.setPosition(600, 40);
+        this.windGaugeBg.setPosition(600, 30);
+        this.windGaugeFill.setPosition(600, 30);
+        this.windArrow.setPosition(700, 30);
+        this.riskText.setPosition(500, 15);
     
         this.topBarContainer.add([
             this.windGaugeBg,
@@ -173,14 +169,40 @@ export default class UIScene extends Phaser.Scene {
             this.riskText
         ]);
     
-        // Create zoom controls
+        // Bottom bar background
+        const bottomBarBg = this.add.rectangle(
+            this.scale.width / 2,
+            this.scale.height - 30,
+            this.scale.width,
+            60,
+            0x2d3436
+        ).setScrollFactor(0);
+        this.bottomBarContainer.add(bottomBarBg);
+
         this.createZoomControls();
+
+        // Controls panel
+        this.controlsButton = createDrawnButton(this, {
+            x: 200,
+            y: this.scale.height - 30,
+            width: 140,
+            height: 40,
+            backgroundColor: 0x555555,
+            hoverColor: 0x777777,
+            text: 'Controls',
+            fontSize: '10px',
+            onClick: () => console.log('Show controls')
+        });
+        this.bottomBarContainer.add([this.controlsButton.button, this.controlsButton.buttonText]);
     
         // HUD elements
-        createHUD(this);
-        this.uiContainer.add([coins, bank, open_shop]);
-    
-        // Key to doggle HUD
+        createHUD(this); // Assumes you have createHUD() ready
+        this.bottomBarContainer.add([coins, bank, open_shop]);
+
+        // Main UI Container
+        this.uiContainer.add([this.topBarContainer, this.bottomBarContainer]);
+
+        // Key to toggle HUD
         this.input.keyboard.on('keydown-U', () => {
             this.toggleUI(!this.uiContainer.visible);
         });
@@ -201,43 +223,7 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
-    }
-
-    createDrawnButton(scene, x, y, width, height, backgroundColor, hoverColor, text, fontSize, callback) {
-        // Create rectangle button
-        const button = scene.add.rectangle(x, y, width, height, backgroundColor)
-        .setOrigin(0.5)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(10);
-    
-        // Create button text
-        const buttonText = scene.add.text(x, y, text, {
-            fontFamily: '"Press Start 2P"', // ✅ correct
-            fontStyle: 'normal',
-            fontSize: '10px',
-            color: '#FFFFFF',
-            align: 'center'
-        })
-        .setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(11);
-    
-        // Hover effect
-        button.on('pointerover', () => {
-            button.setFillStyle(hoverColor);
-        });
-    
-        button.on('pointerout', () => {
-            button.setFillStyle(backgroundColor);
-        });
-    
-        // Click action
-        button.on('pointerdown', callback);
-    
-        // Return both so you can add them together into containers
-        return { button, buttonText };
-    }    
+    }   
 
     // update function
     update() {
@@ -456,85 +442,61 @@ export default class UIScene extends Phaser.Scene {
     }
     
     createZoomControls() {
-        // Add zoom buttons on the left side
         const BUTTON_SIZE = 40;
-        const BUTTON_X = 10;
-        const ZOOM_IN_Y = 320;
-        const ZOOM_OUT_Y = 370;
-        
-        // Try to create zoom buttons with images if available
-        let useImageAssets = false;
-        try {
-            if (this.textures.exists('zoom-in') && this.textures.exists('zoom-out')) {
-                useImageAssets = true;
+        const BUTTON_SPACING = 20;
+        const baseX = 40; // Start at 40px from left inside bottom bar
+        const baseY = 20; 
+
+        // Zoom In Button
+        const zoomIn = createDrawnButton(this, {
+            x: baseX,
+            y: baseY,
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            backgroundColor: 0x666666,
+            hoverColor: 0x888888,
+            text: '+',
+            fontSize: '20px',
+            onClick: () => {
+            const mapScene = this.scene.get('MapScene');
+            mapScene.currentZoom = Phaser.Math.Clamp(
+                mapScene.currentZoom + 0.1,
+                mapScene.MIN_ZOOM,
+                mapScene.MAX_ZOOM
+            );
+            mapScene.cameras.main.setZoom(mapScene.currentZoom);
+            this.handleZoomChange(mapScene.currentZoom);
             }
-        } catch (e) {
-            useImageAssets = false;
-        }
-        
-        if (useImageAssets) {
-            // Zoom in button
-            this.zoomInButton = this.add.image(BUTTON_X, ZOOM_IN_Y, 'zoom-in')
-                .setOrigin(0)
-                .setDisplaySize(BUTTON_SIZE, BUTTON_SIZE)
-                .setScrollFactor(0);
-                
-            // Zoom out button
-            this.zoomOutButton = this.add.image(BUTTON_X, ZOOM_OUT_Y, 'zoom-out')
-                .setOrigin(0)
-                .setDisplaySize(BUTTON_SIZE, BUTTON_SIZE)
-                .setScrollFactor(0);
-        } else {
-            // Fallback to rectangle buttons with text if images not available
-            // Zoom in button
-            this.zoomInButton = this.add.rectangle(BUTTON_X, ZOOM_IN_Y, BUTTON_SIZE, BUTTON_SIZE, 0x666666)
-                .setOrigin(0)
-                .setStrokeStyle(2, 0xffffff)
-                .setScrollFactor(0);
-            this.uiContainer.add(this.zoomInButton);    
-                
-            const zoom_in_text = this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_IN_Y + BUTTON_SIZE/2, "+", {
-                fontSize: "24px",
-                fill: "#fff"
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.uiContainer.add(zoom_in_text); 
-            
-            // Zoom out button
-            this.zoomOutButton = this.add.rectangle(BUTTON_X, ZOOM_OUT_Y, BUTTON_SIZE, BUTTON_SIZE, 0x666666)
-                .setOrigin(0)
-                .setStrokeStyle(2, 0xffffff)
-                .setScrollFactor(0);
-            this.uiContainer.add(this.zoomOutButton);
-                
-            const zoom_out_text = this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_OUT_Y + BUTTON_SIZE/2, "-", {
-                fontSize: "24px",
-                fill: "#fff"
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.uiContainer.add(zoom_out_text);
-        }
-        
-        // Make buttons interactive
-        this.zoomInButton.setInteractive().on('pointerdown', () => {
+        });
+
+        // Zoom Out Button
+        const zoomOut = createDrawnButton(this, {
+            x: baseX + BUTTON_SIZE + BUTTON_SPACING,
+            y: baseY,
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            backgroundColor: 0x666666,
+            hoverColor: 0x888888,
+            text: '-',
+            fontSize: '20px',
+            onClick: () => {
             const mapScene = this.scene.get('MapScene');
             mapScene.currentZoom = Phaser.Math.Clamp(
-                mapScene.currentZoom + 0.1, 
-                mapScene.MIN_ZOOM, 
+                mapScene.currentZoom - 0.1,
+                mapScene.MIN_ZOOM,
                 mapScene.MAX_ZOOM
             );
             mapScene.cameras.main.setZoom(mapScene.currentZoom);
             this.handleZoomChange(mapScene.currentZoom);
+            }
         });
-        
-        this.zoomOutButton.setInteractive().on('pointerdown', () => {
-            const mapScene = this.scene.get('MapScene');
-            mapScene.currentZoom = Phaser.Math.Clamp(
-                mapScene.currentZoom - 0.1, 
-                mapScene.MIN_ZOOM, 
-                mapScene.MAX_ZOOM
-            );
-            mapScene.cameras.main.setZoom(mapScene.currentZoom);
-            this.handleZoomChange(mapScene.currentZoom);
-        });
+
+        // Store the button references if you need later
+        this.zoomInButton = zoomIn.button;
+        this.zoomOutButton = zoomOut.button;
+
+        // Add drawn buttons to bottomBarContainer
+        this.bottomBarContainer.add([zoomIn.button, zoomIn.buttonText, zoomOut.button, zoomOut.buttonText]);
     }
 
     // Handler to update fire spread progress indicator
