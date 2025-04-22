@@ -87,6 +87,10 @@ export function createHUD(scene) {
 
      // Spawn player shop sprites
     open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
+    open_shop.setInteractive()
+    .on('pointerover', () => open_shop.setTint(0xaaaaaa))
+    .on('pointerout', () => open_shop.clearTint());
+
 
     let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
@@ -105,10 +109,10 @@ export function createHUD(scene) {
     // Add Price Tag Sprites
     let price_hose = scene.add.sprite(380, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let price_hose_text = scene.add.text(393, 170, '$150', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fontStyle: 'normal',
+        color: '#000000'
     }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
     let price_extinguisher = scene.add.sprite(620, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let price_extinguisher_text = scene.add.text(633, 170, '$25', {
