@@ -1,6 +1,10 @@
 import WebFontLoader from 'webfontloader';
 import Phaser from 'phaser';
 
+if (typeof window !== 'undefined') {
+    window.WebFont = WebFontLoader;
+}
+
 
 export default class WebFontFile extends Phaser.Loader.File {
     constructor(loader, fontNames, service = 'google') {
