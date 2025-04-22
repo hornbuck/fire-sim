@@ -210,12 +210,13 @@ export default class UIScene extends Phaser.Scene {
     
         // Create button text
         const buttonText = scene.add.text(x, y, text, {
-            fontFamily: 'Press Start 2P',
+            fontFamily: '"Press Start 2P"', // ✅ correct
             fontStyle: 'normal',
-            fontSize: '20px',
+            fontSize: '10px',
             color: '#FFFFFF',
             align: 'center'
-        }).setOrigin(0.5)
+        })
+        .setOrigin(0.5)
         .setScrollFactor(0)
         .setDepth(11);
     
