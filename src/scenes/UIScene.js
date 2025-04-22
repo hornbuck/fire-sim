@@ -1,5 +1,6 @@
 import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
+import WebFontFile from '../utils/WebFontFile.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -51,6 +52,8 @@ export default class UIScene extends Phaser.Scene {
     preload() {
         preloadHUD(this);
 
+        this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
+
         // Preload UI Elements
 
         // Load zoom control assets
@@ -58,11 +61,7 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('zoom-out', 'assets/zoom-out.png');
 
         this.load.image('Title', 'assets/UI/Title.png')
-        this.load.image('Restart Button', 'assets/UI/restartButton.png')
         this.load.image('login', 'assets/UI/login.png')
-        this.load.image('start_sim', 'assets/UI/start_sim.png');
-        this.load.image('stop_sim', 'assets/UI/stop_sim.png');
-
 
         // Preload Weather UI elements
         this.load.image('weather_title_closed', 'assets/UI/weather_title_closed.png')
@@ -81,8 +80,8 @@ export default class UIScene extends Phaser.Scene {
     }
 
     create() {
-        console.log("UIScene Created");
-    
+        console.log("UIScene Created");  
+
         // Create container to hold ALL UI elements
         this.uiContainer = this.add.container(0, 0);
     
@@ -150,10 +149,12 @@ export default class UIScene extends Phaser.Scene {
         // Timer Text
         this.gameClockText.setPosition(this.SCREEN_WIDTH / 2, 20);
         this.gameClockText.setStyle({
-            fontFamily: 'Press Start 2P',
-            fontSize: '24px',
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            fontStyle: 'normal',
             color: '#FFFFFF'
         });
+        
         this.topBarContainer.add(this.gameClockText);
     
         // Wind Gauge and Risk Text
@@ -210,7 +211,8 @@ export default class UIScene extends Phaser.Scene {
         // Create button text
         const buttonText = scene.add.text(x, y, text, {
             fontFamily: 'Press Start 2P',
-            fontSize: fontSize,
+            fontStyle: 'normal',
+            fontSize: '20px',
             color: '#FFFFFF',
             align: 'center'
         }).setOrigin(0.5)
@@ -314,13 +316,14 @@ export default class UIScene extends Phaser.Scene {
         this._createTooltip(this.windGaugeBg, 'Wind Speed & Direction');
 
         // Risk text
-        this.riskText = this.add
-        .text(this.WIND_GAUGE_X, this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT - 40, 
+        this.riskText = this.add.text(this.WIND_GAUGE_X, this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT - 40, 
             'Risk: Low', {
-        fontSize: '16px',
-        fill: '#00ff00', // start green
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: { x: 4, y: 2 }
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fill: '#00ff00', // start green
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: { x: 4, y: 2 }
         })
         .setScrollFactor(0);
         this.uiContainer.add(this.riskText);
@@ -341,54 +344,6 @@ export default class UIScene extends Phaser.Scene {
                 this.scene.start('LoginScene');
             });
         this.uiContainer.add(this.loginMenuButton);
-
-        // Restart Game button
-        this.restartButton = this.add.image(this.RESTART_BUTTON_X, this.RESTART_BUTTON_Y, 'Restart Button')
-            .setInteractive()
-            .setScale(0.20)
-            .on('pointerover', () => {  
-                this.restartButton.setTint(0x8B4513); // Apply tint on hover
-            })
-            .on('pointerout', () => {  
-                this.restartButton.clearTint(); // Clear the tint
-            })
-            .on('pointerdown', () => {
-                console.log("Restart button clicked");
-                
-                // First ensure fire simulation is stopped
-                const mapScene = this.scene.get('MapScene');
-                if (mapScene) {
-                    if (mapScene.isFireSimRunning) {
-                        mapScene.isFireSimRunning = false;
-                        this.events.emit('fireSimToggled', false);
-                    }
-                    
-                    // Clear any existing delayed calls that might interfere
-                    if (mapScene.time && mapScene.time.removeAllEvents) {
-                        mapScene.time.removeAllEvents();
-                    }
-                }
-                
-                // Add a short delay before actually restarting
-                this.time.delayedCall(100, () => {
-                    console.log("Emitting restartGame event");
-                    this.events.emit('restartGame'); // Emit event to MapScene
-                });
-            });
-        this._createTooltip(this.restartButton, 'Restart Game');
-        this.uiContainer.add(this.restartButton);
-
-
-        // Fire toggle button
-        this.fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
-            .setInteractive()
-            .setScale(0.20)
-            .on('pointerdown', () => {
-                console.log("Fire image button clicked!");
-                this.events.emit('toggleFire');
-            });
-        this._createTooltip(this.fireButton, 'Start or Stop Fire Simulation')
-        this.uiContainer.add(this.fireButton);
 
         // Game Clock
         this.gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
@@ -422,19 +377,23 @@ export default class UIScene extends Phaser.Scene {
         
         // Zoom level display
         this.zoomText = this.add.text(this.ZOOM_PERCENT_TEXT_X, this.ZOOM_PERCENT_TEXT_Y, "Zoom: 100%", {
+            fontFamily: '"Press Start 2P"',
             fontSize: "16px",
+            fontStyle: 'normal',
             fill: "#fff",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             padding: { x: 5, y: 5 }
-        }).setScrollFactor(0);
+        })
         this.uiContainer.add(this.zoomText);
 
         this.controlsButton = this.add.text(80, 550, 'Controls', {
-            fontSize: '16px',
+            fontFamily: '"Press Start 2P"',
+            fontSize: '14px',
+            fontStyle: 'normal',
             fill: '#fff',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             padding: { x: 5, y: 5 },
-        })
+        })        
         .setOrigin(0, 0)
         .setScrollFactor(0)
         .setInteractive();
@@ -448,10 +407,16 @@ export default class UIScene extends Phaser.Scene {
         this.controlpanelBg = this.add
             .rectangle(0, 0, 200, 80, 0x000000, 0.7)
             .setOrigin(0);
-        this.controlpanelText = this.add.text(10, 10,
-            'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
-            { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } }
-        );
+            this.controlpanelText = this.add.text(10, 10,
+                'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
+                { 
+                    fontFamily: '"Press Start 2P"',
+                    fontSize: '10px',
+                    fontStyle: 'normal',
+                    fill: '#fff',
+                    wordWrap: { width: 180 }
+                }
+            );
         this.controlsPanel.add([ this.controlpanelBg, this.controlpanelText ]);
         this.uiContainer.add(this.controlsPanel);
 
@@ -463,6 +428,9 @@ export default class UIScene extends Phaser.Scene {
         // Tile Info
         this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
             "Select tile", {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '14px',
+                fontStyle: 'normal',
                 fill: "#ffffff",
                 backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
                 padding: { x: 14, y: 10 },
