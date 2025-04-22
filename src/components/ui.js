@@ -1,5 +1,6 @@
 import {activate_resource, deactivate, show_tooltip, set_text} from "./DeploymentClickEvents.js";
-import { setupShop, manageShop } from "./PlayerShop.js";
+import { createNewShop } from "./PlayerShop.js";
+
 
 // Initialize player coins text object
 export let bank;
@@ -90,6 +91,12 @@ export function createHUD(scene) {
     open_shop.setInteractive()
     .on('pointerover', () => open_shop.setTint(0xaaaaaa))
     .on('pointerout', () => open_shop.clearTint());
+    
+    open_shop.on('pointerdown', () => {
+        scene.shopBackgroundFade.setVisible(true);
+        scene.shopContainer.setVisible(true);
+    });
+      
 
 
     let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
@@ -215,9 +222,7 @@ export function createHUD(scene) {
     }).setDepth(600).setVisible(false);
 
     // Load player shop
-    setupShop(scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers,
-        price_hose, price_hose_text, price_extinguisher, price_extinguisher_text, price_helicopter, price_helicopter_text, price_firetruck, price_firetruck_text, price_airtanker, 
-        price_airtanker_text, price_hotshotcrew, price_hotshotcrew_text, price_smokejumpers, price_smokejumpers_text);
+    createNewShop(scene);
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
