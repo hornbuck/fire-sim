@@ -99,6 +99,8 @@ export default class MapScene extends Phaser.Scene {
         this.selectionMarker.strokeRect(0, 0, this.TILE_SIZE, this.TILE_SIZE);
         this.selectionMarker.setVisible(false);
 
+        this.selectionMarker.setDepth(100);
+
         console.log("MapScene Create Finished");
     }
 
