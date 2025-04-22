@@ -53,7 +53,7 @@ export function createHUD(scene) {
     console.log("createHUD called");
 
     // Sidebar rectangle
-    const sidebarWidth = 100;
+    const sidebarWidth = 50;
     const sidebar = scene.add.rectangle(800 - sidebarWidth / 2, 300, sidebarWidth, 600, 0x2d3436);
     sidebar.setDepth(-1);
     console.log("Sidebar created");
@@ -76,13 +76,14 @@ export function createHUD(scene) {
     const iconSize = 0.8; // Scale of each icon
 
      // Player Coins Block to UI
-     coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
-     bank = scene.add.text(580, 560, '0', { // I NEED ADDRESSED
-         font: '24px Arial',
-         fill: '#ffffff',
-         align: 'center',
-         wordWrap: { width: 80 },
-     }).setOrigin(0.5, 0.5).setDepth(2);
+    coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
+    bank = scene.add.text(600, 560, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '16px',
+        fontStyle: 'normal',
+        color: '#ffffff'
+    })
+    .setOrigin(0.5, 0.5).setDepth(2);
 
      // Spawn player shop sprites
     open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
@@ -406,7 +407,7 @@ export function preloadHUD(scene) {
     });
 
     // Load smokejumpers spritesheet (Part 1 of 2)
-     scene.load.spritesheet('set-smokejumpers', 'assets//64x64-Map-Tiles/Deployable%20Resources/smokejumpers.png', {
+    scene.load.spritesheet('set-smokejumpers', 'assets//64x64-Map-Tiles/Deployable%20Resources/smokejumpers.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });
