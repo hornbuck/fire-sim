@@ -116,13 +116,33 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
 }
 
 // Notification to player that they are out of specified asset
-export function show_notification (scene, notification) {
-     
-    notification.setVisible(true);
-    
-    scene.time.delayedCall(1000, () => {
-         notification.setVisible(false);
-     });
+export function show_notification (scene, target, message = null) {
+    // Case 1: target is a text object + message provided
+    if (target?.setText && message = null) {
+        target.setText(message).setVisible(true);
+        scene.time.delayedCall(2000, () => target.setVisible(false));
+    }
+
+    // Case 2: target is just a message string (fallback mode)
+    else if (typeof target === 'string') {
+        if (!scene.fallbackNotificationText) {
+            scene.fallbackNotificationText = scene.add.text(
+                scene.scale.width / 2,
+                scene.scale.height - 30,
+                '',
+                {
+                    fontFamily: '"Press Start 2P"',
+                    fontSize: '10px',
+                    color: '#ff5555',
+                    backgroundColor: '#000000',
+                    padding: { x: 10, y: 4 },
+                }
+            ).setOrigin(0.5).setDepth(999).setScrollFactor(0).setVisible(false);
+        }
+
+        scene.fallbackNotificationText.setText(target).setVisible(true);
+        scene.time.delayedCall(2000, () => scene.fallbackNotificationText.setVisible(false));
+    }
 }
 
 // This function allows the player to deploy an asset
