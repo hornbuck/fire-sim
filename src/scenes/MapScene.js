@@ -37,6 +37,7 @@ export default class MapScene extends Phaser.Scene {
         // Camera state variables
         this.currentZoom = 1;
         this.isPanning = false;
+        this.panVector = { x:0, y:0 };
 
         // Player's score
         this.score = 0;
@@ -112,6 +113,10 @@ export default class MapScene extends Phaser.Scene {
         console.log("Setting up MapScene event listeners");
         this.scene.get('UIScene').events.on('toggleFire', this.toggleFireSimulation, this);
         this.scene.get('UIScene').events.on('restartGame', this.initializeMap, this);
+
+        const ui = this.scene.get('UIScene');
+        ui.events.on('panStart', this.onPanStart, this);
+        ui.events.on('panStop',  this.onPanStop,  this);
     }
     
     setupCameraControls() {
@@ -171,50 +176,50 @@ export default class MapScene extends Phaser.Scene {
             }
         });
         
-        // Set up panning with middle mouse button or right mouse button
-        this.input.on('pointerdown', (pointer) => {
-            // Only start panning with middle or right button and if pointer is in map area
-            if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < viewportWidth) {
-                this.isPanning = true;
-                this.lastPanPosition = { x: pointer.x, y: pointer.y };
+        // // Set up panning with middle mouse button or right mouse button
+        // this.input.on('pointerdown', (pointer) => {
+        //     // Only start panning with middle or right button and if pointer is in map area
+        //     if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < viewportWidth) {
+        //         this.isPanning = true;
+        //         this.lastPanPosition = { x: pointer.x, y: pointer.y };
                 
-                // Change cursor to grabbing
-                this.input.setDefaultCursor('grabbing');
-            }
-        });
+        //         // Change cursor to grabbing
+        //         this.input.setDefaultCursor('grabbing');
+        //     }
+        // });
         
-        this.input.on('pointermove', (pointer) => {
-            if (this.isPanning) {
-                // Calculate the difference since last position
-                const deltaX = pointer.x - this.lastPanPosition.x;
-                const deltaY = pointer.y - this.lastPanPosition.y;
+        // this.input.on('pointermove', (pointer) => {
+        //     if (this.isPanning) {
+        //         // Calculate the difference since last position
+        //         const deltaX = pointer.x - this.lastPanPosition.x;
+        //         const deltaY = pointer.y - this.lastPanPosition.y;
                 
-                // Move the camera
-                this.cameras.main.scrollX -= deltaX / this.currentZoom;
-                this.cameras.main.scrollY -= deltaY / this.currentZoom;
+        //         // Move the camera
+        //         this.cameras.main.scrollX -= deltaX / this.currentZoom;
+        //         this.cameras.main.scrollY -= deltaY / this.currentZoom;
                 
-                // Update last position
-                this.lastPanPosition = { x: pointer.x, y: pointer.y };
-            }
-        });
+        //         // Update last position
+        //         this.lastPanPosition = { x: pointer.x, y: pointer.y };
+        //     }
+        // });
         
-        this.input.on('pointerup', () => {
-            if (this.isPanning) {
-                this.isPanning = false;
-                this.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
-            }
-        });
+        // this.input.on('pointerup', () => {
+        //     if (this.isPanning) {
+        //         this.isPanning = false;
+        //         this.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
+        //     }
+        // });
         
-        // Keyboard controls for panning (WASD or arrow keys)
-        this.cursors = this.input.keyboard.createCursorKeys();
+        // // Keyboard controls for panning (WASD or arrow keys)
+        // this.cursors = this.input.keyboard.createCursorKeys();
         
-        // Add WASD keys
-        this.wasd = {
-            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-        };
+        // // Add WASD keys
+        // this.wasd = {
+        //     up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+        //     down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+        //     left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+        //     right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+        // };
         
         // Add zoom keys
         this.zoomKeys = {
@@ -666,17 +671,28 @@ handleTileClick(pointer) {
             }
         }
     }
+
+    onPanStart(dir) {
+        this.panVector = dir;
+      }
+    
+      onPanStop() {
+        this.panVector = { x: 0, y: 0 };
+    }
     
     handleCameraControls(delta) {
         // Adjust camera speed based on zoom level
         const adjustedSpeed = this.CAMERA_SPEED / this.currentZoom;
         
         // Calculate camera movement based on keyboard input
-        const moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
-                      ((this.cursors.right.isDown || this.wasd.right.isDown) ? adjustedSpeed : 0);
+        // let moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
+        //               ((this.cursors.right.isDown || this.wasd.right.isDown) ? adjustedSpeed : 0);
         
-        const moveY = ((this.cursors.up.isDown || this.wasd.up.isDown) ? -adjustedSpeed : 0) +
-                      ((this.cursors.down.isDown || this.wasd.down.isDown) ? adjustedSpeed : 0);
+        // let moveY = ((this.cursors.up.isDown || this.wasd.up.isDown) ? -adjustedSpeed : 0) +
+        //               ((this.cursors.down.isDown || this.wasd.down.isDown) ? adjustedSpeed : 0);
+
+        let moveX = 0;
+        let moveY = 0;
         
         // Move camera
         if (moveX !== 0 || moveY !== 0) {
@@ -695,6 +711,15 @@ handleTileClick(pointer) {
             this.currentZoom = Phaser.Math.Clamp(this.currentZoom - 0.01, this.MIN_ZOOM, this.MAX_ZOOM);
             this.cameras.main.setZoom(this.currentZoom);
             zoomChanged = true;
+        }
+
+        moveX += this.panVector.x * adjustedSpeed;
+        moveY += this.panVector.y * adjustedSpeed;
+
+        // apply it:
+        if (moveX || moveY) {
+        this.cameras.main.scrollX += moveX;
+        this.cameras.main.scrollY += moveY;
         }
         
         if (zoomChanged) {
