@@ -1,7 +1,7 @@
 // *** The functions below allow external files to change and access ***
 // *** the number of firefighting assets the player has access to.   ***
 
-//* Number Limits
+//* Asset Limits
 export let hose = 10;
 export let extinguisher = 5;
 export let helicopter = 3;

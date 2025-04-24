@@ -64,7 +64,28 @@ export default class Map {
             }
         });
 
-        // Step 3: Apply Cellular Automata to refine terrain transitions
+        // Step 3: Generate 200 random houses for the player to protect
+        let counter = 0;
+        let x = 0;
+        let y = 0;
+        for (let counter = 0; counter < 200; counter++) {
+            x = Math.floor(Math.random() * (99 - 1) + 1);
+            y = Math.floor(Math.random() * (99 - 1) + 1);
+
+            // Blend in with surrounding terrain
+            if (grid[y][x].terrain === "shrub") {
+                grid[y][x] = new TerrainTile(x, y, "sand-house");
+            } else if (grid[y][x].terrain === "tree") {
+                grid[y][x] = new TerrainTile(x, y, "dirt-house");
+            } else if (grid[y][x].terrain === "grass") {
+                grid[y][x] = new TerrainTile(x, y, "grass-house");
+            }
+            else if (grid[y][x].terrain === "water") {
+                --counter;
+            }
+        }
+
+        // Step 4: Apply Cellular Automata to refine terrain transitions
         return CellularAutomata.apply(grid);
     }    
 
@@ -76,13 +97,14 @@ export default class Map {
 getTerrainFromNoise(value) {
     let terrain = 'shrub'; // Default to shrub
 
+    
     if (value < 0.2) {
         terrain = 'water';
     } else if (value < 0.4) { // Use "else if" instead of "elif"
         terrain = 'tree';
     } else if (value < 0.7) { // Corrected this condition
         terrain = 'grass';
-    } 
+    }
 
     // console.log(`Noise: ${value}, Terrain: ${terrain}`);
 

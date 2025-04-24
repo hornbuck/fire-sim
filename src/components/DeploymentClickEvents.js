@@ -2,6 +2,7 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import { all_assets, bank, n_cooldown, out_hoses, out_extinguishers, out_helicopters, out_firetrucks, out_airtankers, out_hotshots, out_smokejumpers } from './ui.js';
 import { t_hose, t_extinguisher, t_firetruck, t_helicopter, t_airtanker, t_hotshotcrew, t_smokejumpers_plane, t_smokejumpers_ground } from '../components/AnimatedSprites.js';
 import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setHelicopter, getFiretruck, setFiretruck, getAirtanker, setAirtanker, getHotshotCrew, setHotshotCrew, getSmokejumpers, setSmokejumpers} from "./assetValues.js";
+import { paused } from '../scenes/MapScene.js';
 
 // Global vars to track which technique is currently active and whether their cooldown is active
 export let technique = "";
@@ -89,7 +90,7 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
         "pointerdown",
         function (pointer, localX, localY, event) {
             // Activates a resource on click if none are active
-            if (activated_resource === "none") {
+            if (activated_resource === "none" && !paused) {
                 resource.setTexture('active-' + resourceName +'');
                 scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
                 technique = techniqueNameON;
@@ -97,7 +98,7 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
                 mode = "deployment";
             } else {
                 // Deactive clicked asset if it's already active
-                if (activated_resource === resourceName) {
+                if (activated_resource === resourceName && !paused) {
                     deactivate(all_assets);
                     resource.setTexture(resourceName);
                     technique = techniqueNameOFF;
@@ -105,12 +106,14 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
                     activated_resource == "none";
                     mode = "cursor";
                 } else { // Deactivate old asset and activate new asset if a different one is clicked
-                    deactivate(all_assets);
-                    resource.setTexture('active-' + resourceName +'');
-                    scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
-                    technique = techniqueNameON;
-                    activated_resource = `${resourceName}`;
-                    mode = "deployment";
+                    if (!paused) {
+                        deactivate(all_assets);
+                        resource.setTexture('active-' + resourceName +'');
+                        scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
+                        technique = techniqueNameON;
+                        activated_resource = `${resourceName}`;
+                        mode = "deployment";
+                    }
                 }
             }
         },
@@ -145,7 +148,8 @@ export function use_resource (scene, x, y, fireSprite) {
     let asset = new AnimatedSprite(3);
 
     // Deploy animations
-    if (activated_resource === "hose") {
+    if (activated_resource === "hose" && !paused) {
+        console.log(paused);
         if (getHose() > 0) {
             if (cooldown[0] == 0) {
                 setHose(-1);
@@ -168,7 +172,7 @@ export function use_resource (scene, x, y, fireSprite) {
             show_notification(scene, out_hoses);
         }
     }
-    if (activated_resource === "extinguisher") {
+    if (activated_resource === "extinguisher" && !paused) {
         if (getExtinguisher() > 0) {
             if (cooldown[1] == 0) {
                 setExtinguisher(-1);
@@ -192,7 +196,7 @@ export function use_resource (scene, x, y, fireSprite) {
             show_notification(scene, out_extinguishers);
         }
     }
-    if (activated_resource === "helicopter") {
+    if (activated_resource === "helicopter" && !paused) {
         if (getHelicopter() > 0) {
           if (cooldown[2] === 0) {
             setHelicopter(-1);
@@ -243,7 +247,7 @@ export function use_resource (scene, x, y, fireSprite) {
         }
       }
       
-    if (activated_resource === "firetruck") {
+    if (activated_resource === "firetruck" && !paused) {
         if (getFiretruck() > 0) {
             if (cooldown[3] == 0) {
                 setFiretruck(-1);
@@ -267,7 +271,7 @@ export function use_resource (scene, x, y, fireSprite) {
         }
     }
 
-    if (activated_resource === "airtanker") {
+    if (activated_resource === "airtanker" && !paused) {
         if (getAirtanker() > 0) {
         if (cooldown[4] == 0) {
             setAirtanker(-1);
@@ -307,7 +311,7 @@ export function use_resource (scene, x, y, fireSprite) {
         show_notification(scene, out_airtankers);
         }
     }
-    if (activated_resource === "hotshot-crew") {
+    if (activated_resource === "hotshot-crew" && !paused) {
         if (getHotshotCrew() > 0) {
             if (cooldown[5] == 0) {
                 setHotshotCrew(-1);
@@ -330,7 +334,7 @@ export function use_resource (scene, x, y, fireSprite) {
             show_notification(scene, out_hotshots);
         }
     }
-    if (activated_resource === "smokejumper") {
+    if (activated_resource === "smokejumper" && !paused) {
         if (getSmokejumpers() > 0) {
             if (cooldown[6] == 0) {
                 setSmokejumpers(-1);
