@@ -3,6 +3,10 @@ import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
 import { use_resource, activated_resource, mode } from '../components/DeploymentClickEvents.js';
+import { bank } from "../components/ui.js";
+import { getCoins, setCoins } from "../components/DeploymentClickEvents.js";
+
+export let paused = true;
 
 export default class MapScene extends Phaser.Scene {
     constructor() {
@@ -50,6 +54,9 @@ export default class MapScene extends Phaser.Scene {
         this.load.image('grass', 'assets/64x64-Map-Tiles/grass.png');
         this.load.image('shrub', 'assets/64x64-Map-Tiles/Shrubs/shrubs-on-sand.png');
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
+        this.load.image('dirt-house', 'assets/64x64-Map-Tiles/dirt-house.png');
+        this.load.image('sand-house', 'assets/64x64-Map-Tiles/sand-house.png');
+        this.load.image('grass-house', 'assets/64x64-Map-Tiles/grass-house.png');
         
         // Preload burned terrain assets
         this.load.image('burned-grass', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass.png');
@@ -330,6 +337,13 @@ export default class MapScene extends Phaser.Scene {
             pixelWidth: this.mapPixelWidth,
             pixelHeight: this.mapPixelHeight
         });
+
+        
+        // Set player coins in bank to 0
+        if (this.scene.isActive('UIScene')) {  
+            setCoins(getCoins());
+            bank.setText(`${getCoins()}`);
+        }
     }
 
     renderMap(map, tileSize) {
@@ -600,6 +614,7 @@ handleTileClick(pointer) {
         console.log("Toggle fire simulation called");
         this.isFireSimRunning = !this.isFireSimRunning;
         console.warn(`Fire Simulation ${this.isFireSimRunning ? "Started" : "Stopped"}`);
+        paused = !this.isFireSimRunning; // stops the player from using assets when the game is paused
         
         // Notify UIScene
         this.events.emit('fireSimToggled', this.isFireSimRunning);
