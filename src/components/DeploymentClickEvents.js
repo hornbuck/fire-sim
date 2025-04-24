@@ -118,7 +118,7 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
 // Notification to player that they are out of specified asset
 export function show_notification (scene, target, message = null) {
     // Case 1: target is a text object + message provided
-    if (target?.setText && message = null) {
+    if (target?.setText && message === null) {
         target.setText(message).setVisible(true);
         scene.time.delayedCall(2000, () => target.setVisible(false));
     }
@@ -224,31 +224,31 @@ export function use_resource (scene, x, y, fireSprite) {
               [ 1,  0],  // east
               [-1,  0],  // west
             ];
-      
+
             deltas.forEach(([dx, dy]) => {
-              const nx = tileX + dx;
-              const ny = tileY + dy;
-              if (
-                nx >= 0 && nx < mapScene.map.width &&
-                ny >= 0 && ny < mapScene.map.height
-              ) {
+                const nx = tileX + dx;
+                const ny = tileY + dy;
+                if (
+                    nx >= 0 && nx < mapScene.map.width &&
+                    ny >= 0 && ny < mapScene.map.height
+                ) {
                 const neighbor = mapScene.map.grid[ny][nx];
                 if (neighbor && neighbor.sprite) {
-                  mapScene.events.emit('extinguishFire', neighbor.sprite);
+                    mapScene.events.emit('extinguishFire', neighbor.sprite);
                 }
-              }
+            }
             });
-      
+
             bank.setText(`${coins}`);
-          });
+        });
           // =============================================
-      
+
         } else {
-          console.log("Sorry! You ran out!");
-          show_notification(scene, out_helicopters);
+            console.log("Sorry! You ran out!");
+            show_notification(scene, out_helicopters);
         }
-      }
-      
+    }
+
     if (activated_resource === "firetruck") {
         if (getFiretruck() > 0) {
             if (cooldown[3] == 0) {
