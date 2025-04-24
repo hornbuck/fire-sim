@@ -2,7 +2,7 @@ import Map from '../components/MapGenerator.js';
 import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
-import { use_resource, activated_resource } from '../components/DeploymentClickEvents.js';
+import { use_resource, activated_resource, mode } from '../components/DeploymentClickEvents.js';
 
 export default class MapScene extends Phaser.Scene {
     constructor() {
@@ -37,6 +37,9 @@ export default class MapScene extends Phaser.Scene {
         // Camera state variables
         this.currentZoom = 1;
         this.isPanning = false;
+
+        // Player's score
+        this.score = 0;
     }
 
     preload() {
@@ -395,14 +398,7 @@ handleTileClick(pointer) {
         screenX: pointer.x,
         screenY: pointer.y
     });
-
-    // DEPLOY LOGIC:
-    // - Hotshot crews can cut line on any (unburnt or burnt) tile
-    // - All other tools only work on burning tiles
-    if (activated_resource === 'hotshot-crew'
-        || clickedTile.burnStatus === 'burning') {
-        use_resource(this, pointer.x, pointer.y, clickedTile.sprite);
-    }
+  
 }
 
 
@@ -576,21 +572,29 @@ handleTileClick(pointer) {
         console.log("Simulated initial non-burning fire burst.");
     }
     
-
     updateFireSpread() {
-        const spreadCount = this.fireSpread.simulateFireStep();
+        // returns how many tiles WERE burning
+        const activeFires = this.fireSpread.simulateFireStep();
 
-        // Only update burning tiles that need visual effects
-        this.map.grid.forEach((row) => {
-            row.forEach((tile) => {
+        if (activeFires === 0) {
+            console.log("You win!");
+            this.isFireSimRunning = false;
+            this.events.emit('fireSimToggled', false);
+            return;
+        }
+
+        // if still fires, just make sure any newly burning tiles get their flame sprite:
+        this.map.grid.forEach(row =>
+            row.forEach(tile => {
                 if (tile.burnStatus === "burning" && !tile.fireS) {
-                    let blaze = new AnimatedSprite(3);
+                    const blaze = new AnimatedSprite(3);
                     blaze.lightFire(this, tile.sprite, this.flameGroup);
                     tile.fireS = blaze;
                 }
-            });
-        });
+            })
+        );
     }
+
 
     toggleFireSimulation() {
         console.log("Toggle fire simulation called");
@@ -710,6 +714,8 @@ handleTileClick(pointer) {
             if (tile) {
                 // Update burn status
                 tile.burnStatus = 'extinguished';
+                this.score += 1;
+                console.log("Score: ", this.score);
                 
                 // Update tile terrain in order to show extinguished sprite
                 if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
