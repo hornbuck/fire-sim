@@ -217,16 +217,16 @@ export default class MapScene extends Phaser.Scene {
         //     }
         // });
         
-        // // Keyboard controls for panning (WASD or arrow keys)
-        // this.cursors = this.input.keyboard.createCursorKeys();
+        // Keyboard controls for panning (WASD or arrow keys)
+        this.cursors = this.input.keyboard.createCursorKeys();
         
-        // // Add WASD keys
-        // this.wasd = {
-        //     up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-        //     down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-        //     left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        //     right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-        // };
+        // Add WASD keys
+        this.wasd = {
+            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+        };
         
         // Add zoom keys
         this.zoomKeys = {
