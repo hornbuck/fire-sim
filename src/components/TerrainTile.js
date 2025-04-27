@@ -8,11 +8,13 @@ export default class TerrainTile {
     static FUEL_TREE = 6;
     static FLAM_WATER = 0;
     static FUEL_WATER = 0;
+    static FLAM_HOUSE = 5;
+    static FUEL_HOUSE = 8;
 
     constructor(x, y, terrain) {
         this.x = x;          // Tile's X coordinate in the grid
         this.y = y;          // Tile's Y coordinate in the grid
-        this.terrain = terrain;  // Terrain type (grass, shrub, tree, water)
+        this.terrain = terrain;  // Terrain type (grass, shrub, tree, water, house)
         this.burnStatus = "unburned"; // Burn status: unburned, burning, burnt
         this._crownFired = false; // Track if tree has had crown fire burst
 
@@ -30,6 +32,7 @@ export default class TerrainTile {
             shrub: { flammability: TerrainTile.FLAM_SHRUB, fuel: TerrainTile.FUEL_SHRUB },
             tree:  { flammability: TerrainTile.FLAM_TREE, fuel: TerrainTile.FUEL_TREE },
             water: { flammability: TerrainTile.FLAM_WATER, fuel: TerrainTile.FUEL_WATER },
+            house: { flammability: TerrainTile.FLAM_HOUSE, fuel: TerrainTile.FUEL_HOUSE},
         };
         return terrainData[terrain] || { flammability: 0, fuel: 0 }; // Default to no flammability for unknown terrains
     }

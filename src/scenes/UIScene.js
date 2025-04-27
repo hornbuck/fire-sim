@@ -67,6 +67,7 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('wind_2arrow', 'assets/UI/wind_2arrow.png')
         this.load.image('wind_3arrow', 'assets/UI/wind_3arrow.png')
         this.load.image('wind-arrow', 'assets/UI/north.png')
+        this.load.image('north', 'assets/UI/north.png')
         this.load.image('east', 'assets/UI/east.png')
         this.load.image('south', 'assets/UI/south.png')
         this.load.image('west', 'assets/UI/west.png')
@@ -473,6 +474,29 @@ export default class UIScene extends Phaser.Scene {
             this.handleZoomChange(mapScene.currentZoom);
             }
         });
+        // UIScene.js → inside createUIElements(), after zoom controls :contentReference[oaicite:0]{index=0}&#8203;:contentReference[oaicite:1]{index=1}
+        const PAD_X = 50, PAD_Y = this.SCREEN_HEIGHT - 100;
+        const SIZE = 32;
+
+        const arrows = {
+        up:    this.add.image(PAD_X + SIZE, PAD_Y - SIZE,  'north'),
+        down:  this.add.image(PAD_X + SIZE, PAD_Y + SIZE,  'south'),
+        left:  this.add.image(PAD_X,        PAD_Y,        'west'),
+        right: this.add.image(PAD_X + SIZE*2, PAD_Y,      'east')
+        };
+        for (let dir in arrows) {
+        arrows[dir]
+            .setDisplaySize(SIZE, SIZE)
+            .setScrollFactor(0)
+            .setInteractive()
+            // when pressed, tell MapScene to start panning that direction:
+            .on('pointerdown', () => this.events.emit('panStart', { x: dir==='left'? -1 : dir==='right'? 1 : 0,
+                                                                    y: dir==='up'? -1 : dir==='down'? 1 : 0 }))
+            // when released (or pointerout), stop panning:
+            .on('pointerup',   () => this.events.emit('panStop'))
+            .on('pointerout',  () => this.events.emit('panStop'));
+        }
+
 
         this.zoomText = this.add.text(
             baseX + (BUTTON_SIZE + BUTTON_SPACING) * 1.75,

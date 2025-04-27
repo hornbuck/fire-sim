@@ -45,8 +45,8 @@ export default class AnimatedSprite {
             console.log("Fire animation already exists.");
         }
     
-        let fireSprite = scene.add.sprite(sprite.x + 16, sprite.y, 'fire-blaze')
-            .setDepth(1)
+        let fireSprite = scene.add.sprite(sprite.x + 32, sprite.y, 'fire-blaze')
+            .setDepth(900)
             .setScale(0.75);
     
         console.log("Fire sprite created:", fireSprite);
@@ -123,7 +123,7 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let hoseSprite = scene.add.sprite(x + 30, y + 10, 'set-hose').setDepth(1).setScale(1.0, 1.0);
+        let hoseSprite = scene.add.sprite(x + 40, y + 32, 'set-hose').setDepth(1000).setScale(1.5, 1.5);
         hoseSprite.play('hoseAnimConfig');
         scene.time.delayedCall(t_hose, () => {
             hoseSprite.destroy();
@@ -151,7 +151,7 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let cloudSprite = scene.add.sprite(x, y, 'set-extinguisher').setDepth(1).setScale(0.75, 0.75);
+        let cloudSprite = scene.add.sprite(x, y + 32, 'set-extinguisher').setDepth(1000).setScale(0.75, 0.75);
         cloudSprite.play('extinguisherAnimConfig');
         scene.time.delayedCall(t_extinguisher, () => {
             cloudSprite.destroy();
@@ -175,7 +175,7 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let truckSprite = scene.add.sprite(x + 40, y, 'set-firetruck').setDepth(1).setScale(1.3, 1.3);
+        let truckSprite = scene.add.sprite(x + 40, y + 32, 'set-firetruck').setDepth(1000).setScale(1.3, 1.3);
         truckSprite.play('firetruckAnimConfig');
         scene.time.delayedCall(t_firetruck, () => {
             truckSprite.destroy();
@@ -201,7 +201,7 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let helicopterSprite = scene.add.sprite(x, y - 40, 'set-helicopter').setDepth(1).setScale(1.5, 1.5);
+        let helicopterSprite = scene.add.sprite(x, y - 40, 'set-helicopter').setDepth(1000).setScale(1.5, 1.5);
         helicopterSprite.play('helicopterAnimConfig');
         scene.time.delayedCall(t_helicopter, () => {
             helicopterSprite.destroy();
@@ -228,7 +228,7 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let airtankerSprite = scene.add.sprite(x, y - 40, 'set-airtanker').setDepth(1).setScale(2.5, 2.5);
+        let airtankerSprite = scene.add.sprite(x, y - 40, 'set-airtanker').setDepth(1000).setScale(4.5, 4.5);
         airtankerSprite.play('airtankerAnimConfig');
         scene.time.delayedCall(t_airtanker, () => {
             airtankerSprite.destroy();
@@ -255,7 +255,7 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let airtankerSprite = scene.add.sprite(x + 40, y, 'set-hotshot').setDepth(1).setScale(1.0, 1.0);
+        let airtankerSprite = scene.add.sprite(x + 40, y + 28, 'set-hotshot').setDepth(1000).setScale(1.1, 1.1);
         airtankerSprite.play('hotshotAnimConfig');
         scene.time.delayedCall(t_hotshotcrew, () => {
             airtankerSprite.destroy();
@@ -289,12 +289,12 @@ export default class AnimatedSprite {
         });
 
         // Play animation
-        let smokejumpersSprite = scene.add.sprite(x, y - 40, 'set-smokejumpers').setDepth(1).setScale(1.0, 1.0);
+        let smokejumpersSprite = scene.add.sprite(x, y - 40, 'set-smokejumpers').setDepth(1000).setScale(2.0, 2.0);
 
         smokejumpersSprite.play('smokejumpersAnimConfig');
         scene.time.delayedCall(t_smokejumpers_plane, () => {
             smokejumpersSprite.destroy();
-            let smokejumpersGroundSprite = scene.add.sprite(x, y, 'set-smokejumpers-dig').setDepth(2).setScale(0.5, 0.5);
+            let smokejumpersGroundSprite = scene.add.sprite(x, y, 'set-smokejumpers-dig').setDepth(2).setScale(1.0, 1.0);
             smokejumpersGroundSprite.play('smokejumpersGroundAnimConfig');
             scene.time.delayedCall(t_smokejumpers_ground, () => {
                 smokejumpersGroundSprite.destroy();

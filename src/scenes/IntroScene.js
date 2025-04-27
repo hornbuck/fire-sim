@@ -45,8 +45,7 @@ export default class IntroScene extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive();
 
         startText.on('pointerdown', () => {
-            this.scene.start('MapScene');
-            this.scene.launch('UIScene');
+            this.scene.start('MenuScene');
         });
 
         // Add subtle fade animation for text

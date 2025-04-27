@@ -25,26 +25,31 @@ class FireSpread {
      * @returns {void} This method does not return any value. It updates the grid by spreading fire to adjacent tiles.
      */
     simulateFireStep() {
-        const burningTiles = []; // Store tiles that were burning at start
-    
+        const burningTiles = [];
         for (let y = 0; y < this.map.height; y++) {
             for (let x = 0; x < this.map.width; x++) {
                 const tile = this.map.grid[y][x];
-    
                 if (tile.burnStatus === "burning") {
-                    burningTiles.push({ tile, x, y }); // Collect tiles that were burning
+                    burningTiles.push({ tile, x, y });
                 }
             }
         }
-    
+
+        // no active files -> return 0
+        if (burningTiles.length === 0) {
+            return 0;
+        }
+
+        // otherwise spread fire as before
         let spreadCount = 0;
-    
-        // Process only tiles that were burning at the start of this step
         burningTiles.forEach(({ tile, x, y }) => {
             spreadCount += this.processBurningTile(tile, this.map.grid, x, y);
         });
-    
+
+        // See if there were any fires for win-checking
+        return burningTiles.length;
     }
+
     
 
     /**

@@ -2,10 +2,12 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import { all_assets, bank, n_cooldown, out_hoses, out_extinguishers, out_helicopters, out_firetrucks, out_airtankers, out_hotshots, out_smokejumpers } from './ui.js';
 import { t_hose, t_extinguisher, t_firetruck, t_helicopter, t_airtanker, t_hotshotcrew, t_smokejumpers_plane, t_smokejumpers_ground } from '../components/AnimatedSprites.js';
 import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setHelicopter, getFiretruck, setFiretruck, getAirtanker, setAirtanker, getHotshotCrew, setHotshotCrew, getSmokejumpers, setSmokejumpers} from "./assetValues.js";
+import { paused } from '../scenes/MapScene.js';
 
 // Global vars to track which technique is currently active and whether their cooldown is active
 export let technique = "";
 export let activated_resource = "none";
+export let mode = "cursor";
 
 export let dropDirection = 'horizontal'; // default
 
@@ -82,23 +84,38 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
     console.log(`Resource Activated: ${resourceName}`)
     resource.setInteractive();
 
-    let active = true;
-
     // When water hose is clicked (activated), the cursor is replaced with water and fire sprites can be destroyed.
     // When water hose is deactivated, fire sprites can no longer be destroyed.
     resource.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
-            if (active === true) {
-                // Check for already-activated resources
-                deactivate(all_assets);
-
+            // Activates a resource on click if none are active
+            if (activated_resource === "none" && !paused) {
                 resource.setTexture('active-' + resourceName +'');
                 scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
                 technique = techniqueNameON;
                 activated_resource = `${resourceName}`;
-                
-            } 
+                mode = "deployment";
+            } else {
+                // Deactive clicked asset if it's already active
+                if (activated_resource === resourceName && !paused) {
+                    deactivate(all_assets);
+                    resource.setTexture(resourceName);
+                    technique = techniqueNameOFF;
+                    scene.input.setDefaultCursor('url('+ OFFcursorURL +'), pointer');
+                    activated_resource == "none";
+                    mode = "cursor";
+                } else { // Deactivate old asset and activate new asset if a different one is clicked
+                    if (!paused) {
+                        deactivate(all_assets);
+                        resource.setTexture('active-' + resourceName +'');
+                        scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
+                        technique = techniqueNameON;
+                        activated_resource = `${resourceName}`;
+                        mode = "deployment";
+                    }
+                }
+            }
         },
         this
     );
@@ -151,7 +168,8 @@ export function use_resource (scene, x, y, fireSprite) {
     let asset = new AnimatedSprite(3);
 
     // Deploy animations
-    if (activated_resource === "hose") {
+    if (activated_resource === "hose" && !paused) {
+        console.log(paused);
         if (getHose() > 0) {
             if (cooldown[0] == 0) {
                 setHose(-1);
@@ -174,7 +192,7 @@ export function use_resource (scene, x, y, fireSprite) {
             show_notification(scene, out_hoses);
         }
     }
-    if (activated_resource === "extinguisher") {
+    if (activated_resource === "extinguisher" && !paused) {
         if (getExtinguisher() > 0) {
             if (cooldown[1] == 0) {
                 setExtinguisher(-1);
@@ -198,7 +216,7 @@ export function use_resource (scene, x, y, fireSprite) {
             show_notification(scene, out_extinguishers);
         }
     }
-    if (activated_resource === "helicopter") {
+    if (activated_resource === "helicopter" && !paused) {
         if (getHelicopter() > 0) {
           if (cooldown[2] === 0) {
             setHelicopter(-1);
@@ -247,9 +265,9 @@ export function use_resource (scene, x, y, fireSprite) {
             console.log("Sorry! You ran out!");
             show_notification(scene, out_helicopters);
         }
-    }
-
-    if (activated_resource === "firetruck") {
+      }
+      
+    if (activated_resource === "firetruck" && !paused) {
         if (getFiretruck() > 0) {
             if (cooldown[3] == 0) {
                 setFiretruck(-1);
@@ -273,7 +291,7 @@ export function use_resource (scene, x, y, fireSprite) {
         }
     }
 
-    if (activated_resource === "airtanker") {
+    if (activated_resource === "airtanker" && !paused) {
         if (getAirtanker() > 0) {
         if (cooldown[4] == 0) {
             setAirtanker(-1);
@@ -313,56 +331,30 @@ export function use_resource (scene, x, y, fireSprite) {
         show_notification(scene, out_airtankers);
         }
     }
-    if (activated_resource === "hotshot-crew") {
-    if (getHotshotCrew() > 0) {
-        if (cooldown[5] === 0) {
-        setHotshotCrew(-1);
-        asset.useHotshotCrew(scene, x, y, fireSprite);
-        asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
-        coins += 300;
+    if (activated_resource === "hotshot-crew" && !paused) {
+        if (getHotshotCrew() > 0) {
+            if (cooldown[5] == 0) {
+                setHotshotCrew(-1);
+                asset.useHotshotCrew(scene, x, y, fireSprite);
+                asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
+                coins += 300;
+            } else {
+                show_notification(scene, n_cooldown);
+            }
+
+            scene.time.delayedCall(t_hotshotcrew, () => {
+                scene.events.emit('extinguishFire', fireSprite);
+                bank.setText(`${coins}`);
+            })
+
         } else {
-        show_notification(scene, n_cooldown);
+            console.log("Sorry! You ran out!");
+
+            // Notification to player that they are out of hotshot crews
+            show_notification(scene, out_hotshots);
         }
-
-        // ==== DEFENSIVE LINE: carve through 5 tiles of unburnt terrain ====
-        scene.time.delayedCall(t_hotshotcrew, () => {
-        const mapScene = scene.scene.get('MapScene');
-        const size    = mapScene.TILE_SIZE;
-        const tileX   = Math.floor(fireSprite.x / size);
-        const tileY   = Math.floor(fireSprite.y / size);
-
-        for (let i = -2; i <= 2; i++) {
-            const nx = tileX + (dropDirection === 'horizontal' ? i : 0);
-            const ny = tileY + (dropDirection === 'vertical'   ? i : 0);
-
-            if (
-            nx >= 0 && nx < mapScene.map.width &&
-            ny >= 0 && ny < mapScene.map.height
-            ) {
-            const tile = mapScene.map.grid[ny][nx];
-            // only cut through normal, unburnt terrain
-            if (tile.burnStatus === 'unburned') {
-                tile.burnStatus    = 'firebreak';
-                tile.flammability  = 0;
-                // update its sprite to show a firebreak line
-                // (you can swap to a special texture or tint it)
-                tile.terrain       = 'burned-grass';  // or your custom 'firebreak' asset
-                mapScene.fireSpread.updateSprite(nx, ny);
-            }
-            }
-        }
-
-        bank.setText(`${coins}`);
-        });
-        // ==================================================================
-
-    } else {
-        console.log("Sorry! You ran out!");
-        show_notification(scene, out_hotshots);
     }
-    }
-
-    if (activated_resource === "smokejumper") {
+    if (activated_resource === "smokejumper" && !paused) {
         if (getSmokejumpers() > 0) {
             if (cooldown[6] == 0) {
                 setSmokejumpers(-1);

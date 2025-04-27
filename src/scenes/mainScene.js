@@ -45,6 +45,7 @@ export class MainScene extends Phaser.Scene {
         this.load.image('grass', 'assets/64x64-Map-Tiles/grass.png');
         this.load.image('shrub', 'assets/64x64-Map-Tiles/Shrubs/shrubs-on-sand.png');
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
+        this.load.image('house', 'assets/64x64-Map-Tiles/house.png');
 
         // Preload terrain animation assets
         this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
