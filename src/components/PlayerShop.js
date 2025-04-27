@@ -8,7 +8,6 @@ import {
 import { createDrawnButton } from "./ButtonManager.js";
 
 export function createNewShop(scene) {
-  // Background overlay
   scene.shopBackgroundFade = scene.add.rectangle(
     scene.scale.width / 2,
     scene.scale.height / 2,
@@ -18,10 +17,8 @@ export function createNewShop(scene) {
     0.5
   ).setOrigin(0.5).setScrollFactor(0).setDepth(498).setVisible(false);
 
-  // Container
   scene.shopContainer = scene.add.container(0, 0).setVisible(false).setDepth(499);
 
-  // Shop background
   const shopBg = scene.add.rectangle(
     scene.scale.width / 2,
     scene.scale.height / 2,
@@ -31,7 +28,6 @@ export function createNewShop(scene) {
   ).setOrigin(0.5);
   scene.shopContainer.add(shopBg);
 
-  // Coins display
   scene.shopCoinsText = scene.add.text(scene.scale.width / 2, scene.scale.height / 2 - 230, `Coins: $${getCoins()}`, {
     fontFamily: '"Press Start 2P"',
     fontSize: '10px',
@@ -39,7 +35,6 @@ export function createNewShop(scene) {
   }).setOrigin(0.5);
   scene.shopContainer.add(scene.shopCoinsText);
 
-  // Close button
   const closeBtn = createDrawnButton(scene, {
     x: scene.scale.width / 2 + 305,
     y: scene.scale.height / 2 - 260,
@@ -79,7 +74,6 @@ export function createNewShop(scene) {
     const itemX = startX + col * colSpacing;
     const itemY = startY + row * rowSpacing;
 
-    // Icon background tile
     const bgTile = scene.add.rectangle(itemX, itemY, 52, 52, 0x3c3c3c)
       .setOrigin(0.5)
       .setStrokeStyle(1, 0xffffff, 0.1);
@@ -137,7 +131,7 @@ export function createNewShop(scene) {
           qtyText.setText(scene.shopQuantities[item.key].toString());
           updateShopTotal(scene, items);
         } else {
-          show_notification(scene, 'Insufficient funds!');
+          show_notification(scene, scene.shopNotificationText, 'Insufficient funds!');
         }
       }
     });
@@ -174,7 +168,7 @@ export function createNewShop(scene) {
             setCoins(-totalCost);
             item.set(item.get() + qty);
           } else {
-            show_notification(scene, 'Not enough coins for full purchase!');
+            show_notification(scene, scene.shopNotificationText, 'Not enough coins for full purchase!');
             return;
           }
         }
@@ -186,6 +180,20 @@ export function createNewShop(scene) {
     }
   });
   scene.shopContainer.add([purchaseBtn.button, purchaseBtn.buttonText]);
+
+  scene.shopNotificationText = scene.add.text(
+    scene.scale.width / 2,
+    scene.scale.height / 2 + 260,
+    '',
+    {
+      fontFamily: '"Press Start 2P"',
+      fontSize: '10px',
+      color: '#ff5555',
+      backgroundColor: '#000000',
+      padding: { x: 10, y: 4 }
+    }
+  ).setOrigin(0.5).setDepth(1000).setScrollFactor(0).setVisible(false);
+  scene.shopContainer.add(scene.shopNotificationText);
 }
 
 function updateShopTotal(scene, items) {
