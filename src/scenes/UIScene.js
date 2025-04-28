@@ -387,7 +387,7 @@ export default class UIScene extends Phaser.Scene {
             .rectangle(0, 0, 200, 80, 0x000000, 0.7)
             .setOrigin(0);
             this.controlpanelText = this.add.text(10, 10,
-                'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
+                'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan\nU: Toggle UI',
                 { 
                     fontFamily: '"Press Start 2P"',
                     fontSize: '10px',
