@@ -1,5 +1,6 @@
 import {activate_resource, deactivate, show_tooltip, set_text} from "./DeploymentClickEvents.js";
-import { setupShop, manageShop } from "./PlayerShop.js";
+import { createNewShop } from "./PlayerShop.js";
+
 
 // Initialize player coins text object
 export let bank;
@@ -53,7 +54,7 @@ export function createHUD(scene) {
     console.log("createHUD called");
 
     // Sidebar rectangle
-    const sidebarWidth = 100;
+    const sidebarWidth = 50;
     const sidebar = scene.add.rectangle(800 - sidebarWidth / 2, 300, sidebarWidth, 600, 0x2d3436);
     sidebar.setDepth(-1);
     console.log("Sidebar created");
@@ -76,16 +77,27 @@ export function createHUD(scene) {
     const iconSize = 0.8; // Scale of each icon
 
      // Player Coins Block to UI
-     coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
-     bank = scene.add.text(580, 560, '0', { // I NEED ADDRESSED
-         font: '24px Arial',
-         fill: '#ffffff',
-         align: 'center',
-         wordWrap: { width: 80 },
-     }).setOrigin(0.5, 0.5).setDepth(2);
+    coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
+    bank = scene.add.text(600, 560, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '16px',
+        fontStyle: 'normal',
+        color: '#ffffff'
+    })
+    .setOrigin(0.5, 0.5).setDepth(2);
 
      // Spawn player shop sprites
     open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
+    open_shop.setInteractive()
+    .on('pointerover', () => open_shop.setTint(0xaaaaaa))
+    .on('pointerout', () => open_shop.clearTint());
+    
+    open_shop.on('pointerdown', () => {
+        scene.shopBackgroundFade.setVisible(true);
+        scene.shopContainer.setVisible(true);
+    });
+      
+
 
     let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
@@ -104,10 +116,10 @@ export function createHUD(scene) {
     // Add Price Tag Sprites
     let price_hose = scene.add.sprite(380, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let price_hose_text = scene.add.text(393, 170, '$150', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fontStyle: 'normal',
+        color: '#000000'
     }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
     let price_extinguisher = scene.add.sprite(620, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let price_extinguisher_text = scene.add.text(633, 170, '$25', {
@@ -210,9 +222,7 @@ export function createHUD(scene) {
     }).setDepth(600).setVisible(false);
 
     // Load player shop
-    setupShop(scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers,
-        price_hose, price_hose_text, price_extinguisher, price_extinguisher_text, price_helicopter, price_helicopter_text, price_firetruck, price_firetruck_text, price_airtanker, 
-        price_airtanker_text, price_hotshotcrew, price_hotshotcrew_text, price_smokejumpers, price_smokejumpers_text);
+    createNewShop(scene);
 
     // Group 1: Fire Hose
     let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
@@ -406,7 +416,7 @@ export function preloadHUD(scene) {
     });
 
     // Load smokejumpers spritesheet (Part 1 of 2)
-     scene.load.spritesheet('set-smokejumpers', 'assets//64x64-Map-Tiles/Deployable%20Resources/smokejumpers.png', {
+    scene.load.spritesheet('set-smokejumpers', 'assets//64x64-Map-Tiles/Deployable%20Resources/smokejumpers.png', {
         frameWidth: 64, // Width of each frame
         frameHeight: 64 // Height of each frame
     });

@@ -1,5 +1,7 @@
 import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
+import { createDrawnButton } from '../components/ButtonManager.js';
+import WebFontFile from '../utils/WebFontFile.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -51,18 +53,9 @@ export default class UIScene extends Phaser.Scene {
     preload() {
         preloadHUD(this);
 
+        this.load.addFile(new WebFontFile(this.load, 'Press Start 2P'));
+
         // Preload UI Elements
-
-        // Load zoom control assets
-        this.load.image('zoom-in', 'assets/zoom-in.png');
-        this.load.image('zoom-out', 'assets/zoom-out.png');
-
-        this.load.image('Title', 'assets/UI/Title.png')
-        this.load.image('Restart Button', 'assets/UI/restartButton.png')
-        this.load.image('login', 'assets/UI/login.png')
-        this.load.image('start_sim', 'assets/UI/start_sim.png');
-        this.load.image('stop_sim', 'assets/UI/stop_sim.png');
-
 
         // Preload Weather UI elements
         this.load.image('weather_title_closed', 'assets/UI/weather_title_closed.png')
@@ -80,29 +73,154 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('west', 'assets/UI/west.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
     }
-      
+
     create() {
-        console.log("UIScene Created");
+        console.log("UIScene Created");  
 
-        // Create container to hold ALL UI elements, enabling toggling of UI visibility
-        this.uiContainer = this.add.container(0,0);
+        // Create container to hold ALL UI elements
+        this.uiContainer = this.add.container(0, 0);
 
-        // Create UI Elements
-        this.createUIElements();
+        this.topBarContainer = this.add.container(0, 0);
+
+        this.bottomBarContainer = this.add.container(0, this.scale.height - 60);
+    
+        // Create UI elements
+        this.createUIElements(); // (this still sets up logo, buttons, etc.)
+    
+        // Top bar background
+        const topBarHeight = 60;
+        const topBar = this.add.rectangle(
+            this.SCREEN_WIDTH / 2,
+            topBarHeight / 2,
+            this.SCREEN_WIDTH,
+            topBarHeight,
+            0x2d3436 // Dark gray
+        );
+        topBar.setScrollFactor(0);
+        topBar.setDepth(5);
+        this.uiContainer.add(topBar);
+    
+        // Top bar container
+        this.topBarContainer.setDepth(10);
+        this.uiContainer.add(this.topBarContainer);
+    
+        // Add and position UI elements in the top bar container
+    
+        // Logo
+        this.logo.setPosition(40, 30);
+        this.logo.setScale(0.4);
+        this.topBarContainer.add(this.logo);
+    
+        // Create Restart Button
+        const restart = createDrawnButton(this, {
+            x: 120,
+            y: 30,
+            width: 80,
+            height: 30,
+            backgroundColor: 0x8B0000,
+            hoverColor: 0xA52A2A,
+            text: 'Restart',
+            fontSize: '10px',
+            onClick: () => {
+                console.log("Restart clicked");
+                this.events.emit('restartGame');
+            }
+        });
+        this.topBarContainer.add([restart.button, restart.buttonText]);
+
+        // Create fire sart/stop button
+        const fireButton = createDrawnButton(this, {
+            x: 200,
+            y: 30,
+            width: 80,
+            height: 30,
+            backgroundColor: 0x228B22,
+            hoverColor: 0x2E8B57,
+            text: 'Start',
+            fontSize: '10px',
+            onClick: () => {
+            console.log("Start Fire clicked");
+            this.events.emit('toggleFire');
+            }
+        });
+        this.topBarContainer.add([fireButton.button, fireButton.buttonText]);
+
+    
+        // Timer Text
+        this.gameClockText.setPosition(300, 15, 'Time: 00:00');
+        this.gameClockText.setStyle({
+            fontFamily: '"Press Start 2P"',
+            fontSize: '14px',
+            fontStyle: 'normal',
+            color: '#FFFFFF'
+        });
         
-        // Create zoom controls
+        this.topBarContainer.add(this.gameClockText);
+    
+        // Wind Gauge and Risk Text
+        this.windGaugeBg.setPosition(600, 30);
+        this.windGaugeFill.setPosition(600, 30);
+        this.windArrow.setPosition(700, 30);
+        this.riskText.setPosition(500, 15);
+    
+        this.topBarContainer.add([
+            this.windGaugeBg,
+            this.windGaugeFill,
+            this.windArrow,
+            this.riskText
+        ]);
+    
+        // Bottom bar background
+        const bottomBarBg = this.add.rectangle(
+            this.scale.width / 2,
+            this.scale.height - 30,
+            this.scale.width,
+            60,
+            0x2d3436
+        ).setScrollFactor(0);
+        this.bottomBarContainer.add(bottomBarBg);
+
         this.createZoomControls();
 
-        // Ensure HUD is created
-        createHUD(this);
+        // Controls panel
+        const controlsButtonX = this.zoomText.x + this.zoomText.width + 80; // 40px padding after zoom text
 
-        this.uiContainer.add([ coins, bank, open_shop ]);
+        this.controlsButton = createDrawnButton(this, {
+            x: controlsButtonX,
+            y: 20, // Same Y as zoom buttons
+            width: 140,
+            height: 40,
+            backgroundColor: 0x555555,
+            hoverColor: 0x777777,
+            text: 'Controls',
+            fontSize: '14px',
+            onClick: () => console.log('Show controls')
+        });
+        this.bottomBarContainer.add([this.controlsButton.button, this.controlsButton.buttonText]);
 
+        this.controlsButton.button.setInteractive().on('pointerdown', () => {
+            this.controlsPanel.setVisible(!this.controlsPanel.visible);
+        });
+
+        // HUD elements
+        createHUD(this); // Assumes you have createHUD() ready
+        this.bottomBarContainer.add([coins, bank, open_shop]);
+
+        // Move them cleanly into the bottom bar layout
+        coins.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
+        bank.setPosition(coins.x + 30, 20); // 100px gap between coins and bank
+        open_shop.setPosition(bank.x + 75, 20); // 100px gap between bank and shop button
+
+
+        // Main UI Container
+        this.uiContainer.add([this.topBarContainer, this.bottomBarContainer]);
+
+        // Key to toggle HUD
         this.input.keyboard.on('keydown-U', () => {
             this.toggleUI(!this.uiContainer.visible);
         });
-
-        // Initialize resource text references
+    
+        // Resource text elements
         this.hoseText = hoseText;
         this.extinguisherText = extinguisherText;
         this.helicopterText = helicopterText;
@@ -110,7 +228,7 @@ export default class UIScene extends Phaser.Scene {
         this.airtankerText = airtankerText;
         this.hotshotcrewText = hotshotcrewText;
         this.smokejumperText = smokejumperText;
-
+    
         // Listen for events from MapScene
         this.scene.get('MapScene').events.on('updateGameClock', this.updateGameClock, this);
         this.scene.get('MapScene').events.on('weatherUpdated', this.updateWeatherDisplay, this);
@@ -118,9 +236,7 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
-        // this.scene.get('MapScene').events.on('updateGlobalRisk', this.updateGlobalRisk, this);
-        // this.scene.get('MapScene').events.on('updateWindDirection', this.updateWindDirection, this);
-    }
+    }   
 
     // update function
     update() {
@@ -160,7 +276,7 @@ export default class UIScene extends Phaser.Scene {
     
         return tt;
     }
-  
+
     createUIElements() {
         // Game title
         this.logo = this.add.image(40, 40, 'Title');
@@ -203,13 +319,14 @@ export default class UIScene extends Phaser.Scene {
         this._createTooltip(this.windGaugeBg, 'Wind Speed & Direction');
 
         // Risk text
-        this.riskText = this.add
-        .text(this.WIND_GAUGE_X, this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT - 40, 
+        this.riskText = this.add.text(this.WIND_GAUGE_X, this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT - 40, 
             'Risk: Low', {
-        fontSize: '16px',
-        fill: '#00ff00', // start green
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: { x: 4, y: 2 }
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fill: '#00ff00', // start green
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: { x: 4, y: 2 }
         })
         .setScrollFactor(0);
         this.uiContainer.add(this.riskText);
@@ -230,54 +347,6 @@ export default class UIScene extends Phaser.Scene {
                 this.scene.start('LoginScene');
             });
         this.uiContainer.add(this.loginMenuButton);
-
-        // Restart Game button
-        this.restartButton = this.add.image(this.RESTART_BUTTON_X, this.RESTART_BUTTON_Y, 'Restart Button')
-            .setInteractive()
-            .setScale(0.20)
-            .on('pointerover', () => {  
-                this.restartButton.setTint(0x8B4513); // Apply tint on hover
-            })
-            .on('pointerout', () => {  
-                this.restartButton.clearTint(); // Clear the tint
-            })
-            .on('pointerdown', () => {
-                console.log("Restart button clicked");
-                
-                // First ensure fire simulation is stopped
-                const mapScene = this.scene.get('MapScene');
-                if (mapScene) {
-                    if (mapScene.isFireSimRunning) {
-                        mapScene.isFireSimRunning = false;
-                        this.events.emit('fireSimToggled', false);
-                    }
-                    
-                    // Clear any existing delayed calls that might interfere
-                    if (mapScene.time && mapScene.time.removeAllEvents) {
-                        mapScene.time.removeAllEvents();
-                    }
-                }
-                
-                // Add a short delay before actually restarting
-                this.time.delayedCall(100, () => {
-                    console.log("Emitting restartGame event");
-                    this.events.emit('restartGame'); // Emit event to MapScene
-                });
-            });
-        this._createTooltip(this.restartButton, 'Restart Game');
-        this.uiContainer.add(this.restartButton);
-
-
-        // Fire toggle button
-        this.fireButton = this.add.image(this.FIRE_BUTTON_X, this.FIRE_BUTTON_Y, 'start_sim')
-            .setInteractive()
-            .setScale(0.20)
-            .on('pointerdown', () => {
-                console.log("Fire image button clicked!");
-                this.events.emit('toggleFire');
-            });
-        this._createTooltip(this.fireButton, 'Start or Stop Fire Simulation')
-        this.uiContainer.add(this.fireButton);
 
         // Game Clock
         this.gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
@@ -308,50 +377,34 @@ export default class UIScene extends Phaser.Scene {
             0xff4500
         ).setOrigin(0, 0).setScrollFactor(0);
         this.uiContainer.add(this.fireStepBar);
-        
-        // Zoom level display
-        this.zoomText = this.add.text(this.ZOOM_PERCENT_TEXT_X, this.ZOOM_PERCENT_TEXT_Y, "Zoom: 100%", {
-            fontSize: "16px",
-            fill: "#fff",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            padding: { x: 5, y: 5 }
-        }).setScrollFactor(0);
-        this.uiContainer.add(this.zoomText);
 
-        this.controlsButton = this.add.text(80, 550, 'Controls', {
-            fontSize: '16px',
-            fill: '#fff',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            padding: { x: 5, y: 5 },
-        })
-        .setOrigin(0, 0)
-        .setScrollFactor(0)
-        .setInteractive();
-        this.uiContainer.add(this.controlsButton);
-
-        this.controlsPanel = this.add.container(80, 466)
+        this.controlsPanel = this.add.container(315, 455)
             .setScrollFactor(0)
             .setVisible(false);
-      
+
         // optional background for readability
         this.controlpanelBg = this.add
             .rectangle(0, 0, 200, 80, 0x000000, 0.7)
             .setOrigin(0);
-        this.controlpanelText = this.add.text(10, 10,
-            'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan',
-            { fontSize: '14px', fill: '#fff', wordWrap: { width: 180 } }
-        );
+            this.controlpanelText = this.add.text(10, 10,
+                'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan\nU: Toggle UI',
+                { 
+                    fontFamily: '"Press Start 2P"',
+                    fontSize: '10px',
+                    fontStyle: 'normal',
+                    fill: '#fff',
+                    wordWrap: { width: 180 }
+                }
+            );
         this.controlsPanel.add([ this.controlpanelBg, this.controlpanelText ]);
         this.uiContainer.add(this.controlsPanel);
-
-        // Hook up show/hide on click
-        this.controlsButton.on('pointerdown', () => {
-            this.controlsPanel.setVisible(!this.controlsPanel.visible);
-        });
 
         // Tile Info
         this.tileInfoText = this.add.text(this.TILE_INFO_X, this.TILE_INFO_Y, 
             "Select tile", {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '14px',
+                fontStyle: 'normal',
                 fill: "#ffffff",
                 backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
                 padding: { x: 14, y: 10 },
@@ -373,84 +426,53 @@ export default class UIScene extends Phaser.Scene {
     }
     
     createZoomControls() {
-        // Add zoom buttons on the left side
         const BUTTON_SIZE = 40;
-        const BUTTON_X = 10;
-        const ZOOM_IN_Y = 320;
-        const ZOOM_OUT_Y = 370;
-        
-        // Try to create zoom buttons with images if available
-        let useImageAssets = false;
-        try {
-            if (this.textures.exists('zoom-in') && this.textures.exists('zoom-out')) {
-                useImageAssets = true;
+        const BUTTON_SPACING = 20;
+        const baseX = 40; // Start at 40px from left inside bottom bar
+        const baseY = 20; 
+
+        // Zoom In Button
+        const zoomIn = createDrawnButton(this, {
+            x: baseX,
+            y: baseY,
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            backgroundColor: 0x666666,
+            hoverColor: 0x888888,
+            text: '+',
+            fontSize: '20px',
+            onClick: () => {
+            const mapScene = this.scene.get('MapScene');
+            mapScene.currentZoom = Phaser.Math.Clamp(
+                mapScene.currentZoom + 0.1,
+                mapScene.MIN_ZOOM,
+                mapScene.MAX_ZOOM
+            );
+            mapScene.cameras.main.setZoom(mapScene.currentZoom);
+            this.handleZoomChange(mapScene.currentZoom);
             }
-        } catch (e) {
-            useImageAssets = false;
-        }
-        
-        if (useImageAssets) {
-            // Zoom in button
-            this.zoomInButton = this.add.image(BUTTON_X, ZOOM_IN_Y, 'zoom-in')
-                .setOrigin(0)
-                .setDisplaySize(BUTTON_SIZE, BUTTON_SIZE)
-                .setScrollFactor(0);
-                
-            // Zoom out button
-            this.zoomOutButton = this.add.image(BUTTON_X, ZOOM_OUT_Y, 'zoom-out')
-                .setOrigin(0)
-                .setDisplaySize(BUTTON_SIZE, BUTTON_SIZE)
-                .setScrollFactor(0);
-        } else {
-            // Fallback to rectangle buttons with text if images not available
-            // Zoom in button
-            this.zoomInButton = this.add.rectangle(BUTTON_X, ZOOM_IN_Y, BUTTON_SIZE, BUTTON_SIZE, 0x666666)
-                .setOrigin(0)
-                .setStrokeStyle(2, 0xffffff)
-                .setScrollFactor(0);
-            this.uiContainer.add(this.zoomInButton);    
-                
-            const zoom_in_text = this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_IN_Y + BUTTON_SIZE/2, "+", {
-                fontSize: "24px",
-                fill: "#fff"
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.uiContainer.add(zoom_in_text); 
-            
-            // Zoom out button
-            this.zoomOutButton = this.add.rectangle(BUTTON_X, ZOOM_OUT_Y, BUTTON_SIZE, BUTTON_SIZE, 0x666666)
-                .setOrigin(0)
-                .setStrokeStyle(2, 0xffffff)
-                .setScrollFactor(0);
-            this.uiContainer.add(this.zoomOutButton);
-                
-            const zoom_out_text = this.add.text(BUTTON_X + BUTTON_SIZE/2, ZOOM_OUT_Y + BUTTON_SIZE/2, "-", {
-                fontSize: "24px",
-                fill: "#fff"
-            }).setOrigin(0.5).setScrollFactor(0);
-            this.uiContainer.add(zoom_out_text);
-        }
-        
-        // Make buttons interactive
-        this.zoomInButton.setInteractive().on('pointerdown', () => {
-            const mapScene = this.scene.get('MapScene');
-            mapScene.currentZoom = Phaser.Math.Clamp(
-                mapScene.currentZoom + 0.1, 
-                mapScene.MIN_ZOOM, 
-                mapScene.MAX_ZOOM
-            );
-            mapScene.cameras.main.setZoom(mapScene.currentZoom);
-            this.handleZoomChange(mapScene.currentZoom);
         });
-        
-        this.zoomOutButton.setInteractive().on('pointerdown', () => {
+
+        // Zoom Out Button
+        const zoomOut = createDrawnButton(this, {
+            x: baseX + BUTTON_SIZE + BUTTON_SPACING,
+            y: baseY,
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            backgroundColor: 0x666666,
+            hoverColor: 0x888888,
+            text: '-',
+            fontSize: '20px',
+            onClick: () => {
             const mapScene = this.scene.get('MapScene');
             mapScene.currentZoom = Phaser.Math.Clamp(
-                mapScene.currentZoom - 0.1, 
-                mapScene.MIN_ZOOM, 
+                mapScene.currentZoom - 0.1,
+                mapScene.MIN_ZOOM,
                 mapScene.MAX_ZOOM
             );
             mapScene.cameras.main.setZoom(mapScene.currentZoom);
             this.handleZoomChange(mapScene.currentZoom);
+            }
         });
         // UIScene.js → inside createUIElements(), after zoom controls :contentReference[oaicite:0]{index=0}&#8203;:contentReference[oaicite:1]{index=1}
         const PAD_X = 50, PAD_Y = this.SCREEN_HEIGHT - 100;
@@ -475,6 +497,28 @@ export default class UIScene extends Phaser.Scene {
             .on('pointerout',  () => this.events.emit('panStop'));
         }
 
+
+        this.zoomText = this.add.text(
+            baseX + (BUTTON_SIZE + BUTTON_SPACING) * 1.75,
+            20, // same Y as zoom buttons
+            'Zoom: 100%',
+            {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '16px',
+                fontStyle: 'normal',
+                color: '#FFFFFF'
+            })
+            .setOrigin(0, 0.5)
+            .setScrollFactor(0);
+
+        // Store the button references if you need later
+        this.zoomInButton = zoomIn.button;
+        this.zoomOutButton = zoomOut.button;
+        this.bottomBarContainer.add(this.zoomText);
+
+
+        // Add drawn buttons to bottomBarContainer
+        this.bottomBarContainer.add([zoomIn.button, zoomIn.buttonText, zoomOut.button, zoomOut.buttonText]);
     }
 
     // Handler to update fire spread progress indicator
@@ -491,7 +535,7 @@ export default class UIScene extends Phaser.Scene {
         else if (percent > 33) color = 0xffff00;
         this.fireStepBar.fillColor = color;
     }
-       
+
     // Handler for game clock updates
     updateGameClock(elapsedTime) {
         let minutes = Math.floor(elapsedTime / 60);
@@ -502,7 +546,7 @@ export default class UIScene extends Phaser.Scene {
         
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
-      
+
     // Handler for tile information updates
     updateTileInfo(tile) {
         console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
@@ -543,7 +587,7 @@ export default class UIScene extends Phaser.Scene {
         this.updateWindDisplay(weather);
         this.updateRiskDisplay(weather.getRiskCategory());
     }
-      
+
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
         if (this.fireButton) {
@@ -553,11 +597,11 @@ export default class UIScene extends Phaser.Scene {
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
-                           medium:'#ffff00',
-                           high:  '#ff0000' };
+                        medium:'#ffff00',
+                        high:  '#ff0000' };
         this.riskText
-          .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
-          .setStyle({ fill: colorMap[risk] });
+        .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
+        .setStyle({ fill: colorMap[risk] });
         }      
     
     // Handler for zoom changes
