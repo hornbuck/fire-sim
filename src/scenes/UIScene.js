@@ -1,4 +1,4 @@
-import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, bank, open_shop } from '../components/ui.js';
+import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, bank, open_shop, coinBg } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
@@ -217,7 +217,7 @@ export default class UIScene extends Phaser.Scene {
 
         // HUD elements
         createHUD(this); // Assumes you have createHUD() ready
-        this.bottomBarContainer.add([bank, open_shop]);
+        this.bottomBarContainer.add([coinBg, bank, open_shop]);
 
         // Move them cleanly into the bottom bar layout
         bank.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
