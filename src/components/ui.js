@@ -50,6 +50,29 @@ export let timerSprite;
 export let coins;
 export let open_shop;
 
+// Helper function to style resource counters
+function styleResourceCounter(text, scene) {
+    text.setStyle({
+        fontFamily: '"Press Start 2P"',
+        fontSize: '10px',
+        color: '#FFFFFF',
+        backgroundColor: '#333333',
+        padding: { x: 6, y: 4 }
+    });
+    
+    // Add a background for better visibility
+    const bg = scene.add.rectangle(
+        text.x,
+        text.y,
+        text.width + 12,
+        text.height + 8,
+        0x333333,
+        0.7
+    ).setOrigin(0.5).setDepth(text.depth - 1);
+    
+    return bg;
+}
+
 export function createHUD(scene) {
     console.log("createHUD called");
 
@@ -232,6 +255,8 @@ export function createHUD(scene) {
     timerSprite = scene.add.sprite(750, 50, 'set-timer').setDepth(10).setScale(1.0, 1.0).setVisible(false);
     activate_resource(0, hose, "hose",'assets/cursors/water.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
+    const hoseTextBg = styleResourceCounter(hoseText, scene);
+
     // Create a tooltip for the fire hose
     show_tooltip(hose, 'hose-tooltip', 660, 55, scene);
 
@@ -247,6 +272,9 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(1, extinguisher, "extinguisher",'assets/cursors/fire-extinguisher.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    
+    const extinguisherTextBg = styleResourceCounter(extinguisherText, scene);
+    
     show_tooltip(extinguisher, 'extinguisher-tooltip', 660, 135, scene);
 
     // Group 3: Helicopter
@@ -261,6 +289,9 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(2, helicopter, "helicopter",'assets/cursors/helicopter.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+
+    const helicopterTextBg = styleResourceCounter(helicopterText, scene);
+    
     show_tooltip(helicopter, 'helicopter-tooltip', 660, 215, scene);
 
     // Group 4: Firetruck
@@ -275,6 +306,9 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(3, firetruck, "firetruck",'assets/cursors/firetruck.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    
+    const firetruckTextBg = styleResourceCounter(firetruckText, scene);
+
     show_tooltip(firetruck, 'firetruck-tooltip', 660, 295, scene);
 
     // Group 5: Airtanker
@@ -289,6 +323,9 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(4, airtanker, "airtanker",'assets/cursors/airtanker.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    
+    const airtankerTextBg = styleResourceCounter(airtankerText, scene);
+
     show_tooltip(airtanker, 'airtanker-tooltip', 660, 375, scene);
 
     // Group 6: Hotshot Crew
@@ -303,6 +340,9 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(5, hotshotcrew, "hotshot-crew",'assets/cursors/hotshot-crew.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    
+    const hotshotcrewTextBg = styleResourceCounter(hotshotcrewText, scene);
+
     show_tooltip(hotshotcrew, 'hotshot-crew-tooltip', 660, 455, scene);
 
     // Group 7: Smokejumper
@@ -317,6 +357,9 @@ export function createHUD(scene) {
     }).setOrigin(0.5, 0.5);
 
     activate_resource(6, smokejumper, "smokejumper",'assets/cursors/launch.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
+    
+    const smokejumperTextBg = styleResourceCounter(smokejumperText, scene);
+
     show_tooltip(smokejumper, 'smokejumper-tooltip', 660, 535, scene);
 }
 
