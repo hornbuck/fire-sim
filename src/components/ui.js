@@ -47,7 +47,7 @@ export let s_total = 0;
 // Initialize timer sprites for later rendering
 export let timerSprite;
 
-export let coinBackground;
+export let coinBg;
 export let open_shop;
 
 // Helper function to style resource counters
