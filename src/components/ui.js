@@ -47,7 +47,7 @@ export let s_total = 0;
 // Initialize timer sprites for later rendering
 export let timerSprite;
 
-export let coinBg;
+export let coins;
 export let open_shop;
 
 // Helper function to style resource counters
@@ -99,32 +99,15 @@ export function createHUD(scene) {
     const sidebarCenter = 300; // Sidebar is vertically centered at 300px
     const iconSize = 0.8; // Scale of each icon
 
-    // Player Coins Block to UI with background
-// First create the background rectangle
-const coinBg = scene.add.rectangle(
-    580, // Centered position for the currency display
-    560, // Same Y position as before
-    120, // Width for the background
-    40,  // Height for the background
-    0x333333, // Dark background color
-    0.8 // Semi-transparent
-).setOrigin(0.5, 0.5).setDepth(1);
-
-// Combined approach with emoji and value in one text object
-bank = scene.add.text(580, 560, '💰 0', {
-    fontFamily: '"Press Start 2P"',
-    fontSize: '16px',
-    fontStyle: 'normal',
-    color: '#ffffff',
-    padding: { x: 8, y: 4 } // Add some padding
-})
-.setOrigin(0.5, 0.5).setDepth(2);
-
-// Set coins to null since we're incorporating it into the bank text
-coins = null;
-
-// Add the background to the scene
-scene.add.existing(coinBg);
+     // Player Coins Block to UI
+    coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
+    bank = scene.add.text(600, 560, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '16px',
+        fontStyle: 'normal',
+        color: '#ffffff'
+    })
+    .setOrigin(0.5, 0.5).setDepth(2);
 
      // Spawn player shop sprites
     open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
