@@ -1,4 +1,4 @@
-import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
+import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, bank, open_shop } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
@@ -217,13 +217,25 @@ export default class UIScene extends Phaser.Scene {
 
         // HUD elements
         createHUD(this); // Assumes you have createHUD() ready
-        this.bottomBarContainer.add([coins, bank, open_shop]);
+        this.bottomBarContainer.add([bank, open_shop]);
 
         // Move them cleanly into the bottom bar layout
-        coins.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
-        bank.setPosition(coins.x + 30, 20); // 100px gap between coins and bank
+        bank.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
         open_shop.setPosition(bank.x + 75, 20); // 100px gap between bank and shop button
 
+        // Update the bank text styling
+        bank.setStyle({
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            color: '#FFFFFF',
+            align: 'center'
+        });
+
+        // Make sure coin elements are above the background
+        bank.setDepth(coinBg.depth + 1);
+
+        // Add the background to the bottom bar first
+        this.bottomBarContainer.add(coinBg);
 
         // Main UI Container
         this.uiContainer.add([this.topBarContainer, this.bottomBarContainer]);
