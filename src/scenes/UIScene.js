@@ -1,6 +1,7 @@
 import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
+import HamburgerMenu from '../components/HamburgerMenu.js';
 import WebFontFile from '../utils/WebFontFile.js';
 
 export default class UIScene extends Phaser.Scene {
@@ -106,10 +107,11 @@ export default class UIScene extends Phaser.Scene {
     
         // Add and position UI elements in the top bar container
     
-        // Logo
-        this.logo.setPosition(40, 30);
-        this.logo.setScale(0.4);
-        this.topBarContainer.add(this.logo);
+        this.hamburgerMenu = new HamburgerMenu(this, {
+            x: 40,
+            y: 30,
+            depth: 1000
+        });
     
         // Create Restart Button
         const restart = createDrawnButton(this, {
