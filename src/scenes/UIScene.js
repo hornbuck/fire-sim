@@ -235,7 +235,7 @@ export default class UIScene extends Phaser.Scene {
 
         // Position currency elements
         coins.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 30, 20);
-        bank.setPosition(coins.x + 15, 20);  // Position close to $ symbol
+        bank.setPosition(coins.x + 20, 20);  // Position close to $ symbol
 
         // Position shop button with proper spacing
         open_shop.setPosition(coinBg.x + coinBg.width/2 + 40, 20); // 40px spacing after coin background

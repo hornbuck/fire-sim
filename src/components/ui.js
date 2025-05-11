@@ -100,7 +100,7 @@ export function createHUD(scene) {
     const iconSize = 0.8; // Scale of each icon
 
     // Create currency elements
-    coins = scene.add.text(560, 560, '💰', {
+    coins = scene.add.text(550, 560, '💰', {
         fontSize: '28px',
         fontStyle: 'bold',
         color: '#FFD700', // Gold color
