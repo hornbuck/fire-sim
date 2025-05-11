@@ -37,13 +37,33 @@ export default class IntroScene extends Phaser.Scene {
 
         // Add start text
         const startText = this.add.text(centerX, gameHeight * 0.8, 'Click to Start', {
-            fontFamily: 'Courier, monospace',
+            fontFamily: '"Press Start 2P"',
             fontSize: '32px',
             color: '#ffffff',
             backgroundColor: '#000000',
             padding: { x: 10, y: 5 }
         }).setOrigin(0.5).setInteractive();
 
+        // Add hover effect
+        startText.on('pointerover', () => {
+            startText.setBackgroundColor('#333333');
+            this.tweens.add({
+                targets: startText,
+                scale: 1.05,
+                duration: 100
+            });
+        });
+        
+        startText.on('pointerout', () => {
+            startText.setBackgroundColor('#000000');
+            this.tweens.add({
+                targets: startText,
+                scale: 1,
+                duration: 100
+            });
+        });
+
+        // Start the game on click
         startText.on('pointerdown', () => {
             this.scene.start('MenuScene');
         });
