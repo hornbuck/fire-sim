@@ -56,12 +56,27 @@ export function setCoins(value) {
 }
 
 // Updates text of asset limits
-export function set_text(value, x, y, scene) {
-    return scene.add.text(x, y, value, {
-        font: '12px Arial',
-        fill: '#ffffff',
+export function set_text(text, x, y, scene) {
+    const textObj = scene.add.text(x, y, text, {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        color: '#FFFFFF',
         align: 'center',
+        backgroundColor: '#333333',
+        padding: { x: 6, y: 4 }
     }).setOrigin(0.5, 0.5);
+    
+    // Add background
+    const bg = scene.add.rectangle(
+        x,
+        y,
+        textObj.width + 12,
+        textObj.height + 8,
+        0x333333,
+        0.7
+    ).setOrigin(0.5).setDepth(textObj.depth - 1);
+    
+    return textObj;
 }
 
 // This function is called by activate_resource (below), in order to deactivate resources that are already active
