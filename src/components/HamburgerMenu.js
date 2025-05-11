@@ -5,6 +5,7 @@
  */
 
 import { createDrawnButton } from './ButtonManager.js';
+import AccessibilityPanel from './AccessibilityPanel.js';
 
 export default class HamburgerMenu {
     /**
@@ -27,7 +28,8 @@ export default class HamburgerMenu {
             menuItems: options.menuItems || [
                 { text: 'Profile', key: 'profile' },
                 { text: 'Login/Logout', key: 'login' },
-                { text: 'Accessibility', key: 'accessibility' },
+                // Uncomment once accessibility is implemented
+                //{ text: 'Accessibility', key: 'accessibility' },
                 { text: 'Settings', key: 'settings' },
                 { text: 'Help', key: 'help' },
                 { text: 'About', key: 'about' }
@@ -57,7 +59,7 @@ export default class HamburgerMenu {
         // Create menu panel (initially hidden)
         this.createMenuPanel();
 
-        // Create accessibility panel (initially hidden)
+        // Create accessibility panel (as a separate component)
         this.createAccessibilityPanel();
     }
 
@@ -156,155 +158,17 @@ export default class HamburgerMenu {
     }
 
     /**
-     * Creates the accessibility options panel.
+     * Creates the accessibility panel as a separate component.
      */
     createAccessibilityPanel() {
-        // Create panel container
-        this.accessibilityPanel = this.scene.add.container(0, 0)
-            .setDepth(this.options.depth + 1)
-            .setVisible(false);
-        
-        // Create panel background
-        const panelBg = this.scene.add.rectangle(
-            this.scene.cameras.main.width / 2,
-            this.scene.cameras.main.height / 2,
-            400,
-            500,
-            0x2d3436,
-            0.95
-        ).setScrollFactor(0);
-        
-        // Create panel title
-        const title = this.scene.add.text(
-            this.scene.cameras.main.width / 2,
-            this.scene.cameras.main.height / 2 - 220,
-            'Accessibility Options',
-            {
-                fontFamily: '"Press Start 2P"',
-                fontSize: '20px',
-                color: '#ffffff',
-                align: 'center'
-            }
-        ).setOrigin(0.5).setScrollFactor(0);
-        
-        // Create close button
-        const closeButton = createDrawnButton(this.scene, {
-            x: this.scene.cameras.main.width / 2 + 170,
-            y: this.scene.cameras.main.height / 2 - 220,
-            width: 30,
-            height: 30,
-            backgroundColor: 0x8B0000,
-            hoverColor: 0xA52A2A,
-            text: 'X',
-            fontSize: '16px',
-            onClick: () => this.hideAccessibilityPanel()
-        });
-        
-        // Create accessibility toggle options
-        const options = [
-            { text: 'High Contrast Mode', key: 'highContrast' },
-            { text: 'Larger Text', key: 'largerText' },
-            { text: 'Reduced Motion', key: 'reducedMotion' },
-            { text: 'Screen Reader Support', key: 'screenReader' },
-            { text: 'Colorblind Mode', key: 'colorblind', isSelector: true }
-        ];
-        
-        // Add all elements to the accessibility panel
-        this.accessibilityPanel.add([panelBg, title, closeButton.button, closeButton.buttonText]);
-        
-        // Create toggle buttons for each option
-        const startY = this.scene.cameras.main.height / 2 - 150;
-        const spacing = 60;
-        
-        this.accessibilityToggles = [];
-        
-        options.forEach((option, index) => {
-            const y = startY + (index * spacing);
-            
-            // Create option label
-            const label = this.scene.add.text(
-                this.scene.cameras.main.width / 2 - 150,
-                y,
-                option.text,
-                {
-                    fontFamily: '"Press Start 2P"',
-                    fontSize: '14px',
-                    color: '#ffffff'
-                }
-            ).setScrollFactor(0);
-            
-            this.accessibilityPanel.add(label);
-            
-            if (option.isSelector) {
-                // Create dropdown selector for colorblind modes
-                const selector = createDrawnButton(this.scene, {
-                    x: this.scene.cameras.main.width / 2 + 100,
-                    y: y,
-                    width: 150,
-                    height: 30,
-                    backgroundColor: 0x555555,
-                    hoverColor: 0x777777,
-                    text: 'Deuteranopia',
-                    fontSize: '10px',
-                    onClick: () => this.cycleColorblindMode(selector)
-                });
-                
-                this.accessibilityPanel.add([selector.button, selector.buttonText]);
-                this.accessibilityToggles.push({ key: option.key, element: selector, value: 'deuteranopia' });
-            } else {
-                // Create toggle button
-                const toggleBg = this.scene.add.rectangle(
-                    this.scene.cameras.main.width / 2 + 100,
-                    y,
-                    50,
-                    26,
-                    0x555555
-                ).setScrollFactor(0);
-                
-                const toggleCircle = this.scene.add.circle(
-                    this.scene.cameras.main.width / 2 + 80,
-                    y,
-                    10,
-                    0xffffff
-                ).setScrollFactor(0);
-                
-                // Make toggle interactive
-                toggleBg.setInteractive()
-                .on('pointerdown', () => {
-                    const isActive = toggleBg.fillColor === 0x228B22;
-                    
-                    // Toggle state
-                    toggleBg.setFillStyle(isActive ? 0x555555 : 0x228B22);
-                    toggleCircle.x = isActive ? 
-                        this.scene.cameras.main.width / 2 + 80 : 
-                        this.scene.cameras.main.width / 2 + 120;
-                    
-                    // Store toggle state
-                    this.accessibilityToggles.find(t => t.key === option.key).value = !isActive;
-                    
-                    // Apply accessibility setting
-                    this.applyAccessibilitySetting(option.key, !isActive);
-                });
-                
-                this.accessibilityPanel.add([toggleBg, toggleCircle]);
-                this.accessibilityToggles.push({ key: option.key, element: { bg: toggleBg, circle: toggleCircle }, value: false });
+        // Create the accessibility panel instance
+        this.accessibilityPanel = new AccessibilityPanel(this.scene, {
+            depth: this.options.depth + 1,
+            onSettingsApplied: (settings) => {
+                console.log('Accessibility settings applied:', settings);
+                // Additional actions after settings are applied can go here
             }
         });
-        
-        // Create apply button
-        const applyButton = createDrawnButton(this.scene, {
-            x: this.scene.cameras.main.width / 2,
-            y: this.scene.cameras.main.height / 2 + 200,
-            width: 150,
-            height: 40,
-            backgroundColor: 0x228B22,
-            hoverColor: 0x2E8B57,
-            text: 'Apply',
-            fontSize: '16px',
-            onClick: () => this.applyAllAccessibilitySettings()
-        });
-        
-        this.accessibilityPanel.add([applyButton.button, applyButton.buttonText]);
     }
 
     /**
@@ -372,7 +236,7 @@ export default class HamburgerMenu {
      * Show the accessibility options panel.
      */
     showAccessibilityPanel() {
-        this.accessibilityPanel.setVisible(true);
+        this.accessibilityPanel.show();
         this.toggleMenu(); // Close the menu
     }
 
@@ -380,7 +244,7 @@ export default class HamburgerMenu {
      * Hide the accessibility options panel.
      */
     hideAccessibilityPanel() {
-        this.accessibilityPanel.setVisible(false);
+        this.accessibilityPanel.hide();
     }
 
     /**
@@ -500,146 +364,6 @@ export default class HamburgerMenu {
     }
 
     /**
-     * Cycle through colorblind modes.
-     * @param {Object} selector - The selector button to update.
-     */
-    cycleColorblindMode(selector) {
-        const modes = ['Deuteranopia', 'Protanopia', 'Tritanopia', 'None'];
-        const toggle = this.accessibilityToggles.find(t => t.key === 'colorblind');
-        const currentIndex = modes.findIndex(m => m.toLowerCase() === toggle.value);
-        const nextIndex = (currentIndex + 1) % modes.length;
-        const nextMode = modes[nextIndex].toLowerCase();
-        
-        // Update button text
-        selector.buttonText.setText(modes[nextIndex]);
-        
-        // Update toggle value
-        toggle.value = nextMode;
-    }
-
-    /**
-     * Apply a specific accessibility setting.
-     * @param {string} key - The key of the setting to apply.
-     * @param {boolean|string} value - The value to apply.
-     */
-    applyAccessibilitySetting(key, value) {
-        console.log(`Applying accessibility setting: ${key} = ${value}`);
-        
-        // Store the setting in local storage
-        try {
-            const settings = JSON.parse(localStorage.getItem('accessibilitySettings') || '{}');
-            settings[key] = value;
-            localStorage.setItem('accessibilitySettings', JSON.stringify(settings));
-        } catch (e) {
-            console.error('Error saving accessibility settings:', e);
-        }
-        
-        // Apply the setting to the game
-        switch(key) {
-            case 'highContrast':
-                // Apply high contrast mode
-                this.applyHighContrast(value);
-                break;
-            case 'largerText':
-                // Apply larger text mode
-                this.applyLargerText(value);
-                break;
-            case 'reducedMotion':
-                // Apply reduced motion mode
-                this.applyReducedMotion(value);
-                break;
-            case 'screenReader':
-                // Apply screen reader mode
-                this.applyScreenReader(value);
-                break;
-            case 'colorblind':
-                // Apply colorblind mode
-                this.applyColorblindMode(value);
-                break;
-        }
-    }
-
-    /**
-     * Apply all accessibility settings at once.
-     */
-    applyAllAccessibilitySettings() {
-        this.accessibilityToggles.forEach(toggle => {
-            this.applyAccessibilitySetting(toggle.key, toggle.value);
-        });
-        
-        // Show a confirmation message
-        const message = this.scene.add.text(
-            this.scene.cameras.main.width / 2,
-            this.scene.cameras.main.height / 2 + 150,
-            'Settings Applied!',
-            {
-                fontFamily: '"Press Start 2P"',
-                fontSize: '16px',
-                color: '#00ff00',
-                align: 'center'
-            }
-        ).setOrigin(0.5).setScrollFactor(0);
-        
-        // Add message to accessibility panel
-        this.accessibilityPanel.add(message);
-        
-        // Remove message after 2 seconds
-        this.scene.time.delayedCall(2000, () => {
-            message.destroy();
-        });
-    }
-
-    /**
-     * Apply high contrast mode.
-     * @param {boolean} enabled - Whether high contrast is enabled.
-     */
-    applyHighContrast(enabled) {
-        if (this.scene.events) {
-            this.scene.events.emit('setHighContrast', enabled);
-        }
-    }
-
-    /**
-     * Apply larger text mode.
-     * @param {boolean} enabled - Whether larger text is enabled.
-     */
-    applyLargerText(enabled) {
-        if (this.scene.events) {
-            this.scene.events.emit('setLargerText', enabled);
-        }
-    }
-
-    /**
-     * Apply reduced motion mode.
-     * @param {boolean} enabled - Whether reduced motion is enabled.
-     */
-    applyReducedMotion(enabled) {
-        if (this.scene.events) {
-            this.scene.events.emit('setReducedMotion', enabled);
-        }
-    }
-
-    /**
-     * Apply screen reader mode.
-     * @param {boolean} enabled - Whether screen reader support is enabled.
-     */
-    applyScreenReader(enabled) {
-        if (this.scene.events) {
-            this.scene.events.emit('setScreenReader', enabled);
-        }
-    }
-
-    /**
-     * Apply colorblind mode.
-     * @param {string} mode - The colorblind mode to apply.
-     */
-    applyColorblindMode(mode) {
-        if (this.scene.events) {
-            this.scene.events.emit('setColorblindMode', mode);
-        }
-    }
-
-    /**
      * Toggle the menu open/closed state.
      */
     toggleMenu() {
@@ -736,42 +460,6 @@ export default class HamburgerMenu {
                 duration: 300,
                 ease: 'Power2'
             });
-        }
-    }
-
-    /**
-     * Load saved accessibility settings from local storage.
-     */
-    loadSavedSettings() {
-        try {
-            const settings = JSON.parse(localStorage.getItem('accessibilitySettings') || '{}');
-            
-            // Apply saved settings
-            Object.entries(settings).forEach(([key, value]) => {
-                const toggle = this.accessibilityToggles.find(t => t.key === key);
-                
-                if (toggle) {
-                    if (key === 'colorblind') {
-                        // Update colorblind selector
-                        const modes = ['Deuteranopia', 'Protanopia', 'Tritanopia', 'None'];
-                        const mode = modes.find(m => m.toLowerCase() === value) || 'None';
-                        toggle.element.buttonText.setText(mode);
-                        toggle.value = value;
-                    } else {
-                        // Update toggle switch
-                        toggle.element.bg.setFillStyle(value ? 0x228B22 : 0x555555);
-                        toggle.element.circle.x = value ? 
-                            this.scene.cameras.main.width / 2 + 120 : 
-                            this.scene.cameras.main.width / 2 + 80;
-                        toggle.value = value;
-                    }
-                    
-                    // Apply the setting
-                    this.applyAccessibilitySetting(key, value);
-                }
-            });
-        } catch (e) {
-            console.error('Error loading accessibility settings:', e);
         }
     }
 }
