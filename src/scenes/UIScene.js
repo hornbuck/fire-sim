@@ -2,6 +2,7 @@ import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, fire
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
+import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
 
 export default class UIScene extends Phaser.Scene {
