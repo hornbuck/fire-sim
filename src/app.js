@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import IntroScene from './scenes/IntroScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import TutorialScene from './scenes/TutorialScene.js';
 import SignupScene from "./scenes/signupScene.js";
@@ -15,7 +14,7 @@ const config = {
     width: 800,
     height: 600,
     parent: 'game-container',
-    scene: [IntroScene, MenuScene, TutorialScene, SignupScene, LoginScene, MapScene, UIScene],
+    scene: [MenuScene, TutorialScene, SignupScene, LoginScene, MapScene, UIScene],
     backgroundColor: '#282c34',
     scale: {
         mode: Phaser.Scale.FIT,
