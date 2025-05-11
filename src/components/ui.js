@@ -99,38 +99,61 @@ export function createHUD(scene) {
     const sidebarCenter = 300; // Sidebar is vertically centered at 300px
     const iconSize = 0.8; // Scale of each icon
 
-    // Player Coins Block to UI
+    // Create currency elements
     coins = scene.add.text(560, 560, '💰', {
-        fontSize: '32px',  // Larger font for the emoji
-        fontStyle: 'normal',
-        color: '#FFD700'  // Gold color to make it more visible
+        fontSize: '28px',
+        fontStyle: 'bold',
+        color: '#FFD700', // Gold color
+        fontFamily: '"Press Start 2P"'
     })
     .setOrigin(0.5, 0.5)
-    .setDepth(20);  // Much higher depth to ensure it's on top
+    .setDepth(50);
 
-    bank = scene.add.text(600, 560, '0', {
+    bank = scene.add.text(610, 560, '0', {
         fontFamily: '"Press Start 2P"',
         fontSize: '16px',
         fontStyle: 'normal',
-        color: '#ffffff'
+        color: '#FFFFFF'
     })
     .setOrigin(0.5, 0.5)
-    .setDepth(10); // Higher depth to ensure it's visible
+    .setDepth(50);
 
-     // Spawn player shop sprites
-    open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
-    open_shop.setInteractive()
-    .on('pointerover', () => open_shop.setTint(0xaaaaaa))
-    .on('pointerout', () => open_shop.clearTint());
-    
-    open_shop.on('pointerdown', () => {
+    // Create shop button
+    open_shop = scene.add.text(660, 560, '🛍️', {
+        fontSize: '28px',
+        fontStyle: 'normal'
+    })
+    .setOrigin(0.5, 0.5)
+    .setDepth(50);
+
+    // Create background for shop button
+    const shopBg = scene.add.rectangle(
+        open_shop.x,
+        open_shop.y,
+        50,  // Width for shop button
+        40,  // Height for shop button
+        0x333333,  // Match coin background color
+        0.8
+    ).setOrigin(0.5, 0.5).setDepth(45);  // Below the emoji's depth
+
+    // Store reference to the background
+    open_shop.shopBg = shopBg;
+
+    // Add interactivity to shop button
+    open_shop.setInteractive({ useHandCursor: true })
+    .on('pointerover', () => {
+        open_shop.setAlpha(0.8);
+        open_shop.shopBg.fillColor = 0x444444; // Lighter on hover
+    })
+    .on('pointerout', () => {
+        open_shop.setAlpha(1.0);
+        open_shop.shopBg.fillColor = 0x333333; // Back to normal
+    })
+    .on('pointerdown', () => {
         scene.shopBackgroundFade.setVisible(true);
         scene.shopContainer.setVisible(true);
     });
-      
 
-
-    let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let remove_button = scene.add.sprite(400, 540, 'remove-button').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
     let purchase = scene.add.sprite(570, 500, 'purchase').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
