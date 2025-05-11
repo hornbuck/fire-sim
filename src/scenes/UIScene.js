@@ -111,7 +111,15 @@ export default class UIScene extends Phaser.Scene {
         this.hamburgerMenu = new HamburgerMenu(this, {
             x: 40,
             y: 30,
-            depth: 1000
+            depth: 1000,
+            openDirection: 'left'
+        });
+
+        this.accessibilityPanel = new AccessibilityPanel(this, {
+            depth: 1001,
+            onSettingsApplied: (settings) => {
+                console.log('Accessibility settings applied:', settings);
+            }
         });
     
         // Create Restart Button
@@ -153,9 +161,11 @@ export default class UIScene extends Phaser.Scene {
         this.gameClockText.setPosition(300, 15, 'Time: 00:00');
         this.gameClockText.setStyle({
             fontFamily: '"Press Start 2P"',
-            fontSize: '14px',
+            fontSize: '16px',
             fontStyle: 'normal',
-            color: '#FFFFFF'
+            color: '#FFFFFF',
+            align: 'center',
+            padding: { x: 5, y: 2 },
         });
         
         this.topBarContainer.add(this.gameClockText);
@@ -281,10 +291,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     createUIElements() {
-        // Game title
-        this.logo = this.add.image(40, 40, 'Title');
-        this.uiContainer.add(this.logo);
-
         // Gauge background (gray outline)
         this.windGaugeBg = this.add.rectangle(
             this.WIND_GAUGE_X,
@@ -333,23 +339,6 @@ export default class UIScene extends Phaser.Scene {
         })
         .setScrollFactor(0);
         this.uiContainer.add(this.riskText);
-
-
-        // Login Button via MainScene
-        this.loginMenuButton = this.add.image(this.LOGIN_BUTTON_X, this.LOGIN_BUTTON_Y, 'login')
-            .setInteractive()
-            .on('pointerover', () => {  // Hover effect
-                this.loginMenuButton.setTint(0x8B4513); // Apply tint on hover
-            })
-            .on('pointerout', () => {  // Reset when not hovering
-                this.loginMenuButton.clearTint(); // Clear the tint
-            })
-            .on('pointerdown', () => {
-                this.events.removeAllListeners();
-                this.scene.remove('MainScene');
-                this.scene.start('LoginScene');
-            });
-        this.uiContainer.add(this.loginMenuButton);
 
         // Game Clock
         this.gameClockText = this.add.text(this.GAME_CLOCK_X, this.GAME_CLOCK_Y, "Time: 00:00", {
@@ -409,22 +398,13 @@ export default class UIScene extends Phaser.Scene {
                 fontSize: '14px',
                 fontStyle: 'normal',
                 fill: "#ffffff",
-                backgroundColor: "linear-gradient(180deg, rgba(20,20,20,0.9), rgba(0,0,0,0.7))",
+                backgroundColor: "#2d3436",
                 padding: { x: 14, y: 10 },
                 align: "left",
-                shadow: {
-                    offsetX: 0,
-                    offsetY: 0,
-                    color: "rgba(255, 255, 255, 0.3)",
-                    blur: 6,
-                    stroke: true,
-                    fill: true
-                }
             })
             .setDepth(10)
             .setScrollFactor(0)
-            .setOrigin(0)
-            .setStyle({ borderRadius: "8px" });
+
         this.uiContainer.add(this.tileInfoText);
     }
     
