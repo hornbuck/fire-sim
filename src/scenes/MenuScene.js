@@ -40,7 +40,7 @@ export default class MenuScene extends Phaser.Scene {
         // Create title text
         const titleText = this.add.text(centerX, centerY - 150, 'WILDFIRE COMMAND', {
             fontFamily: '"Press Start 2P"',
-            fontSize: '36px',
+            fontSize: '45px',
             color: '#ffffff',
             stroke: '#ff6600',
             strokeThickness: 6,
