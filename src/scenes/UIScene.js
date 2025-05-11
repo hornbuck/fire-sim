@@ -217,37 +217,31 @@ export default class UIScene extends Phaser.Scene {
 
         // HUD elements
         createHUD(this); // Assumes you have createHUD() ready
-        this.bottomBarContainer.add([coins, bank, open_shop]);
-
-        // Move them cleanly into the bottom bar layout
-        coins.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
-        bank.setPosition(coins.x + 30, 20); // 100px gap between coins and bank
-        open_shop.setPosition(bank.x + 75, 20); // 100px gap between bank and shop button
-
-        // Add a background for the coin counter
+        // First add the background with the lowest depth
         const coinBg = this.add.rectangle(
-            coins.x, 
-            coins.y,
+            this.controlsButton.button.x + this.controlsButton.button.width + 50, // Position for coins
+            20, // Same Y as zoom buttons
             70,
             40,
             0x333333,
             0.8
-        ).setOrigin(0.5).setScrollFactor(0);
+        ).setOrigin(0.5).setScrollFactor(0).setDepth(5); // Lower depth
 
-        // Update the bank text styling
-        bank.setStyle({
-            fontFamily: '"Press Start 2P"',
-            fontSize: '16px',
-            color: '#FFFFFF',
-            align: 'center'
-        });
-
-        // Make sure coin elements are above the background
-        coins.setDepth(coinBg.depth + 1);
-        bank.setDepth(coinBg.depth + 1);
-
-        // Add the background to the bottom bar first
+        // Add the background to the bottom bar first, then the UI elements
         this.bottomBarContainer.add(coinBg);
+        this.bottomBarContainer.add([coins, bank, open_shop]);
+
+        // Force extreme depth values to ensure visibility
+        coins.setDepth(50);  // Very high depth
+        bank.setDepth(50);   // Very high depth
+
+        // Position them
+        coins.setPosition(this.controlsButton.button.x + this.controlsButton.button.width + 40, 20);
+        bank.setPosition(coins.x + 30, 20);
+        open_shop.setPosition(bank.x + 75, 20);
+
+        console.log("Coins position:", coins.x, coins.y, "depth:", coins.depth);
+        console.log("Background position:", coinBg.x, coinBg.y, "depth:", coinBg.depth);
 
         // Main UI Container
         this.uiContainer.add([this.topBarContainer, this.bottomBarContainer]);

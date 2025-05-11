@@ -99,15 +99,23 @@ export function createHUD(scene) {
     const sidebarCenter = 300; // Sidebar is vertically centered at 300px
     const iconSize = 0.8; // Scale of each icon
 
-     // Player Coins Block to UI
-    coins = scene.add.sprite(560, 560, 'coins').setScale(0.3).setDepth(1).setOrigin(0.5, 0.5); // I NEED ADDRESSED 
+    // Player Coins Block to UI
+    coins = scene.add.text(560, 560, '💰', {
+        fontSize: '32px',  // Larger font for the emoji
+        fontStyle: 'normal',
+        color: '#FFD700'  // Gold color to make it more visible
+    })
+    .setOrigin(0.5, 0.5)
+    .setDepth(20);  // Much higher depth to ensure it's on top
+
     bank = scene.add.text(600, 560, '0', {
         fontFamily: '"Press Start 2P"',
         fontSize: '16px',
         fontStyle: 'normal',
         color: '#ffffff'
     })
-    .setOrigin(0.5, 0.5).setDepth(2);
+    .setOrigin(0.5, 0.5)
+    .setDepth(10); // Higher depth to ensure it's visible
 
      // Spawn player shop sprites
     open_shop = scene.add.sprite(660, 560, 'open-shop').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5); // I NEED ADDRESSED
