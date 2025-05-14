@@ -9,6 +9,8 @@ export default class TutorialScene extends Phaser.Scene {
     preload() {
         this.load.image('page 1', 'assets/tutorial icons/page-1.png');
         this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
+
+        this.load.image('basic-game', 'assets/tutorial/basic-game.png');
     }
 
     create() {
@@ -49,10 +51,17 @@ export default class TutorialScene extends Phaser.Scene {
             color: '#ffffff',
             align: 'center'
         }).setOrigin(0.5);
+
+        
         
         // Tutorial content - use the original image for content if needed
-        const tutorialContent = this.add.image(centerX, centerY, 'page 1').setOrigin(0.5);
-        
+        const tutorialContent = this.add.image(centerX, centerY, 'page 1').setOrigin(0.5).setDepth(1);
+        const basicGame = this.add.image(centerX, centerY, 'basic-game').setOrigin(0.5).setDepth(2);
+        const scaleX = gameWidth / basicGame.width;
+        const scaleY = gameHeight / basicGame.height;
+        const scale = Math.max(scaleX, scaleY); // Choose max to cover the entire space
+        basicGame.setScale(scale).setAlpha(0.5);
+
         // Add back button
         const backButton = createDrawnButton(this, {
             x: centerX,

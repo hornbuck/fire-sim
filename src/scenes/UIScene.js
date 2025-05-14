@@ -227,8 +227,7 @@ export default class UIScene extends Phaser.Scene {
             0.8
         ).setOrigin(0.5).setScrollFactor(0).setDepth(5);
 
-        // Add backgrounds to bottom bar container first (lower depth)
-        this.bottomBarContainer.add([coinBg, open_shop.shopBg]);
+        
 
         // Add UI elements to bottom bar (higher depth)
         this.bottomBarContainer.add([coins, bank, open_shop]);
@@ -239,12 +238,11 @@ export default class UIScene extends Phaser.Scene {
 
         // Position shop button with proper spacing
         open_shop.setPosition(coinBg.x + coinBg.width/2 + 40, 20); // 40px spacing after coin background
-        open_shop.shopBg.setPosition(open_shop.x, 20);
 
         // Ensure proper depth for visibility
         coins.setDepth(coinBg.depth + 1);
         bank.setDepth(coinBg.depth + 1);
-        open_shop.setDepth(open_shop.shopBg.depth + 1);
+        open_shop.setDepth(open_shop.depth + 1);
 
         // Main UI Container
         this.uiContainer.add([this.topBarContainer, this.bottomBarContainer]);

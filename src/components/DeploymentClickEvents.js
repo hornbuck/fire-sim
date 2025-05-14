@@ -175,6 +175,14 @@ export function show_notification (scene, target, message = null) {
         scene.fallbackNotificationText.setText(target).setVisible(true);
         scene.time.delayedCall(2000, () => scene.fallbackNotificationText.setVisible(false));
     }
+
+    else {
+        target.setVisible(true);
+    
+        scene.time.delayedCall(1000, () => {
+         target.setVisible(false);
+        });
+    }
 }
 
 // This function allows the player to deploy an asset

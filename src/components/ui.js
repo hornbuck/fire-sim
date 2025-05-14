@@ -34,16 +34,6 @@ export let airtankerText;
 export let hotshotcrewText;
 export let smokejumperText;
 
-// Initialize purchase quantity for each asset
-export let s_hose;
-export let s_extinguisher;
-export let s_helicopter;
-export let s_firetruck;
-export let s_airtanker;
-export let s_hotshotcrew;
-export let s_smokejumpers;
-export let s_total = 0;
-
 // Initialize timer sprites for later rendering
 export let timerSprite;
 
@@ -100,14 +90,10 @@ export function createHUD(scene) {
     const iconSize = 0.8; // Scale of each icon
 
     // Create currency elements
-    coins = scene.add.text(550, 560, '💰', {
-        fontSize: '28px',
-        fontStyle: 'bold',
-        color: '#FFD700', // Gold color
-        fontFamily: '"Press Start 2P"'
-    })
+    coins = scene.add.sprite(550, 560, 'coins')
     .setOrigin(0.5, 0.5)
-    .setDepth(50);
+    .setDepth(50)
+    .setScale(0.23);
 
     bank = scene.add.text(610, 560, '0', {
         fontFamily: '"Press Start 2P"',
@@ -119,161 +105,21 @@ export function createHUD(scene) {
     .setDepth(50);
 
     // Create shop button
-    open_shop = scene.add.text(660, 560, '🛍️', {
-        fontSize: '28px',
-        fontStyle: 'normal'
-    })
+    open_shop = scene.add.sprite(660, 560, 'open-shop')
     .setOrigin(0.5, 0.5)
-    .setDepth(50);
-
-    // Create background for shop button
-    const shopBg = scene.add.rectangle(
-        open_shop.x,
-        open_shop.y,
-        50,  // Width for shop button
-        40,  // Height for shop button
-        0x333333,  // Match coin background color
-        0.8
-    ).setOrigin(0.5, 0.5).setDepth(45);  // Below the emoji's depth
-
-    // Store reference to the background
-    open_shop.shopBg = shopBg;
+    .setDepth(50)
+    .setScale(0.23);
 
     // Add interactivity to shop button
     open_shop.setInteractive({ useHandCursor: true })
     .on('pointerover', () => {
         open_shop.setAlpha(0.8);
-        open_shop.shopBg.fillColor = 0x444444; // Lighter on hover
+        open_shop.fillColor = 0x444444; // Lighter on hover
     })
     .on('pointerout', () => {
         open_shop.setAlpha(1.0);
-        open_shop.shopBg.fillColor = 0x333333; // Back to normal
+        open_shop.fillColor = 0x333333; // Back to normal
     })
-    .on('pointerdown', () => {
-        scene.shopBackgroundFade.setVisible(true);
-        scene.shopContainer.setVisible(true);
-    });
-
-    let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let remove_button = scene.add.sprite(400, 540, 'remove-button').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let purchase = scene.add.sprite(570, 500, 'purchase').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let no_funds = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'no-funds').setScale(1).setDepth(1100).setOrigin(0.5, 0.5).setVisible(false);
-    
-    let add_hose = scene.add.sprite(360, 210, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_extinguisher = scene.add.sprite(590, 210, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_helicopter = scene.add.sprite(360, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_firetruck = scene.add.sprite(590, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_airtanker = scene.add.sprite(360, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_smokejumpers = scene.add.sprite(500, 413, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-
-    // Add Price Tag Sprites
-    let price_hose = scene.add.sprite(380, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_hose_text = scene.add.text(393, 170, '$150', {
-        fontFamily: '"Press Start 2P"',
-        fontSize: '12px',
-        fontStyle: 'normal',
-        color: '#000000'
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-    let price_extinguisher = scene.add.sprite(620, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_extinguisher_text = scene.add.text(633, 170, '$25', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-    let price_helicopter = scene.add.sprite(390, 250, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_helicopter_text = scene.add.text(403, 240, '$300', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-    let price_firetruck = scene.add.sprite(620, 250, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_firetruck_text = scene.add.text(633, 240, '$250', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-    let price_airtanker = scene.add.sprite(390, 320, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_airtanker_text = scene.add.text(403, 310, '$250', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-    let price_hotshotcrew = scene.add.sprite(620, 320, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_hotshotcrew_text = scene.add.text(633, 310, '$700', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-    let price_smokejumpers = scene.add.sprite(532, 390, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
-    let price_smokejumpers_text = scene.add.text(545, 380, '$250', {
-        font: '22px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    // Initialize asset shop amounts
-    s_hose = scene.add.text(310, 210, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_extinguisher = scene.add.text(535, 210, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_helicopter = scene.add.text(310, 277, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_firetruck = scene.add.text(535, 277, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_airtanker = scene.add.text(310, 347, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_hotshotcrew = scene.add.text(535, 347, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_smokejumpers = scene.add.text(405, 413, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
-
-    s_total = scene.add.text(210, 483, '0', {
-        font: '32px Arial',
-        fill: '#000000',
-        align: 'center',
-        wordWrap: { width: 80 },
-    }).setDepth(600).setVisible(false);
 
     // Load player shop
     createNewShop(scene);
