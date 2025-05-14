@@ -270,16 +270,6 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
-        
-        // Ignore UI elements for camera
-        this.cameras.main.ignore([
-            this.uiContainer,
-            this.topBarContainer,
-            this.bottomBarContainer,
-            this.controlsPanel,
-            this.tileInfoText
-        ]);          
-    
     }   
 
     // update function
