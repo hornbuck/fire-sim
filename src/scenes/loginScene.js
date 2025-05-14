@@ -34,20 +34,10 @@ export default class LoginScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
-        // Solid gray background panel
-        this.add.rectangle(400, 240, 330, 330, 0x2D3436, 1).setOrigin(0.5); // taller box
-        this.add.rectangle(400, 240, 334, 334).setStrokeStyle(2, 0xffffff).setOrigin(0.5); // updated border
-
-        this.input.enabled = true; // allow inputs in LoginScene
-        this.scene.bringToTop();   // ensure LoginScene is on top
-        this.input.setDefaultCursor('default');
-
-        // Disable input for other scenes to prevent interaction during login
-        const mapScene = this.scene.get('MapScene');
-        if (mapScene) mapScene.input.enabled = false;
-
-        const uiScene = this.scene.get('UIScene');
-        if (uiScene) uiScene.input.enabled = false;
+        // Stop MapScene
+        if (this.scene.isActive('MapScene')) {
+            this.scene.stop('MapScene');
+        }
 
         // Add a fun title text with a retro arcade feel.
         this.add.text(400, 150, 'Log In', {
@@ -111,11 +101,9 @@ export default class LoginScene extends Phaser.Scene {
                     console.log('Login successful:', userCredential);
                     // Transition to game after successful login
                     // Reenable the MapScene and UIScene input
-                    const mapScene = this.scene.get('MapScene');
-                    if (mapScene) mapScene.input.enabled = true;
-                    
-                    const uiScene = this.scene.get('UIScene');
-                    if (uiScene) uiScene.input.enabled = true;
+                    this.scene.start('MapScene');
+                    this.scene.launch('UIScene');
+
                                 
                     this.startGame();
                 })
