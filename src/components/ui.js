@@ -77,7 +77,7 @@ export function createHUD(scene) {
     console.log("createHUD called");
 
     // Sidebar rectangle
-    const sidebarWidth = 50;
+    const sidebarWidth = 110;
     const sidebar = scene.add.rectangle(800 - sidebarWidth / 2, 300, sidebarWidth, 600, 0x2d3436);
     sidebar.setDepth(-1);
     console.log("Sidebar created");
