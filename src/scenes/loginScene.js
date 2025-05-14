@@ -34,9 +34,24 @@ export default class LoginScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
+        // Solid gray background panel
+        this.add.rectangle(400, 240, 330, 330, 0x2D3436, 1).setOrigin(0.5); // taller box
+        this.add.rectangle(400, 240, 334, 334).setStrokeStyle(2, 0xffffff).setOrigin(0.5); // updated border
+
+        this.input.enabled = true; // allow inputs in LoginScene
+        this.scene.bringToTop();   // ensure LoginScene is on top
+        this.input.setDefaultCursor('default');
+        const mapScene = this.scene.get('MapScene');
+        if (mapScene) mapScene.input.enabled = false;
+
+        const uiScene = this.scene.get('UIScene');
+        if (uiScene) uiScene.input.enabled = false;
+
+
+
         // Add a fun title text with a retro arcade feel.
-        this.add.text(400, 100, 'Please Log In', {
-            fontSize: '36px',
+        this.add.text(400, 150, 'Log In', {
+            fontSize: '25px',
             fill: '#FFD700',
             fontFamily: '"Press Start 2P", cursive',
             stroke: '#000',
@@ -95,12 +110,22 @@ export default class LoginScene extends Phaser.Scene {
                 .then((userCredential) => {
                     console.log('Login successful:', userCredential);
                     // Transition to game after successful login
+                    // Reenable the MapScene and UIScene input
+                    const mapScene = this.scene.get('MapScene');
+                    if (mapScene) mapScene.input.enabled = true;
+                    
+                    const uiScene = this.scene.get('UIScene');
+                    if (uiScene) uiScene.input.enabled = true;
+                                
                     this.startGame();
                 })
                 .catch((error) => {
                     console.error('Login error:', error);
                     alert(`Login failed: ${error.message}`);
                 });
+
+
+
         });
 
         // Create a DOM element for the "Back to Signup" button.
@@ -130,7 +155,7 @@ export default class LoginScene extends Phaser.Scene {
             fontFamily: '"Press Start 2P", cursive',
             border: '2px solid #FFFFFF',
             cursor: 'pointer'
-        }, 'RETURN TO GAME').setOrigin(0.5);
+        }, 'MAIN MENU').setOrigin(0.5);
 
         toGame.addListener('click');
         toGame.on('click', () => {
