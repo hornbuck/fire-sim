@@ -121,17 +121,16 @@ export default class LoginScene extends Phaser.Scene {
         });
 
         // Create a PLAY button to bypass login and go directly to the game
-        const toGame = this.add.dom(700, 20, 'button', {
-            width: '140px',
-            height: '30px',
-            fontSize: '12px',
+        const toGame = this.add.dom(395, 370, 'button', {
+            width: '200px',
+            height: '35px',
+            fontSize: '14px',
             color: '#FFFFFF',
             backgroundColor: '#8B0000',
             fontFamily: '"Press Start 2P", cursive',
             border: '2px solid #FFFFFF',
             cursor: 'pointer'
-        }, 'PLAY').setOrigin(0.5);
-        
+        }, 'RETURN TO GAME').setOrigin(0.5);
 
         toGame.addListener('click');
         toGame.on('click', () => {
