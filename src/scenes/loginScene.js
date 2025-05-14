@@ -52,7 +52,7 @@ export default class LoginScene extends Phaser.Scene {
         }).setOrigin(0.5);
         emailInput.node.setAttribute('type', 'email');
         emailInput.node.setAttribute('name', 'email');
-        emailInput.node.setAttribute('placeholder', 'Enter Email');
+        emailInput.node.setAttribute('placeholder', 'Email');
         emailInput.node.classList.add('input-field');
 
         // Create a DOM element for the password input.
@@ -64,22 +64,20 @@ export default class LoginScene extends Phaser.Scene {
         }).setOrigin(0.5);
         passwordInput.node.setAttribute('type', 'password');
         passwordInput.node.setAttribute('name', 'password');
-        passwordInput.node.setAttribute('placeholder', 'Enter Password');
+        passwordInput.node.setAttribute('placeholder', 'Password');
         passwordInput.node.classList.add('input-field');
 
         // Create a DOM element for the Login button.
         const loginButton = this.add.dom(470, 320, 'button', {
-            width: '100px',
+            width: '140px',
             height: '30px',
-            font: '16px "Georgia", serif',
-            padding: { x: 15, y: 10 },
-            fontSize: '20px',
-            color: '#fff',
-            backgroundColor: '#8B0000',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-        }, 'Login').setOrigin(0.5);
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#228B22',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'LOGIN').setOrigin(0.5);
 
         // Add a click event listener to the login button.
         loginButton.addListener('click');
@@ -107,17 +105,15 @@ export default class LoginScene extends Phaser.Scene {
 
         // Create a DOM element for the "Back to Signup" button.
         const signupButton = this.add.dom(315, 320, 'button', {
-            width: '120px',
+            width: '140px',
             height: '30px',
-            font: '16px "Georgia", serif',
-            padding: { x: 15, y: 10 },
-            fontSize: '20px',
-            color: '#fff',
-            backgroundColor: '#556B2F',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-        }, 'New User?').setOrigin(0.5);
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#555555',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'NEW USER?').setOrigin(0.5);
 
         signupButton.addListener('click');
         signupButton.on('click', () => {
@@ -126,15 +122,16 @@ export default class LoginScene extends Phaser.Scene {
 
         // Create a PLAY button to bypass login and go directly to the game
         const toGame = this.add.dom(700, 20, 'button', {
-            width: '130px',
-            height: '40px',
-            fontSize: '16px',
-            color: '#fff',
-            backgroundColor: '#4169E1',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
+            width: '140px',
+            height: '30px',
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#8B0000',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
         }, 'PLAY').setOrigin(0.5);
+        
 
         toGame.addListener('click');
         toGame.on('click', () => {
