@@ -2,14 +2,18 @@ export default class TerrainTile {
     // Static constants for terrain attributes
     static FLAM_GRASS = 0.8;
     static FUEL_GRASS = 2;
-    static FLAM_SHRUB = 0.5;
+    static FLAM_SHRUB = 2.5;
     static FUEL_SHRUB = 4;
     static FLAM_TREE = 0.3;
     static FUEL_TREE = 6;
     static FLAM_WATER = 0;
     static FUEL_WATER = 0;
-    static FLAM_HOUSE = 5;
-    static FUEL_HOUSE = 8;
+    static FLAM_GRASS_HOUSE = 7;
+    static FUEL_GRASS_HOUSE = 4;
+    static FLAM_SAND_HOUSE = 3;
+    static FUEL_SAND_HOUSE = 6;
+    static FLAM_DIRT_HOUSE = 5;
+    static FUEL_DIRT_HOUSE = 4;
 
     constructor(x, y, terrain) {
         this.x = x;          // Tile's X coordinate in the grid
@@ -32,7 +36,9 @@ export default class TerrainTile {
             shrub: { flammability: TerrainTile.FLAM_SHRUB, fuel: TerrainTile.FUEL_SHRUB },
             tree:  { flammability: TerrainTile.FLAM_TREE, fuel: TerrainTile.FUEL_TREE },
             water: { flammability: TerrainTile.FLAM_WATER, fuel: TerrainTile.FUEL_WATER },
-            house: { flammability: TerrainTile.FLAM_HOUSE, fuel: TerrainTile.FUEL_HOUSE},
+            'grass-house': { flammability: TerrainTile.FLAM_GRASS_HOUSE, fuel: TerrainTile.FUEL_GRASS_HOUSE},
+            'sand-house': { flammability: TerrainTile.FLAM_SAND_HOUSE, fuel: TerrainTile.FUEL_SAND_HOUSE},
+            'dirt-house': { flammability: TerrainTile.FLAM_DIRT_HOUSE, fuel: TerrainTile.FUEL_DIRT_HOUSE},
         };
         return terrainData[terrain] || { flammability: 0, fuel: 0 }; // Default to no flammability for unknown terrains
     }

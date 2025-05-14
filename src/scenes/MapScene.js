@@ -63,11 +63,17 @@ export default class MapScene extends Phaser.Scene {
         this.load.image('burned-grass', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass.png');
         this.load.image('burned-shrub', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-shrubs-on-sand.png');
         this.load.image('burned-tree', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-trees-on-light-dirt.png');
+        this.load.image('burned-dirt-house', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-dirt-house.png');
+        this.load.image('burned-sand-house', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-sand-house.png');
+        this.load.image('burned-grass-house', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass-house.png');
 
         // Preload extinguished terrain assets
         this.load.image('extinguished-grass', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/grass.png');
         this.load.image('extinguished-shrub', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/shrub.png');
         this.load.image('extinguished-tree', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/tree.png');
+        this.load.image('extinguished-dirt-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/dirt-house.png');
+        this.load.image('extinguished-sand-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/sand-house.png');
+        this.load.image('extinguished-grass-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/grass-house.png');
         
         // Preload animation assets
         this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
@@ -217,16 +223,16 @@ export default class MapScene extends Phaser.Scene {
         //     }
         // });
         
-        // // Keyboard controls for panning (WASD or arrow keys)
-        // this.cursors = this.input.keyboard.createCursorKeys();
+        // Keyboard controls for panning (WASD or arrow keys)
+         this.cursors = this.input.keyboard.createCursorKeys();
         
-        // // Add WASD keys
-        // this.wasd = {
-        //     up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-        //     down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-        //     left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-        //     right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-        // };
+         // Add WASD keys
+         this.wasd = {
+             up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+             down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+             right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+        };
         
         // Add zoom keys
         this.zoomKeys = {
@@ -476,7 +482,10 @@ handleTileClick(pointer) {
                             candidateTile.terrain && 
                             (candidateTile.terrain === 'tree' || 
                              candidateTile.terrain === 'shrub' || 
-                             candidateTile.terrain === 'grass')) {
+                             candidateTile.terrain === 'grass' ||
+                             candidateTile.terrain === 'dirt_house' ||
+                             candidateTile.terrain === 'sand_house' ||
+                             candidateTile.terrain === 'grass_house')) {
                             
                             startX = x;
                             startY = y;
@@ -758,12 +767,18 @@ handleTileClick(pointer) {
                 console.log("Score: ", this.score);
                 
                 // Update tile terrain in order to show extinguished sprite
-                if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
+                if (tile.terrain === 'grass') {
                     tile.terrain = 'extinguished-grass';
                 } else if (tile.terrain.includes('shrub') || tile.terrain === 'shrub') {
                     tile.terrain = 'extinguished-shrub';
                 } else if (tile.terrain.includes('tree') || tile.terrain === 'tree') {
                     tile.terrain = 'extinguished-tree';
+                } else if (tile.terrain.includes('dirt-house') || tile.terrain === 'dirt-house') {
+                    tile.terrain = 'extinguished-dirt-house';
+                } else if (tile.terrain.includes('sand-house') || tile.terrain === 'sand-house') {
+                    tile.terrain = 'extinguished-sand-house';
+                } else if (tile.terrain.includes('grass-house') || tile.terrain === 'grass-house') {
+                    tile.terrain = 'extinguished-grass-house';
                 }
         
                 // Update the tile's sprite to show it extinguished

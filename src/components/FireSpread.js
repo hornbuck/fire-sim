@@ -145,7 +145,14 @@ class FireSpread {
                         tile.terrain = 'burned-shrub';
                     } else if (tile.terrain === 'tree') {
                         tile.terrain = 'burned-tree';
+                    } else if (tile.terrain === 'grass-house') {
+                        tile.terrain = 'burned-grass-house';
+                    } else if (tile.terrain === 'sand-house') {
+                        tile.terrain = 'burned-sand-house';
+                    } else if (tile.terrain === 'dirt-house') {
+                        tile.terrain = 'burned-dirt-house';
                     }
+
                     // Update the tile's sprite to show it burned
                     this.updateSprite(x, y);
             }
