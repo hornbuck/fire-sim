@@ -2,9 +2,10 @@ import Map from '../components/MapGenerator.js';
 import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
-import { use_resource, activated_resource, mode } from '../components/DeploymentClickEvents.js';
 import { bank } from "../components/ui.js";
-import { getCoins, setCoins } from "../components/DeploymentClickEvents.js";
+import { getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
+
+
 
 export let paused = true;
 
@@ -26,7 +27,7 @@ export default class MapScene extends Phaser.Scene {
         this.UI_WIDTH = 100;      // Width of UI area on right side
         
         // Fire simulation settings
-        this.FIRE_SPREAD_INTERVAL = 7000; // Fire step interval (ms)
+        this.FIRE_SPREAD_INTERVAL = 12000; // Fire step interval (ms)
         
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds
@@ -100,6 +101,9 @@ export default class MapScene extends Phaser.Scene {
         if (!this.scene.isActive('UIScene')) {
             this.scene.launch('UIScene');
         }
+
+        // Init handler for deployment direction prompt
+        initDirectionHandler(this);
 
         // Set up input events
         this.input.on('pointerdown', this.handleTileClick, this);
@@ -188,40 +192,6 @@ export default class MapScene extends Phaser.Scene {
                 this.centerMapIfNeeded();
             }
         });
-        
-        // // Set up panning with middle mouse button or right mouse button
-        // this.input.on('pointerdown', (pointer) => {
-        //     // Only start panning with middle or right button and if pointer is in map area
-        //     if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < viewportWidth) {
-        //         this.isPanning = true;
-        //         this.lastPanPosition = { x: pointer.x, y: pointer.y };
-                
-        //         // Change cursor to grabbing
-        //         this.input.setDefaultCursor('grabbing');
-        //     }
-        // });
-        
-        // this.input.on('pointermove', (pointer) => {
-        //     if (this.isPanning) {
-        //         // Calculate the difference since last position
-        //         const deltaX = pointer.x - this.lastPanPosition.x;
-        //         const deltaY = pointer.y - this.lastPanPosition.y;
-                
-        //         // Move the camera
-        //         this.cameras.main.scrollX -= deltaX / this.currentZoom;
-        //         this.cameras.main.scrollY -= deltaY / this.currentZoom;
-                
-        //         // Update last position
-        //         this.lastPanPosition = { x: pointer.x, y: pointer.y };
-        //     }
-        // });
-        
-        // this.input.on('pointerup', () => {
-        //     if (this.isPanning) {
-        //         this.isPanning = false;
-        //         this.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
-        //     }
-        // });
         
         // Keyboard controls for panning (WASD or arrow keys)
          this.cursors = this.input.keyboard.createCursorKeys();
@@ -384,48 +354,55 @@ export default class MapScene extends Phaser.Scene {
     }
 
 handleTileClick(pointer) {
-    // Ignore clicks if in panning mode
-    if (this.isPanning) {
-        return;
-    }
-    
-    // Ignore clicks in the UI area
+    if (this.isPanning) return;
+
     const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
-    if (pointer.x > viewportWidth) {
-        return;
-    }
-    
-    // Convert screen coordinates to world coordinates
+    if (pointer.x > viewportWidth) return;
+
+    // Calculate tile coordinates
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    
-    // Calculate tile coordinates based on world point
     const tileX = Math.floor(worldPoint.x / this.TILE_SIZE);
     const tileY = Math.floor(worldPoint.y / this.TILE_SIZE);
 
     // Ensure click is within map bounds
-    if (tileX < 0 || tileX >= this.map.width || tileY < 0 || tileY >= this.map.height) {
-        return;
-    }
+    if (tileX < 0 || tileX >= this.map.width || tileY < 0 || tileY >= this.map.height) return;
 
     const clickedTile = this.map.getTile(tileX, tileY);
     if (!clickedTile) return;
 
-    console.log(`Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})`);
+    // —— DEPLOYMENT MODE GUARD ——  
+    if (mode === "deployment") {
+if (activated_resource === "hotshot-crew"   ||
+    activated_resource === "hotshotcrew") {
+            // Hotshots can drop on any tile:
+            const xPx = tileX * this.TILE_SIZE;
+            const yPx = tileY * this.TILE_SIZE;
+            use_resource(this, xPx, yPx, null);
+        } else {
+            // All other tools must target an existing fire sprite
+            const fireSprite = clickedTile.fireSprite;
+            if (!fireSprite) {
+                // (Optional) show a “No fire here” notification
+                return;
+            }
+            use_resource(this, fireSprite.x, fireSprite.y, fireSprite);
+        }
+        return;  // skip the normal tile-info UI after deploying
+    }
+
+    // —— NORMAL TILE SELECTION UI ——  
     this.selectedTile = clickedTile;
     this.selectionMarker
         .setVisible(true)
         .setPosition(tileX * this.TILE_SIZE, tileY * this.TILE_SIZE);
     this.lastTileInfoSnapshot = { ...clickedTile };
 
-    // Send tile info to UIScene
-    this.events.emit('tileInfo', {
+    this.events.emit("tileInfo", {
         ...clickedTile,
         screenX: pointer.x,
         screenY: pointer.y
     });
-  
 }
-
 
     startFire() {
         console.log("Starting fire initialization...");
@@ -607,6 +584,7 @@ handleTileClick(pointer) {
         if (activeFires === 0) {
             console.log("You win!");
             this.isFireSimRunning = false;
+            this.events.emit('gameWon');
             this.events.emit('fireSimToggled', false);
             return;
         }
@@ -709,14 +687,11 @@ handleTileClick(pointer) {
         const adjustedSpeed = this.CAMERA_SPEED / this.currentZoom;
         
         // Calculate camera movement based on keyboard input
-        // let moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
-        //               ((this.cursors.right.isDown || this.wasd.right.isDown) ? adjustedSpeed : 0);
+        let moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
+                      ((this.cursors.right.isDown || this.wasd.right.isDown) ? adjustedSpeed : 0);
         
-        // let moveY = ((this.cursors.up.isDown || this.wasd.up.isDown) ? -adjustedSpeed : 0) +
-        //               ((this.cursors.down.isDown || this.wasd.down.isDown) ? adjustedSpeed : 0);
-
-        let moveX = 0;
-        let moveY = 0;
+        let moveY = ((this.cursors.up.isDown || this.wasd.up.isDown) ? -adjustedSpeed : 0) +
+                      ((this.cursors.down.isDown || this.wasd.down.isDown) ? adjustedSpeed : 0);
         
         // Move camera
         if (moveX !== 0 || moveY !== 0) {
@@ -764,6 +739,7 @@ handleTileClick(pointer) {
                 // Update burn status
                 tile.burnStatus = 'extinguished';
                 this.score += 1;
+                this.events.emit('scoreUpdated', this.score);
                 console.log("Score: ", this.score);
                 
                 // Update tile terrain in order to show extinguished sprite

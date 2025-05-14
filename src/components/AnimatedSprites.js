@@ -128,12 +128,6 @@ export default class AnimatedSprite {
         scene.time.delayedCall(t_hose, () => {
             hoseSprite.destroy();
         });
-
-        // Destroy fire at end of animation
-        scene.time.delayedCall(t_hose, () => {
-            fireSprite.destroy();
-        });
-        
     }
 
     //----------------------------------
@@ -156,9 +150,6 @@ export default class AnimatedSprite {
         scene.time.delayedCall(t_extinguisher, () => {
             cloudSprite.destroy();
         });
-
-        // Destory fire
-        fireSprite.destroy();
     }
 
     //----------------------------------
@@ -179,11 +170,6 @@ export default class AnimatedSprite {
         truckSprite.play('firetruckAnimConfig');
         scene.time.delayedCall(t_firetruck, () => {
             truckSprite.destroy();
-        });
-
-        // Destroy fire at end of animation
-        scene.time.delayedCall(t_firetruck, () => {
-            fireSprite.destroy();
         });
     }
 
@@ -206,12 +192,6 @@ export default class AnimatedSprite {
         scene.time.delayedCall(t_helicopter, () => {
             helicopterSprite.destroy();
         });
-
-        // Destroy fire at end of animation
-        scene.time.delayedCall(t_helicopter, () => {
-            fireSprite.destroy();
-        });
-        
     }
 
     //----------------------------------
@@ -232,18 +212,12 @@ export default class AnimatedSprite {
         airtankerSprite.play('airtankerAnimConfig');
         scene.time.delayedCall(t_airtanker, () => {
             airtankerSprite.destroy();
-        });
-
-        // Destroy fire at end of animation
-        scene.time.delayedCall(t_airtanker, () => {
-            fireSprite.destroy();
-        });
-        
+        });   
     }
 
     //----------------------------------
     ////// HOTSHOT CREW ASSET /////
-    useHotshotCrew(scene, x, y, fireSprite) {
+    useHotshotCrew(scene, x, y) {
         console.log("Hotshot Crew activated!");
 
         // Register truck animation
@@ -260,12 +234,6 @@ export default class AnimatedSprite {
         scene.time.delayedCall(t_hotshotcrew, () => {
             airtankerSprite.destroy();
         });
-
-        // Destroy fire at end of animation
-        scene.time.delayedCall(t_hotshotcrew, () => {
-            fireSprite.destroy();
-        });
-        
     }
 
     //----------------------------------
@@ -300,11 +268,5 @@ export default class AnimatedSprite {
                 smokejumpersGroundSprite.destroy();
             }) 
         });
-
-        // Destroy fire at end of animation
-        scene.time.delayedCall(t_smokejumpers_ground, () => {
-            fireSprite.destroy();
-        });
-        
     }
 }
