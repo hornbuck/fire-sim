@@ -78,7 +78,7 @@ export function createNewShop(scene) {
         wordWrap: { width: 80 },
     }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
 
-    s_smokejumpers = scene.add.text(405, 413, '0', {
+    s_smokejumpers = scene.add.text(310, 417, '0', {
         fontFamily: '"Press Start 2P"',
         fontSize: '20px',
         fill: '#000000',
@@ -107,7 +107,7 @@ export function createNewShop(scene) {
     let add_firetruck = scene.add.sprite(590, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
     let add_airtanker = scene.add.sprite(360, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
     let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
-    let add_smokejumpers = scene.add.sprite(500, 413, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_smokejumpers = scene.add.sprite(360, 417, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
 
     // Add Price Tag Sprites
     let price_hose = scene.add.sprite(380, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
