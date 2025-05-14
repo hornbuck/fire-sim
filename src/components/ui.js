@@ -120,7 +120,7 @@ export function createHUD(scene) {
         open_shop.setAlpha(1.0);
         open_shop.fillColor = 0x333333; // Back to normal
     })
-
+   
     // Load player shop
     createNewShop(scene);
 
