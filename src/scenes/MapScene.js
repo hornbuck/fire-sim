@@ -155,7 +155,7 @@ export default class MapScene extends Phaser.Scene {
         
         // Create a camera that doesn't include the UI area
         this.cameras.main.setBounds(0, 0, this.mapPixelWidth, this.mapPixelHeight);
-        this.cameras.main.setViewport(0, 0, viewportWidth, viewportHeight);
+        this.cameras.main.setViewport(0, 0, this.cameras.main.width, this.cameras.main.height);
         
         // Center the camera on the map
         this.cameras.main.centerOn(this.mapPixelWidth / 2, this.mapPixelHeight / 2);
