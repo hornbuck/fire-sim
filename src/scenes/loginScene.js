@@ -136,7 +136,7 @@ export default class LoginScene extends Phaser.Scene {
         // Create a PLAY button to bypass login and go directly to the game
         const toGame = this.add.dom(395, 370, 'button', {
             width: '200px',
-            height: '35px',
+            height: '30px',
             fontSize: '14px',
             color: '#FFFFFF',
             backgroundColor: '#8B0000',
