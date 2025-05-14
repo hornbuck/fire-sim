@@ -41,13 +41,13 @@ export default class LoginScene extends Phaser.Scene {
         this.input.enabled = true; // allow inputs in LoginScene
         this.scene.bringToTop();   // ensure LoginScene is on top
         this.input.setDefaultCursor('default');
+
+        // Disable input for other scenes to prevent interaction during login
         const mapScene = this.scene.get('MapScene');
         if (mapScene) mapScene.input.enabled = false;
 
         const uiScene = this.scene.get('UIScene');
         if (uiScene) uiScene.input.enabled = false;
-
-
 
         // Add a fun title text with a retro arcade feel.
         this.add.text(400, 150, 'Log In', {
