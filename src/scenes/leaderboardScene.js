@@ -69,7 +69,7 @@ export default class LeaderboardScene extends Phaser.Scene {
       maxHeight:       '400px',
       overflowY:       'auto',
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      border:          '3px solid #FFD700',
+      border:          '3px solid #FFFFFF',
       borderRadius:    '10px',
       padding:         '16px',
       boxSizing:       'border-box',
@@ -104,12 +104,13 @@ export default class LeaderboardScene extends Phaser.Scene {
       .leader-panel .leader-list li {
         padding: 6px 0;
         border-bottom: 1px solid rgba(255,215,0,0.3);
+        color: #FFFFFF;
       }
       .leader-panel .leader-list li:last-child {
         border-bottom: none;
       }
       .leader-panel h2 {
-        color: #FFFFFF;
+        color: #FFD700;
         font-size: 20px;
       }
       .leader-panel li strong {

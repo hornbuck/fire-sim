@@ -66,7 +66,7 @@ export default class ProfileScene extends Phaser.Scene {
     // 3) Build the list‑item HTML for each score
     //    e.g. "<li>#1: 1200</li><li>#2: 950</li>…"
     const listItems = topScores
-        .map((s, i) => `<li>#${i + 1}: ${s}</li>`)
+        .map((s, i) => `<li><strong>#${i+1}</strong> ${s}</li>`)
         .join('');
 
     // 4) Create an empty DOM <div> as our score panel container
@@ -75,7 +75,7 @@ export default class ProfileScene extends Phaser.Scene {
         maxHeight:       '500px',                // limit height, enable scroll
         overflowY:       'auto',                 // vertical scroll if needed
         backgroundColor: 'rgba(0, 0, 0, 0.85)',  // dark translucent backdrop
-        border:          '3px solid #FFD700',    // gold border
+        border:          '3px solid #FFFFFF',    // gold border
         borderRadius:    '10px',                 // rounded corners
         padding:         '12px',                 // inner spacing
         boxSizing:       'border-box',           // include padding in width
@@ -116,14 +116,18 @@ export default class ProfileScene extends Phaser.Scene {
     .score-panel .score-list li {
         padding: 4px 0;                     /* vertical spacing */
         border-bottom: 1px solid rgba(255,215,0,0.3);  /* subtle separators */
+        color: #FFFFFF;
     }
     .score-panel .score-list li:last-child {
         border-bottom: none;                /* no line after last item */
     }
     .score-panel h2 {
-        color: #FFFFFF;
+        color: #FFD700;
         font-size: 20px;
-      }
+    }
+    .score-panel li strong {
+        color: #FFD700;
+    }
     `;
     document.head.append(style);
 
