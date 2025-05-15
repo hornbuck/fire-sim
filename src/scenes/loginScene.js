@@ -8,7 +8,7 @@ import Phaser from 'phaser';
 import MapScene from './MapScene.js';
 import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { createDrawnButton } from '../components/ButtonManager.js';
 
 
@@ -131,6 +131,39 @@ export default class LoginScene extends Phaser.Scene {
         signupButton.addListener('click');
         signupButton.on('click', () => {
             this.scene.start('SignupScene');
+        });
+        
+        // Listen to Firebase auth changes
+        auth.onAuthStateChanged(user => {
+            // If there’s a user, show the logout button
+            if (user) {
+                // Create the Logout button in the top-left
+                this.logoutButton = this.add.dom(50, 20, 'button', {
+                    width: '100px',
+                    height: '30px',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    backgroundColor: '#8B0000',
+                    fontFamily: '"Press Start 2P", cursive',
+                    border: '2px solid #FFFFFF',
+                    cursor: 'pointer'
+                }, 'LOGOUT')
+                    .setOrigin(0, 0);
+
+                this.logoutButton.addListener('click');
+                this.logoutButton.on('click', () => {
+                    signOut(auth)
+                    .then(() => {
+                        console.log('User logged out');
+                        this.startGame()
+                    })
+                    .catch(err => console.error('Logout failed:', err));
+                });
+             } else if (this.logoutButton) {
+            // No user: remove the button if it exists
+            this.logoutButton.destroy();
+            this.logoutButton = null;
+            }
         });
 
         // Create a PLAY button to bypass login and go directly to the game

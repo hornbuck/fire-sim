@@ -184,8 +184,8 @@ export default class HamburgerMenu {
                 break;
             case 'profile':
                 // Handle profile action
-                if (this.scene.events) {
-                    this.scene.events.emit('openProfile');
+                if (this.scene.scene) {
+                    this.scene.scene.launch('ProfileScene');
                 }
                 this.toggleMenu();
                 break;

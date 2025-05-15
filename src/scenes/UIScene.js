@@ -4,6 +4,7 @@ import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
 import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
+import {auth} from '../firebaseConfig.js'
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -11,7 +12,7 @@ export default class UIScene extends Phaser.Scene {
         
         // UI Layout constants
         this.SCREEN_WIDTH = 800;
-        this.SCREEN_HEIGHT = 600;
+         this.SCREEN_HEIGHT = 600;
         this.UI_SIDEBAR_WIDTH = 100;
         this.GAME_AREA_WIDTH = this.SCREEN_WIDTH - this.UI_SIDEBAR_WIDTH;
         

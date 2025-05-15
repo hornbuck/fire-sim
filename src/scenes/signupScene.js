@@ -39,7 +39,7 @@ export default class SignupScene extends Phaser.Scene {
     
         // Input fields
         const fields = [
-            { placeholder: 'Name', y: 180, type: 'text' },
+            { placeholder: 'Username', y: 180, type: 'text' },
             { placeholder: 'Email', y: 230, type: 'email' },
             { placeholder: 'Password', y: 280, type: 'password' },
             { placeholder: 'Repeat Password', y: 330, type: 'password' },
