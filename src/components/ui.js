@@ -67,8 +67,8 @@ export function createHUD(scene) {
     console.log("createHUD called");
 
     // Sidebar rectangle
-    const sidebarWidth = 130;
-    const sidebar = scene.add.rectangle(window.innerWidth, 300, sidebarWidth, 600, 0x2d3436);
+    const sidebarWidth = 170;
+    const sidebar = scene.add.rectangle(window.innerWidth, 300, sidebarWidth, window.innerHeight + sidebarWidth, 0x2d3436);
     sidebar.setDepth(-1);
     console.log("Sidebar created");
 
@@ -125,10 +125,10 @@ export function createHUD(scene) {
     createNewShop(scene);
 
     // Group 1: Fire Hose
-    let hose = scene.add.sprite(window.innerWidth - 30, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
+    let hose = scene.add.sprite(window.innerWidth - 40, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
     hose.name = "hose";
     all_assets[0] = hose;
-    hoseText = set_text(`10 left`, 750, 90, scene);
+    hoseText = set_text(`10 left`, window.innerWidth - 40, 90, scene);
     timerSprite = scene.add.sprite(750, 50, 'set-timer').setDepth(10).setScale(1.0, 1.0).setVisible(false);
     activate_resource(0, hose, "hose",'assets/cursors/water.png', 'assets/cursors/glove.png', "WATER", "NO-WATER", scene);
 
@@ -138,10 +138,10 @@ export function createHUD(scene) {
     show_tooltip(hose, 'hose-tooltip', 660, 55, scene);
 
     // Group 2: Fire Extinguisher
-    let extinguisher = scene.add.image(750, 130, 'extinguisher').setScale(iconSize).setOrigin(0.5, 0.5);
+    let extinguisher = scene.add.image(window.innerWidth - 40, 130, 'extinguisher').setScale(iconSize).setOrigin(0.5, 0.5);
     extinguisher.name = "extinguisher";
     all_assets[1] = extinguisher;
-    extinguisherText = scene.add.text(750, 170, '5 left', {
+    extinguisherText = scene.add.text(window.innerWidth - 40, 170, '5 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -155,10 +155,10 @@ export function createHUD(scene) {
     show_tooltip(extinguisher, 'extinguisher-tooltip', 660, 135, scene);
 
     // Group 3: Helicopter
-    let helicopter = scene.add.image(750, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
+    let helicopter = scene.add.image(window.innerWidth - 40, 210, 'helicopter').setScale(iconSize).setOrigin(0.5, 0.5);
     helicopter.name = "helicopter";
     all_assets[2] = helicopter;
-    helicopterText = scene.add.text(750, 250, '3 left', {
+    helicopterText = scene.add.text(window.innerWidth - 40, 250, '3 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -172,10 +172,10 @@ export function createHUD(scene) {
     show_tooltip(helicopter, 'helicopter-tooltip', 660, 215, scene);
 
     // Group 4: Firetruck
-    let firetruck = scene.add.image(750, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
+    let firetruck = scene.add.image(window.innerWidth - 40, 290, 'firetruck').setScale(iconSize).setOrigin(0.5, 0.5);
     firetruck.name = "firetruck";
     all_assets[3] = firetruck;
-    firetruckText = scene.add.text(750, 330, '3 left', {
+    firetruckText = scene.add.text(window.innerWidth - 40, 330, '3 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -189,10 +189,10 @@ export function createHUD(scene) {
     show_tooltip(firetruck, 'firetruck-tooltip', 660, 295, scene);
 
     // Group 5: Airtanker
-    let airtanker = scene.add.image(750, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
+    let airtanker = scene.add.image(window.innerWidth - 40, 370, 'airtanker').setScale(iconSize).setOrigin(0.5, 0.5);
     airtanker.name = "airtanker";
     all_assets[4] = airtanker;
-    airtankerText = scene.add.text(750, 410, '2 left', {
+    airtankerText = scene.add.text(window.innerWidth - 40, 410, '2 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -206,10 +206,10 @@ export function createHUD(scene) {
     show_tooltip(airtanker, 'airtanker-tooltip', 660, 375, scene);
 
     // Group 6: Hotshot Crew
-    let hotshotcrew = scene.add.image(750, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
+    let hotshotcrew = scene.add.image(window.innerWidth - 40, 450, 'hotshot-crew').setScale(iconSize).setOrigin(0.5, 0.5);
     hotshotcrew.name = "hotshot-crew";
     all_assets[5] = hotshotcrew;
-    hotshotcrewText = scene.add.text(750, 490, '1 left', {
+    hotshotcrewText = scene.add.text(window.innerWidth - 40, 490, '1 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -223,10 +223,10 @@ export function createHUD(scene) {
     show_tooltip(hotshotcrew, 'hotshot-crew-tooltip', 660, 455, scene);
 
     // Group 7: Smokejumper
-    let smokejumper = scene.add.image(750, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
+    let smokejumper = scene.add.image(window.innerWidth - 40, 530, 'smokejumper').setScale(iconSize).setOrigin(0.5, 0.5);
     smokejumper.name = "smokejumper";
     all_assets[6] = smokejumper;
-    smokejumperText = scene.add.text(750, 570, '5 left', {
+    smokejumperText = scene.add.text(window.innerWidth - 40, 570, '5 left', {
         font: '14px Arial',
         fill: '#ffffff',
         align: 'center',
