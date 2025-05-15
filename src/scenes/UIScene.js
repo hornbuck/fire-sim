@@ -239,9 +239,9 @@ export default class UIScene extends Phaser.Scene {
 
         // Position currency elements
         // Update the positions of coins, bank, and open_shop
-        coins.setPosition(this.scale.width - 450, 0).setDepth(10);
-        bank.setPosition(this.scale.width - 435, 0).setDepth(10);
-        open_shop.setPosition(this.scale.width - 360, 0).setDepth(10);
+        coins.setPosition(window.innerWidth - 450, 0).setDepth(10);
+        bank.setPosition(window.innerWidth - 435, 0).setDepth(10);
+        open_shop.setPosition(window.innerWidth - 360, 0).setDepth(10);
 
         // Ensure proper depth for visibility
         coins.setDepth(1);
@@ -616,7 +616,7 @@ export default class UIScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Create a container for the info button
-        this.infoButtonContainer = this.add.container(575, 540, [infoBg, infoButton])
+        this.infoButtonContainer = this.add.container(window.innerWidth - 290, window.innerHeight - 56, [infoBg, infoButton])
             .setScrollFactor(0);
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 
