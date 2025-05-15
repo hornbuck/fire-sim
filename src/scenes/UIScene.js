@@ -68,12 +68,17 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('wind_1arrow', 'assets/UI/wind_1arrow.png')
         this.load.image('wind_2arrow', 'assets/UI/wind_2arrow.png')
         this.load.image('wind_3arrow', 'assets/UI/wind_3arrow.png')
-        this.load.image('wind-arrow', 'assets/UI/north.png')
-        this.load.image('north', 'assets/UI/north.png')
-        this.load.image('east', 'assets/UI/east.png')
-        this.load.image('south', 'assets/UI/south.png')
-        this.load.image('west', 'assets/UI/west.png')
+        this.load.image('wind-arrow', 'assets/UI/up.png')
+        this.load.image('up', 'assets/UI/up.png')
+        this.load.image('right', 'assets/UI/right.png')
+        this.load.image('down', 'assets/UI/down.png')
+        this.load.image('left', 'assets/UI/left.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
+        this.load.image('Title', 'assets/UI/Title.png')
+        this.load.image('drop_direction_vertical', 'assets/UI/drop_direction_vertical.png');
+        this.load.image('drop_direction_horizontal', 'assets/UI/drop_direction_horizontal.png');
+        this.load.image('toggle_ui_off', 'assets/UI/toggle_ui_off.png')
+        this.load.image('toggle_ui_on', 'assets/UI/toggle_ui_on.png')
     }
 
     create() {
@@ -85,6 +90,8 @@ export default class UIScene extends Phaser.Scene {
         this.topBarContainer = this.add.container(0, 0);
 
         this.bottomBarContainer = this.add.container(0, this.scale.height - 60);
+
+        this.uiToggleButtonContainer = this.add.container(0, 0).setScrollFactor(0);
     
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
@@ -171,9 +178,9 @@ export default class UIScene extends Phaser.Scene {
         this.topBarContainer.add(this.gameClockText);
     
         // Wind Gauge and Risk Text
-        this.windGaugeBg.setPosition(600, 30);
-        this.windGaugeFill.setPosition(600, 30);
-        this.windArrow.setPosition(700, 30);
+        this.windGaugeBg.setPosition(600, 40);
+        this.windGaugeFill.setPosition(600, 40);
+        this.windArrow.setPosition(700, 40);
         this.riskText.setPosition(500, 15);
     
         this.topBarContainer.add([
@@ -268,6 +275,10 @@ export default class UIScene extends Phaser.Scene {
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
         this.scene.get('MapScene').events.on('mapSizeChanged', this.updateMapInfo, this);
+        this.scene.get('MapScene').events.on('scoreUpdated', this.updateScore, this);
+        this.scene.get('MapScene').events.on('gameWon', () => {
+            this.winText.setVisible(true);
+        });
     }   
 
     // update function
@@ -284,8 +295,15 @@ export default class UIScene extends Phaser.Scene {
         }
     }
 
-    toggleUI(show=true) {
+    toggleUI(show = true) {
         this.uiContainer.setVisible(show);
+        this.uiToggleButtonContainer.setVisible(true);  // Always keep toggle button visible
+    
+        // Update toggle icon texture
+        const newTexture = show ? 'toggle_ui_on' : 'toggle_ui_off';
+        if (this.uiToggleButton) {
+            this.uiToggleButton.setTexture(newTexture);
+        }
     }
 
     _createTooltip(target, text, offsetY = -20) {
@@ -340,7 +358,7 @@ export default class UIScene extends Phaser.Scene {
             this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT / 2,
             'wind-arrow'
         )
-        .setDisplaySize(16, 16)
+        .setDisplaySize(20, 20)
         .setOrigin(0.5)
         .setScrollFactor(0);
         this.uiContainer.add(this.windArrow);
@@ -382,7 +400,7 @@ export default class UIScene extends Phaser.Scene {
         // Fire progress bar foreground (starts at 0 width)
         this.fireStepBar = this.add.rectangle(
             this.GAME_CLOCK_X,
-            this.GAME_CLOCK_Y + 28,
+            this.GAME_CLOCK_Y + 50,
             0,
             8,
             0xff4500
@@ -425,6 +443,83 @@ export default class UIScene extends Phaser.Scene {
             .setScrollFactor(0)
 
         this.uiContainer.add(this.tileInfoText);
+
+                // --- Score Text ---
+        this.scoreText = this.add.text(330, 40, "Score: 0", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            padding: { x: 8, y: 4 }
+        }).setScrollFactor(0);
+        this.topBarContainer.add(this.scoreText);
+
+        // --- Win Text (Initially Hidden) ---
+        this.winText = this.add.text(this.scale.width / 2, this.scale.height / 2, "YOU WIN!", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '24px',
+            fill: '#00FF00',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: { x: 20, y: 10 },
+            align: "center"
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1000)
+        .setVisible(false);
+        this.uiContainer.add(this.winText);
+
+        // --- Direction-choice prompt (hidden by default) ---
+        this.directionPromptContainer = this.add.container(
+            this.SCREEN_WIDTH/2, this.SCREEN_HEIGHT/2
+        )
+        .setScrollFactor(0)
+        .setDepth(1001)
+        .setVisible(false)
+
+        // background
+        const bg = this.add.rectangle(0, 0, 350, 200, 0x000000, 0.8).setOrigin(0.5);
+        // prompt text
+        const label = this.add
+            .text(0, -82, "Choose Drop Direction", {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '16px',
+                color: '#FFFFFF'
+            })
+            .setOrigin(0.5)
+
+            // buttons
+            const btnStyle = { fontFamily:'"Press Start 2P"', fontSize:'14px', color:'#ffffff', backgroundColor:'#444', padding:{x:14,y:8} };
+            const vertical = this.add
+                .text(0, -40, "Vertical", btnStyle)
+                .setOrigin(0.5)
+                .setInteractive()
+                .on('pointerdown', () => {
+                this.directionPromptContainer.setVisible(false);
+                this.events.emit('directionChosen', 'vertical');
+                });
+
+            const horizontal = this.add
+                .text(0, 0, "Horizontal", btnStyle)
+                .setOrigin(0.5)
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.directionPromptContainer.setVisible(false);
+                this.events.emit('directionChosen', 'horizontal');
+                });
+
+            const cancel = this.add
+                .text(0, 40, "Cancel", btnStyle)
+                .setOrigin(0.5)
+                .setInteractive()
+                .on('pointerdown', () => {
+                    this.directionPromptContainer.setVisible(false);
+                    this.events.emit('directionChosen', null);
+            });
+
+            this.directionPromptContainer.add([bg, label, vertical, horizontal, cancel]);
+            this.uiContainer.add(this.directionPromptContainer);
+
     }
     
     createZoomControls() {
@@ -476,17 +571,37 @@ export default class UIScene extends Phaser.Scene {
             this.handleZoomChange(mapScene.currentZoom);
             }
         });
-        // UIScene.js → inside createUIElements(), after zoom controls :contentReference[oaicite:0]{index=0}&#8203;:contentReference[oaicite:1]{index=1}
-        const PAD_X = 50, PAD_Y = this.SCREEN_HEIGHT - 100;
+
+
+        // Create toggle icon (default to 'on' since UI starts visible)
+        this.uiToggleButton = this.add.image(-60, 420,'toggle_ui_on')
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDisplaySize(32, 32)
+        .on('pointerover', () => this.uiToggleButton.setTint(0xBBBBBB))  // Darken on hover
+        .on('pointerout', () => this.uiToggleButton.clearTint())         // Clear tint on exit
+        .on('pointerdown', () => {
+            const newState = !this.uiContainer.visible;
+            this.toggleUI(newState);
+            const newTexture = newState ? 'toggle_ui_on' : 'toggle_ui_off';
+            this.uiToggleButton.setTexture(newTexture);
+        });
+        
+        // Add to its own container at position (100, 100)
+        this.uiToggleButtonContainer = this.add.container(100, 100, [this.uiToggleButton])
+            .setScrollFactor(0);
+
+        const PAD_X = 20, PAD_Y = this.SCREEN_HEIGHT-280;
         const SIZE = 32;
 
         const arrows = {
-        up:    this.add.image(PAD_X + SIZE, PAD_Y - SIZE,  'north'),
-        down:  this.add.image(PAD_X + SIZE, PAD_Y + SIZE,  'south'),
-        left:  this.add.image(PAD_X,        PAD_Y,        'west'),
-        right: this.add.image(PAD_X + SIZE*2, PAD_Y,      'east')
+        up:    this.add.image(PAD_X + SIZE, PAD_Y - SIZE,  'up'),
+        down:  this.add.image(PAD_X + SIZE, PAD_Y + SIZE,  'down'),
+        left:  this.add.image(PAD_X,        PAD_Y,        'left'),
+        right: this.add.image(PAD_X + SIZE*2, PAD_Y,      'right')
         };
         for (let dir in arrows) {
+            this.uiContainer.add(arrows[dir]);
         arrows[dir]
             .setDisplaySize(SIZE, SIZE)
             .setScrollFactor(0)
@@ -537,6 +652,12 @@ export default class UIScene extends Phaser.Scene {
         else if (percent > 33) color = 0xffff00;
         this.fireStepBar.fillColor = color;
     }
+
+        updateScore(score) {
+        if (this.scoreText) {
+            this.scoreText.setText(`Score: ${score}`);
+        }
+    } 
 
     // Handler for game clock updates
     updateGameClock(elapsedTime) {
@@ -592,8 +713,8 @@ export default class UIScene extends Phaser.Scene {
 
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
-        if (this.fireButton) {
-            this.fireButton.setTexture(isRunning ? 'stop_sim' : 'start_sim');
+        if (this.fireButton && this.fireButton.buttonText) {
+            this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
         }
     }
 
