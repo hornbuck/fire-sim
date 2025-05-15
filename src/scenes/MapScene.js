@@ -3,7 +3,7 @@ import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
 import { bank } from "../components/ui.js";
-import { setCoins, getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
+import { getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
 
 
 
@@ -235,9 +235,6 @@ export default class MapScene extends Phaser.Scene {
     }
 
     initializeMap() {
-        // Sets Player Score to zero
-        this.score = 0;
-
         // Preserve current zoom level if restarting with existing map
         const previousZoom = this.currentZoom || 1;
         
