@@ -247,7 +247,7 @@ export default class UIScene extends Phaser.Scene {
     
         // Listen for events from MapScene
         this.scene.get('MapScene').events.on('updateGameClock', this.updateGameClock, this);
-        this.scene.get('MapScene').events.on('weatherUpdated', this.updateWeatherDisplay, this);
+        // this.scene.get('MapScene').events.on('weatherUpdated', this.updateWeatherDisplay, this);
         this.scene.get('MapScene').events.on('tileInfo', this.updateTileInfo, this);
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
@@ -442,6 +442,7 @@ export default class UIScene extends Phaser.Scene {
                 .on('pointerdown', () => {
                     this.directionPromptContainer.setVisible(false);
                     this.events.emit('directionChosen', null);
+                    return;
             });
 
             this.directionPromptContainer.add([bg, label, vertical, horizontal, cancel]);
@@ -776,11 +777,11 @@ export default class UIScene extends Phaser.Scene {
         else this.windGaugeFill.fillColor = 0xff0000;
     }
 
-    updateWeatherDisplay(weather) {
-        this.updateWindDisplay(weather);
-        this.updateRiskDisplay(weather.getRiskCategory());
-        this.updateInfoPanel();
-    }
+    // updateWeatherDisplay(weather) {
+    //     this.updateWindDisplay(weather);
+    //     this.updateRiskDisplay(weather.getRiskCategory());
+    //     this.updateInfoPanel();
+    // }
 
     // Handler for fire simulation toggle updates
     updateFireButton(isRunning) {
