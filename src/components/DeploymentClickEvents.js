@@ -81,7 +81,7 @@ export function set_text(text, x, y, scene) {
 
 // This function is called by activate_resource (below), in order to deactivate resources that are already active
 // This way, only one asset is activated at a time.
-function deactivate(sprites) {
+export function deactivate(sprites) {
     for (let i = 0; i <= 6; i++) {
         let asset = sprites[i];
         if (`${activated_resource}` === asset.name) {

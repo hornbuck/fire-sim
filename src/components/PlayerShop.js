@@ -1,5 +1,5 @@
-import { bank } from "./ui.js";
-import { show_notification, getCoins, setCoins } from "./DeploymentClickEvents.js";
+import { bank, all_assets } from "./ui.js";
+import { show_notification, getCoins, setCoins, deactivate } from "./DeploymentClickEvents.js";
 import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setHelicopter, getFiretruck, setFiretruck, getAirtanker, setAirtanker, getHotshotCrew, setHotshotCrew, getSmokejumpers, setSmokejumpers} from "./assetValues.js";
 import { open_shop, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText
  } from "./ui.js";
@@ -399,6 +399,9 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
     open_shop.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
+            deactivate(all_assets);
+            scene.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
+            
             shop.setVisible(true);
             close.setVisible(true);
             remove_button.setVisible(true);
