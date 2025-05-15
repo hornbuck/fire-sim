@@ -64,7 +64,7 @@ export default class LeaderboardScene extends Phaser.Scene {
         .join('');
 
     // 4) Create an empty DOM <div> container at screen center
-    const panel = this.add.dom(400, 120, 'div', {
+    const panel = this.add.dom(380, 200, 'div', {
       width:           '500px',
       maxHeight:       '400px',
       overflowY:       'auto',

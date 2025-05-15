@@ -38,7 +38,7 @@ export default class ProfileScene extends Phaser.Scene {
 
 
     // draw a simple DOM <div> showing “Username: …”
-    this.profileBox = this.add.dom(150, 70, 'div', {
+    this.profileBox = this.add.dom(400, 70, 'div', {
       width: '200px',
       height: '40px',
       fontSize: '14px',
@@ -71,8 +71,8 @@ export default class ProfileScene extends Phaser.Scene {
 
     // 4) Create an empty DOM <div> as our score panel container
     const panel = this.add.dom(400, 200, 'div', {
-        width:           '300px',
-        maxHeight:       '200px',                // limit height, enable scroll
+        width:           '500px',
+        maxHeight:       '500px',                // limit height, enable scroll
         overflowY:       'auto',                 // vertical scroll if needed
         backgroundColor: 'rgba(0, 0, 0, 0.85)',  // dark translucent backdrop
         border:          '3px solid #FFD700',    // gold border
@@ -120,6 +120,10 @@ export default class ProfileScene extends Phaser.Scene {
     .score-panel .score-list li:last-child {
         border-bottom: none;                /* no line after last item */
     }
+    .score-panel h2 {
+        color: #FFFFFF;
+        font-size: 20px;
+      }
     `;
     document.head.append(style);
 

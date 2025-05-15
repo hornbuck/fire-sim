@@ -146,7 +146,7 @@ export default class UIScene extends Phaser.Scene {
                 // Saves score upon restart and sends to db
                 let getScore = this.scene.get('MapScene');
                 getScore.sendScoreToDB();
-            
+                
                 console.log("Restart clicked");
                 this.events.emit('restartGame');
             }

@@ -641,11 +641,13 @@ if (activated_resource === "hotshot-crew"   ||
             this.updateFireSpread();
           }
         }
-      
-      
+        
+        
         
         // Handle keyboard camera controls
+        if (!this.scene.isActive('LoginScene')) {
         this.handleCameraControls(delta);
+        }     
         
         // Scale fire sprites based on camera zoom
         if (this.flameGroup && this.flameGroup.getChildren().length > 0) {

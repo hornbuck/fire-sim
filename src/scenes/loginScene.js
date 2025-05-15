@@ -39,6 +39,14 @@ export default class LoginScene extends Phaser.Scene {
             this.scene.stop('MapScene');
         }
 
+        // remove any captures so W/A/S/D go to the browser again
+        this.input.keyboard.removeCapture([
+            Phaser.Input.Keyboard.KeyCodes.W,
+            Phaser.Input.Keyboard.KeyCodes.A,
+            Phaser.Input.Keyboard.KeyCodes.S,
+            Phaser.Input.Keyboard.KeyCodes.D
+        ]);
+
         // Add a fun title text with a retro arcade feel.
         this.add.text(400, 150, 'Log In', {
             fontSize: '25px',

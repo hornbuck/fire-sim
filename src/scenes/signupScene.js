@@ -30,6 +30,15 @@ export default class SignupScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
+
+        // remove any captures so W/A/S/D go to the browser again
+        this.input.keyboard.removeCapture([
+            Phaser.Input.Keyboard.KeyCodes.W,
+            Phaser.Input.Keyboard.KeyCodes.A,
+            Phaser.Input.Keyboard.KeyCodes.S,
+            Phaser.Input.Keyboard.KeyCodes.D
+        ]);
+
         // Title
         this.add.text(400, 120, 'Sign Up', {
             fontSize: '25px',
@@ -91,26 +100,26 @@ export default class SignupScene extends Phaser.Scene {
             }
     
             createUserWithEmailAndPassword(auth, email, password)
-        .then(async (userCredential) => {
-        const user = userCredential.user;
+            .then(async (userCredential) => {
+                const user = userCredential.user;
 
-        // 1) Update the Auth profile
-        await updateProfile(user, { displayName: name });
+                // 1) Update the Auth profile
+                await updateProfile(user, { displayName: name });
 
-        // 2) Also write to Firestore under /users/{uid}
-        await setDoc(doc(db, "users", user.uid), {
-          displayName: name,
-          email:       user.email,
-          createdAt:   new Date()
+                // 2) Also write to Firestore under /users/{uid}
+                await setDoc(doc(db, "users", user.uid), {
+                displayName: name,
+                email:       user.email,
+                createdAt:   new Date()
+                });
+
+                // 3) Now you can safely launch your game scenes
+                this.scene.start('MapScene');
+                this.scene.launch('UIScene');
+                this.startGame();
+            })
+            .catch(err => alert('Sign up failed: ' + err.message));
         });
-
-        // 3) Now you can safely launch your game scenes
-        this.scene.start('MapScene');
-        this.scene.launch('UIScene');
-        this.startGame();
-      })
-      .catch(err => alert('Sign up failed: ' + err.message));
-  });
     
         // LOGIN button
         const loginButton = this.add.dom(315, 390, 'button', {
