@@ -29,7 +29,7 @@ export default class LeaderboardScene extends Phaser.Scene {
 
         // Compute the exact center of the game canvas:
         const centerX = this.cameras.main.width  * 0.5;
-        const centerY = this.cameras.main.height * 0.5;
+        const centerY = this.cameras.main.height * 0.38;
         // full‐screen semi‑transparent overlay
         const { width, height } = this.scale;
 

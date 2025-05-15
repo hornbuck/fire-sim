@@ -29,8 +29,8 @@ export default class ProfileScene extends Phaser.Scene {
     const username = user ? user.displayName : 'Guest';
 
     // Compute the exact center of the game canvas:
-    const centerX = this.cameras.main.width  * 0.5;
-    const centerY = this.cameras.main.height * 0.5;
+    const centerX = this.cameras.main.width  * 0.50;
+    const centerY = this.cameras.main.height * 0.38;
 
     // full‐screen semi‑transparent overlay
     const { width, height } = this.scale;
