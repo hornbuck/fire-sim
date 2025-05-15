@@ -20,13 +20,37 @@ export default class ProfileScene extends Phaser.Scene {
     }
 
     /**
-     * Sets up the scene, including buttons and user input fields
+     * Sets up the scene
      */
     async create() {
 
     // grab current user (or “Guest”)
     const user     = auth.currentUser;
     const username = user ? user.displayName : 'Guest';
+
+    // full‐screen semi‑transparent overlay
+    const { width, height } = this.scale;
+
+    // 1) draw a dark overlay behind everything
+    this.add.rectangle(0, 0, width, height, 0x000000, 0.70)
+        .setOrigin(0)
+        .setInteractive();    
+
+
+    // draw a simple DOM <div> showing “Username: …”
+    this.profileBox = this.add.dom(150, 70, 'div', {
+      width: '200px',
+      height: '40px',
+      fontSize: '14px',
+      color: '#fff',
+      backgroundColor: '#228B22',
+      fontFamily: '"Press Start 2P", cursive',
+      border: '2px solid #fff',
+      padding: '5px',
+      textAlign: 'left',
+      cursor: 'pointer'
+    }, `Username: ${username}`)
+      .setOrigin(0.5);
     
     // 1) Grab the running MapScene instance
     const mapScene = this.scene.get('MapScene');
@@ -77,7 +101,6 @@ export default class ProfileScene extends Phaser.Scene {
     `;
         panel.node.innerHTML = html;
     }
-    
 
     // 6) Tag the panel for scoped CSS styling
     panel.node.classList.add('score-panel');
@@ -99,31 +122,6 @@ export default class ProfileScene extends Phaser.Scene {
     }
     `;
     document.head.append(style);
-
-
-    // full‐screen semi‑transparent overlay
-    const { width, height } = this.scale;
-
-    // 1) draw a dark overlay behind everything
-    this.add.rectangle(0, 0, width, height, 0x000000, 0.93)
-        .setOrigin(0)
-        .setInteractive();    
-
-
-    // draw a simple DOM <div> showing “Username: …”
-    this.profileBox = this.add.dom(150, 70, 'div', {
-      width: '200px',
-      height: '40px',
-      fontSize: '14px',
-      color: '#fff',
-      backgroundColor: '#228B22',
-      fontFamily: '"Press Start 2P", cursive',
-      border: '2px solid #fff',
-      padding: '5px',
-      textAlign: 'left',
-      cursor: 'pointer'
-    }, `Username: ${username}`)
-      .setOrigin(0.5);
 
     // 3) “X” close button in top-right
     const closeBtn = this.add.text(30, 10, '✕', {

@@ -6,7 +6,7 @@ import { use_resource, activated_resource, mode } from '../components/Deployment
 import { bank } from "../components/ui.js";
 import { getCoins, setCoins } from "../components/DeploymentClickEvents.js";
 import { auth, db } from '../firebaseConfig.js';
-import { collection, doc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
 
 
 export let paused = true;
@@ -885,46 +885,79 @@ handleTileClick(pointer) {
     }
 
     async getTopNScores(n) {
-    // 1) Ensure there’s a signed‑in user
-    const user = auth.currentUser;
-    if (!user) {
-        console.log("User not signed in");
-        return [];
+        // 1) Ensure there’s a signed‑in user
+        const user = auth.currentUser;
+        if (!user) {
+            console.log("User not signed in");
+            return [];
+        }
+
+        // 2) Reference the user’s "scores" subcollection
+        const scoreRef = collection(db, "users", user.uid, "scores");
+
+        // 3) Build a query ordered by "score" descending, limited to n entries
+        const q = query(
+        scoreRef,
+        orderBy("score", "desc"),
+        limit(n)
+        );
+
+        try {
+            // 4) Execute and collect the scores
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                console.log("No scores found");
+                return [];
+            }
+
+            // Map each document to its numeric score
+            const topScores = querySnapshot.docs.map(doc =>
+            doc.data().score
+            );
+
+            console.log(`Top ${n} scores:`, topScores);
+            return topScores;
+
+        } catch (error) {
+            // 5) Error handling
+            console.error("Error fetching top scores", error);
+            return [];
+        }
     }
 
-    // 2) Reference the user’s "scores" subcollection
-    const scoreRef = collection(db, "users", user.uid, "scores");
+    /**
+   * Helper: fetch top N scores across all users
+   */
+  async getGlobalTopNScores(n) {
+    // 1) Collection‑group on every "scores" subcollection
+    const scoresGroup = collectionGroup(db, "scores");
 
-    // 3) Build a query ordered by "score" descending, limited to n entries
+    // 2) Order by score desc, limit to n
     const q = query(
-      scoreRef,
+      scoresGroup,
       orderBy("score", "desc"),
       limit(n)
     );
 
     try {
-        // 4) Execute and collect the scores
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            console.log("No scores found");
-            return [];
-        }
-
-        // Map each document to its numeric score
-        const topScores = querySnapshot.docs.map(doc =>
-          doc.data().score
-        );
-
-        console.log(`Top ${n} scores:`, topScores);
-        return topScores;
-
-    } catch (error) {
-        // 5) Error handling
-        console.error("Error fetching top scores", error);
+      // 3) Execute the query
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        console.log("No global scores found");
         return [];
-    }
-}
+      }
 
+      // 4) Map each doc to { userId, score }
+      return snapshot.docs.map(doc => {
+        // Path: "users/{uid}/scores/{docId}"
+        const [, uid] = doc.ref.path.split('/');
+        return { userId: uid, score: doc.data().score };
+      });
+    } catch (err) {
+      console.error("Error fetching global top scores:", err);
+      return [];
+    }
+  }
 
 }

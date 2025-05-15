@@ -74,7 +74,7 @@ export default class SignupScene extends Phaser.Scene {
     
         signupButton.addListener('click');
         signupButton.on('click', () => {
-            const name = inputRefs['Name'].node.value.trim();
+            const name = inputRefs['Username'].node.value.trim();
             const email = inputRefs['Email'].node.value.trim();
             const password = inputRefs['Password'].node.value;
             const repeatPassword = inputRefs['Repeat Password'].node.value;
@@ -92,9 +92,11 @@ export default class SignupScene extends Phaser.Scene {
                 .then((userCredential) => {
                     updateProfile(userCredential.user, { displayName: name })
                         .then(() => {
-                            this.scene.stop('SignupScene');
                             this.scene.start('MapScene');
                             this.scene.launch('UIScene');
+
+                                        
+                            this.startGame();
                         })
                         .catch(err => alert('Profile update error: ' + err.message));
                 })
@@ -117,6 +119,21 @@ export default class SignupScene extends Phaser.Scene {
         loginButton.on('click', () => {
             this.scene.start('LoginScene');
         });
+    }
+
+     /**
+     * Start the game from the beginning by reloading the page
+     * This ensures a clean state for all scenes
+     */
+    startGame() {
+        console.log("Restarting game...");
+        
+        // Store a flag in sessionStorage to indicate we want to skip intro
+        // and go directly to the game after reload
+        sessionStorage.setItem('skipIntro', 'true');
+        
+        // Force a complete reload of the page
+        window.location.reload();
     }
     
 }
