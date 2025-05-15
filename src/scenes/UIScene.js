@@ -4,6 +4,7 @@ import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
 import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
+import {sendScoreToDB} from '../scenes/MapScene.js'
 import {auth} from '../firebaseConfig.js'
 
 export default class UIScene extends Phaser.Scene {
@@ -134,6 +135,11 @@ export default class UIScene extends Phaser.Scene {
             text: 'Restart',
             fontSize: '10px',
             onClick: () => {
+
+                // Saves score upon restart and sends to db
+                let getScore = this.scene.get('MapScene');
+                getScore.sendScoreToDB();
+            
                 console.log("Restart clicked");
                 this.events.emit('restartGame');
             }

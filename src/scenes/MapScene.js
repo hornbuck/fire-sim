@@ -5,6 +5,9 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import { use_resource, activated_resource, mode } from '../components/DeploymentClickEvents.js';
 import { bank } from "../components/ui.js";
 import { getCoins, setCoins } from "../components/DeploymentClickEvents.js";
+import { auth, db } from '../firebaseConfig.js';
+import { collection, doc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
+
 
 export let paused = true;
 
@@ -608,6 +611,7 @@ handleTileClick(pointer) {
             console.log("You win!");
             this.isFireSimRunning = false;
             this.events.emit('fireSimToggled', false);
+            this.sendScoreToDB();
             return;
         }
 
@@ -793,4 +797,90 @@ handleTileClick(pointer) {
         }
     }
 
+    //-----------------------Firestore------------------------------//
+
+    /**
+     * Orchestrates the full flow of saving the current score
+     * and then fetching the highest score back.
+     */
+    sendScoreToDB() {
+        // Grab the final score from wherever you’ve stored it
+        const finalScore = this.score;
+
+        // Save it into the user’s subcollection
+        this.saveUserScore(finalScore);
+
+        // Then immediately retrieve the highest score (for display, etc.)
+        this.getHighestScore();
+    }
+
+    /**
+     * Saves a single score document under
+     * users/{uid}/scores in Firestore.
+     * @param {number} scoreParameter – The score to save
+     */
+    async saveUserScore(scoreParameter) {
+        // Get the currently signed‑in user
+        const user = auth.currentUser;
+
+        if (user) {
+            // Create a new doc reference in users/{uid}/scores
+            const scoreDocRef = doc(
+                collection(db, "users", user.uid, "scores")
+            );
+
+            try {
+                // Write the score to Firestore
+                await setDoc(scoreDocRef, { score: scoreParameter });
+                console.log("Score saved successfully");
+            } catch (error) {
+                // Log any errors during the write
+                console.error("Error saving score", error);
+            }
+        } else {
+            // No user signed in, so we can’t save
+            console.log("User not signed in");
+        }
+    }
+
+    /**
+     * Fetches the single highest score in the
+     * users/{uid}/scores subcollection.
+     * @returns {Promise<number|null>} – Highest score or null
+     */
+    async getHighestScore() {
+        const user = auth.currentUser;
+
+        if (user) {
+            // Reference to the scores collection for this user
+            const scoreRef = collection(db, "users", user.uid, "scores");
+
+            // Query: order by score descending, limit to 1
+            const q = query(scoreRef, orderBy("score", "desc"), limit(1));
+
+            try {
+                // Execute the query
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // Print and return the top score
+                    const topScore = querySnapshot.docs[0].data().score;
+                    console.log(topScore);
+                    return topScore;
+                } else {
+                    // No scores found for this user
+                    console.log("No scores found");
+                    return null;
+                }
+            } catch (error) {
+                // Handle any errors fetching documents
+                console.error("Error fetching scores", error);
+                return null;
+            }
+        } else {
+            // No user signed in, so we can’t read
+            console.log("User not signed in");
+            return null;
+        }
+    }
 }
