@@ -10,8 +10,8 @@ export default class UIScene extends Phaser.Scene {
         super('UIScene');
         
         // UI Layout constants
-        this.SCREEN_WIDTH = 800;
-        this.SCREEN_HEIGHT = 600;
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT = window.innerHeight;
         this.UI_SIDEBAR_WIDTH = 100;
         this.GAME_AREA_WIDTH = this.SCREEN_WIDTH - this.UI_SIDEBAR_WIDTH;
         

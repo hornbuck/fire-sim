@@ -67,8 +67,8 @@ export function createHUD(scene) {
     console.log("createHUD called");
 
     // Sidebar rectangle
-    const sidebarWidth = 110;
-    const sidebar = scene.add.rectangle(800 - sidebarWidth / 2, 300, sidebarWidth, 600, 0x2d3436);
+    const sidebarWidth = 130;
+    const sidebar = scene.add.rectangle(window.innerWidth, 300, sidebarWidth, 600, 0x2d3436);
     sidebar.setDepth(-1);
     console.log("Sidebar created");
 
@@ -125,7 +125,7 @@ export function createHUD(scene) {
     createNewShop(scene);
 
     // Group 1: Fire Hose
-    let hose = scene.add.sprite(750, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
+    let hose = scene.add.sprite(window.innerWidth - 30, 50, 'hose').setScale(iconSize).setDepth(1).setOrigin(0.5, 0.5);
     hose.name = "hose";
     all_assets[0] = hose;
     hoseText = set_text(`10 left`, 750, 90, scene);
