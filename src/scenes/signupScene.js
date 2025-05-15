@@ -60,7 +60,7 @@ export default class SignupScene extends Phaser.Scene {
     
         fields.forEach(field => {
             const input = this.add.dom(400, field.y, 'input', {
-                width: '250px',
+                width: '500px',
                 height: '30px',
                 fontSize: '16px',
                 padding: '5px',

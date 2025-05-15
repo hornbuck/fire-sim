@@ -44,7 +44,7 @@ export default class LoginScene extends Phaser.Scene {
             Phaser.Input.Keyboard.KeyCodes.W,
             Phaser.Input.Keyboard.KeyCodes.A,
             Phaser.Input.Keyboard.KeyCodes.S,
-            Phaser.Input.Keyboard.KeyCodes.D
+            Phaser.Input.Keyboard.KeyCodes.DÍ
         ]);
 
         // Add a fun title text with a retro arcade feel.
@@ -58,7 +58,7 @@ export default class LoginScene extends Phaser.Scene {
 
         // Create a DOM element for the email input.
         const emailInput = this.add.dom(400, 200, 'input', {
-            width: '200px',
+            width: '500px',
             height: '30px',
             fontSize: '16px',
             padding: '5px',
@@ -70,7 +70,7 @@ export default class LoginScene extends Phaser.Scene {
 
         // Create a DOM element for the password input.
         const passwordInput = this.add.dom(400, 260, 'input', {
-            width: '200px',
+            width: '500px',
             height: '30px',
             fontSize: '16px',
             padding: '5px',

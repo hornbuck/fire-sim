@@ -28,42 +28,31 @@ export default class ProfileScene extends Phaser.Scene {
     const user     = auth.currentUser;
     const username = user ? user.displayName : 'Guest';
 
+    // Compute the exact center of the game canvas:
+    const centerX = this.cameras.main.width  * 0.5;
+    const centerY = this.cameras.main.height * 0.5;
+
     // full‐screen semi‑transparent overlay
     const { width, height } = this.scale;
 
-    // 1) draw a dark overlay behind everything
+    // draw a dark overlay behind everything
     this.add.rectangle(0, 0, width, height, 0x000000, 0.70)
         .setOrigin(0)
         .setInteractive();    
 
-
-    // draw a simple DOM <div> showing “Username: …”
-    this.profileBox = this.add.dom(400, 70, 'div', {
-      width: '200px',
-      height: '40px',
-      fontSize: '14px',
-      color: '#fff',
-      backgroundColor: '#228B22',
-      fontFamily: '"Press Start 2P", cursive',
-      border: '2px solid #fff',
-      padding: '5px',
-      textAlign: 'left',
-      cursor: 'pointer'
-    }, `Username: ${username}`)
-      .setOrigin(0.5);
     
-    // 1) Grab the running MapScene instance
+    // Grab the running MapScene instance
     const mapScene = this.scene.get('MapScene');
-    // 1a) Guard: ensure MapScene exists and exposes our helper
+    // Guard: ensure MapScene exists and exposes our helper
     if (!mapScene || typeof mapScene.getTopNScores !== 'function') {
         console.warn('MapScene or getTopNScores not available');
         return;  // bail out if we can’t fetch scores
     }
 
-    // 2) Fetch the top 5 scores (returns an array of numbers)
+    // Fetch the top 5 scores (returns an array of numbers)
     const topScores = await mapScene.getTopNScores(5);
 
-    // 3) Build the list‑item HTML for each score
+    // Build the list‑item HTML for each score
     //    e.g. "<li>#1: 1200</li><li>#2: 950</li>…"
     const listItems = topScores
         .map((s, i) => 
@@ -80,8 +69,8 @@ export default class ProfileScene extends Phaser.Scene {
         `)
         .join('');
 
-    // 4) Create an empty DOM <div> as our score panel container
-    const panel = this.add.dom(400, 200, 'div', {
+    // Create an empty DOM <div> as our score panel container
+    this.scorePanel = this.add.dom(centerX, centerY, 'div', {
         width:           '500px',
         maxHeight:       '500px',                // limit height, enable scroll
         overflowY:       'auto',                 // vertical scroll if needed
@@ -97,10 +86,10 @@ export default class ProfileScene extends Phaser.Scene {
     }, '')
     .setOrigin(0.5);                          // center the panel on (400,300)
 
-    // 5) Inject our HTML content into that panel’s innerHTML based on if user is logged in
+    // Inject our HTML content into that panel’s innerHTML based on if user is logged in
     if (user){
         const html = `
-            <h2 style="text-align:center; margin:0 0 12px;">High Scores</h2>
+            <h2 style="text-align:center; margin:0 0 12px;">${username}'s High Scores</h2>
 
             <!-- header flex row -->
             <div class="leader-header" style="
@@ -118,18 +107,18 @@ export default class ProfileScene extends Phaser.Scene {
                 ${listItems}
             </ol>
         `;
-        panel.node.innerHTML = html;
+        this.scorePanel.node.innerHTML = html;
     } else {
         const html = `
         <h2>Please sign up if would like to save your scores</h2>
     `;
-        panel.node.innerHTML = html;
+        this.scorePanel.node.innerHTML = html;
     }
 
-    // 6) Tag the panel for scoped CSS styling
-    panel.node.classList.add('score-panel');
+    // Tag the panel for scoped CSS styling
+    this.scorePanel.node.classList.add('score-panel');
 
-    // 7) Dynamically inject CSS rules for our list formatting
+    // Dynamically inject CSS rules for our list formatting
     const style = document.createElement('style');
     style.textContent = `
     .score-panel .score-list {
@@ -152,6 +141,13 @@ export default class ProfileScene extends Phaser.Scene {
     `;
     document.head.append(style);
 
+    // Measure its rendered height
+    const panelHeight = this.scorePanel.node.clientHeight;
+
+    // Compute Y so that the profileBox sits just above it
+    const margin = 8;  // gap between profileBox and panel
+    const profileY = centerY - panelHeight / 2 - margin;
+
     // “X” close button in top-right
     const closeBtn = this.add.text(30, 10, '✕', {
         fontSize: '24px',
@@ -168,5 +164,13 @@ export default class ProfileScene extends Phaser.Scene {
     // optional hover effect
     closeBtn.on('pointerover',  () => closeBtn.setStyle({ color: '#f00' }));
     closeBtn.on('pointerout',   () => closeBtn.setStyle({ color: '#fff' }));
-    }   
+
+    //OPTIONAL: reposition on window resize
+    this.scale.on('resize', (gameSize) => {
+        const { width, height } = gameSize;
+        this.scorePanel.setPosition(width * 0.5, height * 0.5);
+    });
+
+    } 
+    
 }

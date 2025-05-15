@@ -26,24 +26,27 @@ export default class LeaderboardScene extends Phaser.Scene {
 
         // grab current user
         const user     = auth.currentUser;
-        
+
+        // Compute the exact center of the game canvas:
+        const centerX = this.cameras.main.width  * 0.5;
+        const centerY = this.cameras.main.height * 0.5;
         // full‐screen semi‑transparent overlay
         const { width, height } = this.scale;
 
-        // 1) draw a dark overlay behind everything
+        // draw a dark overlay behind everything
         this.add.rectangle(0, 0, width, height, 0x000000, 0.70)
             .setOrigin(0)
             .setInteractive(); 
 
-        // 1) Grab the running MapScene instance
+        // Grab the running MapScene instance
         const mapScene = this.scene.get('MapScene');
-        // 1a) Guard: ensure MapScene exists and exposes our helper
+        // Guard: ensure MapScene exists and exposes our helper
         if (!mapScene || typeof mapScene.getGlobalTopNScores !== 'function') {
             console.warn('MapScene or getGlobalTopNScores not available');
             return;  // bail out if we can’t fetch scores
         }
 
-        // 2) Fetch the top 5 scores (returns an array of numbers)
+        // Fetch the top 5 scores (returns an array of numbers)
         const topScores = await mapScene.getGlobalTopNScores(5);
 
         // Build each <li> so it’s a flex container with
@@ -64,8 +67,8 @@ export default class LeaderboardScene extends Phaser.Scene {
         `)
         .join('');
 
-    // 4) Create an empty DOM <div> container at screen center
-    const panel = this.add.dom(380, 200, 'div', {
+    // Create an empty DOM <div> container at screen center
+    this.scorePanel = this.add.dom(centerX, centerY, 'div', {
       width:           '600px',
       maxHeight:       '400px',
       overflowY:       'auto',
@@ -82,7 +85,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     }, '')
     .setOrigin(0.5);
 
-    // 5) Inject your HTML into that panel
+    // Inject your HTML into that panel
     const html = `
       <h2 style="text-align:center; margin:0 0 12px;">Global Leaderboard</h2>
 
@@ -103,12 +106,12 @@ export default class LeaderboardScene extends Phaser.Scene {
         ${listItems}
       </ol>
     `;
-    panel.node.innerHTML = html;
+    this.scorePanel.node.innerHTML = html;
 
-    // 6) Tag it for scoped CSS
-    panel.node.classList.add('leader-panel');
+    // Tag it for scoped CSS
+    this.scorePanel.node.classList.add('leader-panel');
 
-    // 7) Inject CSS to remove native markers & style separators
+    // Inject CSS to remove native markers & style separators
     const style = document.createElement('style');
     style.textContent = `
       .leader-panel .leader-list {
@@ -150,6 +153,11 @@ export default class LeaderboardScene extends Phaser.Scene {
     // optional hover effect
     closeBtn.on('pointerover',  () => closeBtn.setStyle({ color: '#f00' }));
     closeBtn.on('pointerout',   () => closeBtn.setStyle({ color: '#fff' }));
-    }   
 
+    //OPTIONAL: reposition on window resize
+    this.scale.on('resize', (gameSize) => {
+        const { width, height } = gameSize;
+        this.scorePanel.setPosition(width * 0.5, height * 0.5);
+    });
+    }
 }
