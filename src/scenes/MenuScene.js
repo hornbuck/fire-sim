@@ -85,6 +85,7 @@ export default class MenuScene extends Phaser.Scene {
             0x228B22, // Green color from style guide
             () => {
                 console.log("tutorial!");
+                this.scene.stop('MenuScene');
                 this.scene.start('TutorialScene');
             }
         );
