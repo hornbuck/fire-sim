@@ -11,8 +11,8 @@ console.log("Phaser Game Initializing...");
 
 const config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: window.innerWidth,
+    height: window.innerHeight, 
     parent: 'game-container',
     scene: [MenuScene, TutorialScene, SignupScene, LoginScene, MapScene, UIScene],
     backgroundColor: '#282c34',
