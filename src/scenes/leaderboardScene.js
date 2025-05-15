@@ -157,7 +157,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     //OPTIONAL: reposition on window resize
     this.scale.on('resize', (gameSize) => {
         const { width, height } = gameSize;
-        this.scorePanel.setPosition(width * 0.5, height * 0.5);
+        this.scorePanel.setPosition(width * 0.5, height * 0.38);
     });
     }
 }
