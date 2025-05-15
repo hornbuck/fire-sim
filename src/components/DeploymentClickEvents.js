@@ -16,13 +16,19 @@ let pendingDeployment = null;
 export function initDirectionHandler(mapScene) {
     const ui = mapScene.scene.get('UIScene');
     ui.events.on('directionChosen', dir => {
+        if (dir === null) {
+            pendingDeployment = null;
+            console.log("Deployment canceled by user.");
+            return;  // Fully cancel deployment
+        }
+
         if (!pendingDeployment) return;
         const { scene, x, y, fireSprite } = pendingDeployment;
         pendingDeployment = null;
-        // restart deployment now with chosen direction
         use_resource(scene, x, y, fireSprite, dir);
     });
 }
+
 
 // Global cooldown variable
 // --> This is an array where each index represents an asset, in the following order:
@@ -233,7 +239,7 @@ export function show_notification (scene, target, message = null) {
         if (!scene.fallbackNotificationText) {
             scene.fallbackNotificationText = scene.add.text(
                 scene.scale.width / 2,
-                scene.scale.height - 30,
+                scene.scale.height - 160,
                 '',
                 {
                     fontFamily: '"Press Start 2P"',
@@ -282,7 +288,6 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     const isDirectional =
         activated_resource === "airtanker" ||
         activated_resource === "hotshot-crew";
-    // if (!paused && !direction && isDirectional) {
         if (!direction && isDirectional) {
         pendingDeployment = { scene, x, y, fireSprite };
         scene.scene
