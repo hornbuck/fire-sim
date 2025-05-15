@@ -66,7 +66,18 @@ export default class ProfileScene extends Phaser.Scene {
     // 3) Build the list‑item HTML for each score
     //    e.g. "<li>#1: 1200</li><li>#2: 950</li>…"
     const listItems = topScores
-        .map((s, i) => `<li><strong>#${i+1}</strong> ${s}</li>`)
+        .map((s, i) => 
+            `<li style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,215,0,0.3);
+          ">
+            <span>#${i + 1}</span>
+            <span>${s}</span>
+          </li>
+        `)
         .join('');
 
     // 4) Create an empty DOM <div> as our score panel container
@@ -89,7 +100,20 @@ export default class ProfileScene extends Phaser.Scene {
     // 5) Inject our HTML content into that panel’s innerHTML based on if user is logged in
     if (user){
         const html = `
-            <h2>High Scores</h2>
+            <h2 style="text-align:center; margin:0 0 12px;">High Scores</h2>
+
+            <!-- header flex row -->
+            <div class="leader-header" style="
+                display:flex;
+                justify-content:space-between;
+                font-weight:bold;
+                padding:6px 0;
+                border-bottom:2px solid #FFD700;
+            ">
+                <span>Rank</span>
+                <span>Score</span>
+            </div>
+
             <ol class="score-list">
                 ${listItems}
             </ol>
@@ -124,9 +148,6 @@ export default class ProfileScene extends Phaser.Scene {
     .score-panel h2 {
         color: #FFD700;
         font-size: 20px;
-    }
-    .score-panel li strong {
-        color: #FFD700;
     }
     `;
     document.head.append(style);
