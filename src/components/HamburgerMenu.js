@@ -30,9 +30,9 @@ export default class HamburgerMenu {
                 { text: 'Login/Logout', key: 'login' },
                 // Uncomment once accessibility is implemented
                 //{ text: 'Accessibility', key: 'accessibility' },
-                { text: 'Settings', key: 'settings' },
-                { text: 'Help', key: 'help' },
-                { text: 'About', key: 'about' }
+                //{ text: 'Settings', key: 'settings' },
+                //{ text: 'Help', key: 'help' },
+                //{ text: 'About', key: 'about' }
             ]
         };
 
@@ -205,27 +205,31 @@ export default class HamburgerMenu {
                 }
                 this.toggleMenu();
                 break;
-            case 'settings':
+            // Uncomment and implement these cases as needed
+            /*case 'settings':
                 // Handle settings action
                 if (this.scene.events) {
                     this.scene.events.emit('openSettings');
                 }
                 this.toggleMenu();
                 break;
-            case 'help':
+                */
+            /*case 'help':
                 // Handle help action
                 if (this.scene.events) {
                     this.scene.events.emit('openHelp');
                 }
                 this.toggleMenu();
                 break;
-            case 'about':
+                */
+            /*case 'about':
                 // Handle about action
                 if (this.scene.events) {
                     this.scene.events.emit('openAbout');
                 }
                 this.toggleMenu();
                 break;
+                */
             default:
                 this.toggleMenu();
                 break;
