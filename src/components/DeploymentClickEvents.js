@@ -143,7 +143,14 @@ function extinguishTile(tile, tileX, tileY, mapScene) {
         bank.setText(`${coins}`);
 
         mapScene.events.emit("extinguishFire", tile.sprite);
+    } 
+
+    if (tile.burnStatus === "not-burnt") {
+        tile.terrain = "fire-break";
+        mapScene.fireSpread.updateSprite(tileX, tileY);
+
     } else {
+
         tile.burnStatus = "extinguished";
 
         if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
@@ -411,6 +418,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
                 : [[-2,0],[-1,0],[1,0],[2,0]];
 
             if (tile.burnStatus !== "burnt") {
+                tile.burnStatus = "not-burnt";
                 extinguishTile(tile, tx, ty, mapScene);
             }
             deltas.forEach(([dx,dy]) => {
@@ -418,6 +426,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
                 if (nx>=0 && nx<mapScene.map.width && ny>=0 && ny<mapScene.map.height) {
                     const nbr = mapScene.map.grid[ny][nx];
                     if (nbr.burnStatus !== "burnt") {
+                        nbr.burnStatus = "not-burnt";
                         extinguishTile(nbr, nx, ny, mapScene);
                     }
                 }

@@ -75,6 +75,9 @@ export default class MapScene extends Phaser.Scene {
         this.load.image('extinguished-dirt-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/dirt-house.png');
         this.load.image('extinguished-sand-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/sand-house.png');
         this.load.image('extinguished-grass-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/grass-house.png');
+
+        // Preload firebreak
+        this.load.image('fire-break', 'assets/64x64-Map-Tiles/fire-break.png');
         
         // Preload animation assets
         this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
