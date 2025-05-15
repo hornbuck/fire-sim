@@ -883,4 +883,48 @@ handleTileClick(pointer) {
             return null;
         }
     }
+
+    async getTopNScores(n) {
+    // 1) Ensure there’s a signed‑in user
+    const user = auth.currentUser;
+    if (!user) {
+        console.log("User not signed in");
+        return [];
+    }
+
+    // 2) Reference the user’s "scores" subcollection
+    const scoreRef = collection(db, "users", user.uid, "scores");
+
+    // 3) Build a query ordered by "score" descending, limited to n entries
+    const q = query(
+      scoreRef,
+      orderBy("score", "desc"),
+      limit(n)
+    );
+
+    try {
+        // 4) Execute and collect the scores
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            console.log("No scores found");
+            return [];
+        }
+
+        // Map each document to its numeric score
+        const topScores = querySnapshot.docs.map(doc =>
+          doc.data().score
+        );
+
+        console.log(`Top ${n} scores:`, topScores);
+        return topScores;
+
+    } catch (error) {
+        // 5) Error handling
+        console.error("Error fetching top scores", error);
+        return [];
+    }
+}
+
+
 }
