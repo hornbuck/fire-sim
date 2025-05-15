@@ -4,6 +4,8 @@ import MapScene from './MapScene.js';
 import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig.js";
 
 
 /**
@@ -89,19 +91,26 @@ export default class SignupScene extends Phaser.Scene {
             }
     
             createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    updateProfile(userCredential.user, { displayName: name })
-                        .then(() => {
-                            this.scene.start('MapScene');
-                            this.scene.launch('UIScene');
+        .then(async (userCredential) => {
+        const user = userCredential.user;
 
-                                        
-                            this.startGame();
-                        })
-                        .catch(err => alert('Profile update error: ' + err.message));
-                })
-                .catch(err => alert('Sign up failed: ' + err.message));
+        // 1) Update the Auth profile
+        await updateProfile(user, { displayName: name });
+
+        // 2) Also write to Firestore under /users/{uid}
+        await setDoc(doc(db, "users", user.uid), {
+          displayName: name,
+          email:       user.email,
+          createdAt:   new Date()
         });
+
+        // 3) Now you can safely launch your game scenes
+        this.scene.start('MapScene');
+        this.scene.launch('UIScene');
+        this.startGame();
+      })
+      .catch(err => alert('Sign up failed: ' + err.message));
+  });
     
         // LOGIN button
         const loginButton = this.add.dom(315, 390, 'button', {

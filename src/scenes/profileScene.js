@@ -123,7 +123,7 @@ export default class ProfileScene extends Phaser.Scene {
     `;
     document.head.append(style);
 
-    // 3) “X” close button in top-right
+    // “X” close button in top-right
     const closeBtn = this.add.text(30, 10, '✕', {
         fontSize: '24px',
         color: '#fff',

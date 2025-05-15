@@ -24,6 +24,7 @@ export default class LeaderboardScene extends Phaser.Scene {
      */
     async create() {
 
+        // grab current user
         const user     = auth.currentUser;
         
         // full‐screen semi‑transparent overlay
@@ -45,16 +46,24 @@ export default class LeaderboardScene extends Phaser.Scene {
         // 2) Fetch the top 5 scores (returns an array of numbers)
         const topScores = await mapScene.getGlobalTopNScores(5);
 
-        // 2) Build your list items
-        // 3) Build the list‑item HTML for each score
-        //    e.g. "<li>#1: 1200</li><li>#2: 950</li>…"
+        // Build each <li> so it’s a flex container with
+        // the name on the left and score on the right:
         const listItems = topScores
-        .map(({userId, score }, i) =>
-            `<li><strong>#${i + 1}</strong> ${userId} Score: ${score}</li>`
-        )
+        .map(({ displayName, score }, i) => `
+          <li style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,215,0,0.3);
+          ">
+            <span><strong>#${i+1}</strong> ${displayName}</span>
+            <span>Score: ${score}</span>
+          </li>
+        `)
         .join('');
 
-    // 3) Create an empty DOM container at screen center
+    // 4) Create an empty DOM <div> container at screen center
     const panel = this.add.dom(400, 120, 'div', {
       width:           '500px',
       maxHeight:       '400px',
@@ -72,7 +81,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     }, '')
     .setOrigin(0.5);
 
-    // 4) Inject your HTML into that panel
+    // 5) Inject your HTML into that panel
     const html = `
       <h2 style="text-align:center; margin:0 0 12px;">Global Leaderboard</h2>
       <ol class="leader-list">
@@ -81,10 +90,10 @@ export default class LeaderboardScene extends Phaser.Scene {
     `;
     panel.node.innerHTML = html;
 
-    // 5) Tag it for scoped CSS
+    // 6) Tag it for scoped CSS
     panel.node.classList.add('leader-panel');
 
-    // 6) Inject CSS to remove native markers & style separators
+    // 7) Inject CSS to remove native markers & style separators
     const style = document.createElement('style');
     style.textContent = `
       .leader-panel .leader-list {
@@ -109,7 +118,7 @@ export default class LeaderboardScene extends Phaser.Scene {
     `;
     document.head.appendChild(style);
 
-    // 3) “X” close button in top-right
+    // “X” close button in top-right
     const closeBtn = this.add.text(30, 10, '✕', {
         fontSize: '24px',
         color: '#fff',

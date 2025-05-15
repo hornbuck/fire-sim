@@ -4,8 +4,8 @@ import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
 import { bank } from "../components/ui.js";
 import { auth, db } from '../firebaseConfig.js';
-import { collection, collectionGroup, doc, getDocs, limit, orderBy, query, setDoc } from 'firebase/firestore';
-import { getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
+import { collection, collectionGroup, doc, getDocs,getDoc, limit, orderBy, query, setDoc } from 'firebase/firestore';
+import { setCoins, getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
 
 
 
@@ -908,34 +908,50 @@ if (activated_resource === "hotshot-crew"   ||
    * Helper: fetch top N scores across all users
    */
   async getGlobalTopNScores(n) {
-    // 1) Collection‑group on every "scores" subcollection
-    const scoresGroup = collectionGroup(db, "scores");
+  // 1) Set up a collection‑group query on every "scores" subcollection
+  const scoresGroup = collectionGroup(db, "scores");
 
-    // 2) Order by score desc, limit to n
-    const q = query(
-      scoresGroup,
-      orderBy("score", "desc"),
-      limit(n)
-    );
+  // 2) Order by "score" descending and limit to the top N
+  const q = query(
+    scoresGroup,
+    orderBy("score", "desc"),
+    limit(n)
+  );
 
-    try {
-      // 3) Execute the query
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) {
-        console.log("No global scores found");
-        return [];
-      }
-
-      // 4) Map each doc to { userId, score }
-      return snapshot.docs.map(doc => {
-        // Path: "users/{uid}/scores/{docId}"
-        const [, uid] = doc.ref.path.split('/');
-        return { userId: uid, score: doc.data().score };
-      });
-    } catch (err) {
-      console.error("Error fetching global top scores:", err);
+  try {
+    // 3) Execute the scores query
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      console.log("No global scores found");
       return [];
     }
-  }
 
+    // 4) For each score doc, fetch the corresponding user profile
+    const detailed = await Promise.all(
+      snapshot.docs.map(async scoreDoc => {
+        // Extract the UID from the path: "users/{uid}/scores/{docId}"
+        const [, uid] = scoreDoc.ref.path.split('/');
+
+        // Fetch the user's profile document
+        const userSnap = await getDoc(doc(db, "users", uid));
+        // Use displayName if available, otherwise fallback to UID
+        const displayName = userSnap.exists()
+          ? userSnap.data().displayName
+          : uid;
+
+        // Return a combined object with score and displayName
+        return {
+          userId: uid,
+          displayName,
+          score: scoreDoc.data().score
+        };
+      })
+    );
+
+    return detailed;  // [ { userId, displayName, score }, … ]
+  } catch (err) {
+    console.error("Error fetching global top scores:", err);
+    return [];
+  }
+}
 }
