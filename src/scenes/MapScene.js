@@ -237,6 +237,9 @@ export default class MapScene extends Phaser.Scene {
     }
 
     initializeMap() {
+        // Sets Player Score to zero
+        this.score = 0;
+
         // Preserve current zoom level if restarting with existing map
         const previousZoom = this.currentZoom || 1;
         
@@ -643,7 +646,7 @@ if (activated_resource === "hotshot-crew"   ||
         }
         
         
-        
+
         // Handle keyboard camera controls
         if (!this.scene.isActive('LoginScene')) {
         this.handleCameraControls(delta);
@@ -791,7 +794,7 @@ if (activated_resource === "hotshot-crew"   ||
         this.saveUserScore(finalScore);
 
         // Then immediately retrieve the highest score (for display, etc.)
-        this.getHighestScore();
+        // this.getHighestScore();
     }
 
     /**

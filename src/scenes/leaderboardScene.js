@@ -57,15 +57,16 @@ export default class LeaderboardScene extends Phaser.Scene {
             padding: 4px 0;
             border-bottom: 1px solid rgba(255,215,0,0.3);
           ">
-            <span><strong>#${i+1}</strong> ${displayName}</span>
-            <span>Score: ${score}</span>
+            <span>#${i + 1}</span>
+            <span>${displayName}</span>
+            <span>${score}</span>
           </li>
         `)
         .join('');
 
     // 4) Create an empty DOM <div> container at screen center
     const panel = this.add.dom(380, 200, 'div', {
-      width:           '500px',
+      width:           '600px',
       maxHeight:       '400px',
       overflowY:       'auto',
       backgroundColor: 'rgba(0, 0, 0, 0.85)',
@@ -84,6 +85,20 @@ export default class LeaderboardScene extends Phaser.Scene {
     // 5) Inject your HTML into that panel
     const html = `
       <h2 style="text-align:center; margin:0 0 12px;">Global Leaderboard</h2>
+
+      <!-- header flex row -->
+      <div class="leader-header" style="
+        display:flex;
+        justify-content:space-between;
+        font-weight:bold;
+        padding:6px 0;
+        border-bottom:2px solid #FFD700;
+      ">
+        <span>Rank</span>
+        <span>&nbsp;Name</span>
+        <span>Score</span>
+      </div>
+
       <ol class="leader-list">
         ${listItems}
       </ol>
