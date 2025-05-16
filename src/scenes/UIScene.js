@@ -4,14 +4,15 @@ import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
 import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
+import { deactivate } from '../components/DeploymentClickEvents.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
         super('UIScene');
         
         // UI Layout constants
-        this.SCREEN_WIDTH = 800;
-        this.SCREEN_HEIGHT = 600;
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT = window.innerHeight;
         this.UI_SIDEBAR_WIDTH = 100;
         this.GAME_AREA_WIDTH = this.SCREEN_WIDTH - this.UI_SIDEBAR_WIDTH;
         
@@ -95,6 +96,25 @@ export default class UIScene extends Phaser.Scene {
     
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
+
+        this.pauseText = this.add.text(
+            this.SCREEN_WIDTH / 2,
+            this.SCREEN_HEIGHT / 2,
+            "Game Paused",
+            {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '24px',
+                color: '#FFFFFF',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                padding: { x: 20, y: 10 },
+                align: 'center'
+            }
+        ).setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1000)
+        .setVisible(false);
+        this.uiContainer.add(this.pauseText);
+
     
         // Top bar background
         const topBarHeight = 60;
@@ -147,7 +167,7 @@ export default class UIScene extends Phaser.Scene {
         this.topBarContainer.add([restart.button, restart.buttonText]);
 
         // Create fire sart/stop button
-        const fireButton = createDrawnButton(this, {
+        this.fireButton = createDrawnButton(this, {
             x: 200,
             y: 30,
             width: 80,
@@ -161,7 +181,7 @@ export default class UIScene extends Phaser.Scene {
             this.events.emit('toggleFire');
             }
         });
-        this.topBarContainer.add([fireButton.button, fireButton.buttonText]);
+        this.topBarContainer.add([this.fireButton.button, this.fireButton.buttonText]);
 
     
         // Timer Text
@@ -784,11 +804,19 @@ export default class UIScene extends Phaser.Scene {
     // }
 
     // Handler for fire simulation toggle updates
-    updateFireButton(isRunning) {
-        if (this.fireButton && this.fireButton.buttonText) {
-            this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
-        }
+updateFireButton(isRunning) {
+    if (this.fireButton && this.fireButton.buttonText) {
+        this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
     }
+
+    // Show or hide the pause message
+    if (this.pauseText) {
+        this.pauseText.setVisible(!isRunning);
+    }
+
+    
+}
+
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
