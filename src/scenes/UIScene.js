@@ -4,9 +4,6 @@ import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
 import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
-import {sendScoreToDB} from '../scenes/MapScene.js'
-import {auth} from '../firebaseConfig.js'
-import { deactivate } from '../components/DeploymentClickEvents.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -98,25 +95,7 @@ export default class UIScene extends Phaser.Scene {
     
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
-
-        this.pauseText = this.add.text(
-            this.SCREEN_WIDTH / 2,
-            this.SCREEN_HEIGHT / 2,
-            "Game Paused",
-            {
-                fontFamily: '"Press Start 2P"',
-                fontSize: '24px',
-                color: '#FFFFFF',
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                padding: { x: 20, y: 10 },
-                align: 'center'
-            }
-        ).setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1000)
-        .setVisible(false);
-        this.uiContainer.add(this.pauseText);
-
+    
         // Top bar background
         const topBarHeight = 60;
         const topBar = this.add.rectangle(
@@ -161,11 +140,6 @@ export default class UIScene extends Phaser.Scene {
             text: 'Restart',
             fontSize: '10px',
             onClick: () => {
-
-                // Saves score upon restart and sends to db
-                let getScore = this.scene.get('MapScene');
-                getScore.sendScoreToDB();
-                
                 console.log("Restart clicked");
                 this.events.emit('restartGame');
             }
@@ -173,7 +147,7 @@ export default class UIScene extends Phaser.Scene {
         this.topBarContainer.add([restart.button, restart.buttonText]);
 
         // Create fire sart/stop button
-        this.fireButton = createDrawnButton(this, {
+        const fireButton = createDrawnButton(this, {
             x: 200,
             y: 30,
             width: 80,
@@ -187,7 +161,7 @@ export default class UIScene extends Phaser.Scene {
             this.events.emit('toggleFire');
             }
         });
-        this.topBarContainer.add([this.fireButton.button, this.fireButton.buttonText]);
+        this.topBarContainer.add([fireButton.button, fireButton.buttonText]);
 
     
         // Timer Text
@@ -216,9 +190,10 @@ export default class UIScene extends Phaser.Scene {
 
         this.createZoomControls();
         this.createNavigationCompass();
-        
+
         // Controls panel
         const controlsButtonX = this.zoomText.x + this.zoomText.width + 80; // 40px padding after zoom text
+
         /*this.controlsButton = createDrawnButton(this, {
             x: controlsButtonX,
             y: 20, // Same Y as zoom buttons
@@ -238,8 +213,6 @@ export default class UIScene extends Phaser.Scene {
 
         // HUD elements
         createHUD(this); // Assumes you have createHUD() ready
-
-        
 
         // Add UI elements to bottom bar (higher depth)
         this.bottomBarContainer.add([coins, bank, open_shop]);
@@ -274,7 +247,7 @@ export default class UIScene extends Phaser.Scene {
     
         // Listen for events from MapScene
         this.scene.get('MapScene').events.on('updateGameClock', this.updateGameClock, this);
-        this.scene.get('MapScene').events.on('weatherUpdated', this.updateWeatherDisplay, this);
+        // this.scene.get('MapScene').events.on('weatherUpdated', this.updateWeatherDisplay, this);
         this.scene.get('MapScene').events.on('tileInfo', this.updateTileInfo, this);
         this.scene.get('MapScene').events.on('fireSimToggled', this.updateFireButton, this);
         this.scene.get('MapScene').events.on('zoomChanged', this.handleZoomChange, this);
@@ -332,7 +305,6 @@ export default class UIScene extends Phaser.Scene {
     }
 
     createUIElements() {
-
         // Risk text
         this.riskText = this.add.text(-500, -500, 
             'Risk: Low', {
@@ -365,7 +337,6 @@ export default class UIScene extends Phaser.Scene {
         .setDepth(10);
         this.uiContainer.add(this.gameClockText);
 
-        // Fire progress bar foreground (starts at 0 width)
         // Add this after creating gameClockText
         const progressBarBg = this.add.rectangle(
             400, 
@@ -374,7 +345,7 @@ export default class UIScene extends Phaser.Scene {
             8,
             0x333333
         ).setOrigin(0.5, 0).setScrollFactor(0);
-        
+
         this.fireStepBar = this.add.rectangle(
             325,
             45,
@@ -382,30 +353,10 @@ export default class UIScene extends Phaser.Scene {
             8,
             0xff4500
         ).setOrigin(0, 0).setScrollFactor(0);
-        
+
         this.topBarContainer.add([progressBarBg, this.fireStepBar]);
-
-        this.controlsPanel = this.add.container(315, 455)
-            .setScrollFactor(0)
-            .setVisible(false);
-
-        // optional background for readability
-        this.controlpanelBg = this.add
-            .rectangle(0, 0, 200, 80, 0x000000, 0.7)
-            .setOrigin(0);
-            this.controlpanelText = this.add.text(10, 10,
-                'WASD / Arrows: Pan\nMouse Wheel: Zoom\nRight/Middle Mouse: Pan\nU: Toggle UI',
-                { 
-                    fontFamily: '"Press Start 2P"',
-                    fontSize: '10px',
-                    fontStyle: 'normal',
-                    fill: '#fff',
-                    wordWrap: { width: 180 }
-                }
-            );
-        this.controlsPanel.add([ this.controlpanelBg, this.controlpanelText ]);
-        this.uiContainer.add(this.controlsPanel);
-
+        
+        
         // Tile Info
         this.tileInfoText = this.add.text(-500, -500, 
             "Select tile", {
@@ -419,8 +370,6 @@ export default class UIScene extends Phaser.Scene {
             })
             .setDepth(-1)
             .setScrollFactor(0)
-
-        this.uiContainer.add(this.tileInfoText);
 
                 // --- Score Text ---
         this.scoreText = this.add.text(550, 15, "Score: 0", {
@@ -493,6 +442,7 @@ export default class UIScene extends Phaser.Scene {
                 .on('pointerdown', () => {
                     this.directionPromptContainer.setVisible(false);
                     this.events.emit('directionChosen', null);
+                    return;
             });
 
             this.directionPromptContainer.add([bg, label, vertical, horizontal, cancel]);
@@ -565,7 +515,7 @@ export default class UIScene extends Phaser.Scene {
             this.uiToggleButton.setTexture(newTexture);
         });
         
-        // Add to its own container at position (100, 100)
+        // Add to its own container
         this.uiToggleButtonContainer = this.add.container(650, this.scale.height - 60, [this.uiToggleButton]).setScrollFactor(0);
 
         // Create a rounded rectangle background for the toggle button
@@ -599,7 +549,7 @@ export default class UIScene extends Phaser.Scene {
         
         this.zoomText = this.add.text(
             baseX - 30,
-            40,
+            576,
             'Zoom: 100%',
             {
                 fontFamily: '"Press Start 2P"',
@@ -607,11 +557,18 @@ export default class UIScene extends Phaser.Scene {
                 fontStyle: 'normal',
                 color: '#FFFFFF'
             })
+            .setOrigin(0, 0.5)
+            .setScrollFactor(0);
+
+        // Store the button references if you need later
+        this.zoomInButton = zoomIn.button;
+        this.zoomOutButton = zoomOut.button;
+        this.bottomBarContainer.add(this.zoomText);
 
 
         // Add drawn buttons to bottomBarContainer
         this.bottomBarContainer.add([zoomIn.button, zoomIn.buttonText, zoomOut.button, zoomOut.buttonText]);
-
+    
         // Create an info (i) button with rounded background
         const infoBg = this.add.graphics();
         infoBg.fillStyle(0x555555, 1);
@@ -800,7 +757,6 @@ export default class UIScene extends Phaser.Scene {
             }
 
             this.updateInfoPanel();
-
         } else {
             console.warn("tileInfoText is not defined in UIScene!");
         }
@@ -821,26 +777,18 @@ export default class UIScene extends Phaser.Scene {
         else this.windGaugeFill.fillColor = 0xff0000;
     }
 
-    updateWeatherDisplay(weather) {
-        this.updateWindDisplay(weather);
-        this.updateRiskDisplay(weather.getRiskCategory());
-        this.updateInfoPanel();
-    }
+    // updateWeatherDisplay(weather) {
+    //     this.updateWindDisplay(weather);
+    //     this.updateRiskDisplay(weather.getRiskCategory());
+    //     this.updateInfoPanel();
+    // }
 
     // Handler for fire simulation toggle updates
-updateFireButton(isRunning) {
-    if (this.fireButton && this.fireButton.buttonText) {
-        this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
+    updateFireButton(isRunning) {
+        if (this.fireButton && this.fireButton.buttonText) {
+            this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
+        }
     }
-
-    // Show or hide the pause message
-    if (this.pauseText) {
-        this.pauseText.setVisible(!isRunning);
-    }
-
-    
-}
-
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
@@ -861,6 +809,7 @@ updateFireButton(isRunning) {
     updateMapInfo(mapInfo) {
         console.log(`Map size changed: ${mapInfo.width}x${mapInfo.height} tiles, ${mapInfo.pixelWidth}x${mapInfo.pixelHeight} pixels`);
     }
+
     updateInfoPanel() {
         // Update tile info if available
         if (this.selectedTile) {
