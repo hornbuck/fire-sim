@@ -2,10 +2,33 @@ import AnimatedSprite from '../components/AnimatedSprites.js';
 import { all_assets, bank, n_cooldown, out_hoses, out_extinguishers, out_helicopters, out_firetrucks, out_airtankers, out_hotshots, out_smokejumpers } from './ui.js';
 import { t_hose, t_extinguisher, t_firetruck, t_helicopter, t_airtanker, t_hotshotcrew, t_smokejumpers_plane, t_smokejumpers_ground } from '../components/AnimatedSprites.js';
 import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setHelicopter, getFiretruck, setFiretruck, getAirtanker, setAirtanker, getHotshotCrew, setHotshotCrew, getSmokejumpers, setSmokejumpers} from "./assetValues.js";
+import { paused } from '../scenes/MapScene.js';
 
 // Global vars to track which technique is currently active and whether their cooldown is active
 export let technique = "";
 export let activated_resource = "none";
+export let mode = "cursor";
+
+// stash a pending deployment until direction is picked
+let pendingDeployment = null;
+
+// listen for user's choice
+export function initDirectionHandler(mapScene) {
+    const ui = mapScene.scene.get('UIScene');
+    ui.events.on('directionChosen', dir => {
+        if (dir === null) {
+            pendingDeployment = null;
+            console.log("Deployment canceled by user.");
+            return;  // Fully cancel deployment
+        }
+
+        if (!pendingDeployment) return;
+        const { scene, x, y, fireSprite } = pendingDeployment;
+        pendingDeployment = null;
+        use_resource(scene, x, y, fireSprite, dir);
+    });
+}
+
 
 // Global cooldown variable
 // --> This is an array where each index represents an asset, in the following order:
@@ -34,6 +57,16 @@ let c_airtanker = 10000;
 let c_hotshotcrew = 3000;
 let t_smokejumper = 15000;
 
+export const assetCoinValues = {
+    hose: 100,
+    extinguisher: 50,
+    helicopter: 300,
+    firetruck: 200,
+    airtanker: 500,
+    'hotshot-crew': 300,
+    smokejumper: 1000
+};
+
 // Get the number of coins (useful for external files)
 export function getCoins() {
     return coins;
@@ -52,17 +85,32 @@ export function setCoins(value) {
 }
 
 // Updates text of asset limits
-export function set_text(value, x, y, scene) {
-    return scene.add.text(x, y, value, {
-        font: '12px Arial',
-        fill: '#ffffff',
+export function set_text(text, x, y, scene) {
+    const textObj = scene.add.text(x, y, text, {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        color: '#FFFFFF',
         align: 'center',
+        backgroundColor: '#333333',
+        padding: { x: 6, y: 4 }
     }).setOrigin(0.5, 0.5);
+    
+    // Add background
+    const bg = scene.add.rectangle(
+        x,
+        y,
+        textObj.width + 12,
+        textObj.height + 8,
+        0x333333,
+        0.7
+    ).setOrigin(0.5).setDepth(textObj.depth - 1);
+    
+    return textObj;
 }
 
 // This function is called by activate_resource (below), in order to deactivate resources that are already active
 // This way, only one asset is activated at a time.
-function deactivate(sprites) {
+export function deactivate(sprites) {
     for (let i = 0; i <= 6; i++) {
         let asset = sprites[i];
         if (`${activated_resource}` === asset.name) {
@@ -73,6 +121,56 @@ function deactivate(sprites) {
     }    
 }
 
+function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
+    tile.fuel = Math.max(0, tile.fuel - amount);
+
+    if (tile.fuel === 0) {
+        const reward = assetCoinValues[activated_resource] || 0;
+        coins += reward;
+        bank.setText(`${coins}`);
+        scene.events.emit('extinguishFire', fireSprite);
+    }
+}
+
+
+function extinguishTile(tile, tileX, tileY, mapScene) {
+    if (
+        !tile ||
+        !tile.sprite ||
+        tile.burnStatus === "extinguished" ||
+        // tile.burnStatus === "burned"
+        tile.burnStatus === "burnt"
+    ) return;
+
+    if (tile.burnStatus === "burning") {
+        // Award coins for extinguishing a burning tile
+        const reward = assetCoinValues[activated_resource] || 0;
+        coins += reward;
+        bank.setText(`${coins}`);
+
+        mapScene.events.emit("extinguishFire", tile.sprite);
+    } 
+
+    if (tile.burnStatus === "not-burnt") {
+        tile.terrain = "fire-break";
+        mapScene.fireSpread.updateSprite(tileX, tileY);
+
+    } else {
+
+        tile.burnStatus = "extinguished";
+
+        if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
+            tile.terrain = 'extinguished-grass';
+        } else if (tile.terrain.includes('shrub') || tile.terrain === 'shrub') {
+            tile.terrain = 'extinguished-shrub';
+        } else if (tile.terrain.includes('tree') || tile.terrain === 'tree') {
+            tile.terrain = 'extinguished-tree';
+        }
+
+        mapScene.fireSpread.updateSprite(tileX, tileY);
+    }
+}
+
 // Signals to user that a resource is actively being used
 export function activate_resource (index, resource, resourceName, ONcursorURL, OFFcursorURL, techniqueNameON, techniqueNameOFF, scene) {
     
@@ -80,23 +178,38 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
     console.log(`Resource Activated: ${resourceName}`)
     resource.setInteractive();
 
-    let active = true;
-
     // When water hose is clicked (activated), the cursor is replaced with water and fire sprites can be destroyed.
     // When water hose is deactivated, fire sprites can no longer be destroyed.
     resource.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
-            if (active === true) {
-                // Check for already-activated resources
-                deactivate(all_assets);
-
+            // Activates a resource on click if none are active
+            if (activated_resource === "none" && !paused) {
                 resource.setTexture('active-' + resourceName +'');
                 scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
                 technique = techniqueNameON;
                 activated_resource = `${resourceName}`;
-                
-            } 
+                mode = "deployment";
+            } else {
+                // Deactive clicked asset if it's already active
+                if (activated_resource === resourceName && !paused) {
+                    deactivate(all_assets);
+                    resource.setTexture(resourceName);
+                    technique = techniqueNameOFF;
+                    scene.input.setDefaultCursor('url('+ OFFcursorURL +'), pointer');
+                    activated_resource == "none";
+                    mode = "cursor";
+                } else { // Deactivate old asset and activate new asset if a different one is clicked
+                    if (!paused) {
+                        deactivate(all_assets);
+                        resource.setTexture('active-' + resourceName +'');
+                        scene.input.setDefaultCursor('url('+ ONcursorURL +'), pointer');
+                        technique = techniqueNameON;
+                        activated_resource = `${resourceName}`;
+                        mode = "deployment";
+                    }
+                }
+            }
         },
         this
     );
@@ -114,180 +227,229 @@ export function show_tooltip (resource, resourceName, x, y, scene) {
 }
 
 // Notification to player that they are out of specified asset
-export function show_notification (scene, notification) {
-     
-    notification.setVisible(true);
+export function show_notification (scene, target, message = null) {
+    // Case 1: target is a text object + message provided
+    if (target?.setText && message === null) {
+        target.setText(message).setVisible(true);
+        scene.time.delayedCall(2000, () => target.setVisible(false));
+    }
+
+    // Case 2: target is just a message string (fallback mode)
+    else if (typeof target === 'string') {
+        if (!scene.fallbackNotificationText) {
+            scene.fallbackNotificationText = scene.add.text(
+                scene.scale.width / 2,
+                scene.scale.height - 160,
+                '',
+                {
+                    fontFamily: '"Press Start 2P"',
+                    fontSize: '10px',
+                    color: '#ff5555',
+                    backgroundColor: '#000000',
+                    padding: { x: 10, y: 4 },
+                }
+            ).setOrigin(0.5).setDepth(999).setScrollFactor(0).setVisible(false);
+        }
+
+        scene.fallbackNotificationText.setText(target).setVisible(true);
+        scene.time.delayedCall(2000, () => scene.fallbackNotificationText.setVisible(false));
+    }
+
+    else {
+        target.setVisible(true);
     
-    scene.time.delayedCall(1000, () => {
-         notification.setVisible(false);
-     });
+        scene.time.delayedCall(1000, () => {
+         target.setVisible(false);
+        });
+    }
 }
 
 // This function allows the player to deploy an asset
-export function use_resource (scene, x, y, fireSprite) {
-    // Create an object that controls deployment graphics
+export function use_resource(scene, x, y, fireSprite, direction = null) {
+    // 1) OUT-OF-ASSETS & COOLDOWN for single-tile assets ONLY
+    if (activated_resource === "hose") {
+        if (getHose() <= 0)     { show_notification(scene, out_hoses);   return; }
+        if (cooldown[0] > 0)    { show_notification(scene, n_cooldown);  return; }
+    }
+    else if (activated_resource === "extinguisher") {
+        if (getExtinguisher() <= 0) { show_notification(scene, out_extinguishers); return; }
+        if (cooldown[1] > 0)        { show_notification(scene, n_cooldown);         return; }
+    }
+    else if (activated_resource === "helicopter") {
+        if (getHelicopter() <= 0) { show_notification(scene, out_helicopters); return; }
+        if (cooldown[2] > 0)      { show_notification(scene, n_cooldown);      return; }
+    }
+    else if (activated_resource === "firetruck") {
+        if (getFiretruck() <= 0) { show_notification(scene, out_firetrucks); return; }
+        if (cooldown[3] > 0)     { show_notification(scene, n_cooldown);     return; }
+    }
+
+    // 2) DIRECTION PROMPT for multi-tile assets
+    const isDirectional =
+        activated_resource === "airtanker" ||
+        activated_resource === "hotshot-crew";
+        if (!direction && isDirectional) {
+        pendingDeployment = { scene, x, y, fireSprite };
+        scene.scene
+            .get('UIScene')
+            .directionPromptContainer
+            .setVisible(true);
+        return;
+    }
+
+    // 3) OUT-OF-ASSETS & COOLDOWN for directional assets (after prompt)
+    if (activated_resource === "airtanker") {
+        if (getAirtanker() <= 0) { show_notification(scene, out_airtankers); return; }
+        if (cooldown[4] > 0)     { show_notification(scene, n_cooldown);     return; }
+    }
+    else if (activated_resource === "hotshot-crew") {
+        if (getHotshotCrew() <= 0) { show_notification(scene, out_hotshots); return; }
+        if (cooldown[5] > 0)       { show_notification(scene, n_cooldown);   return; }
+    }
+    else if (activated_resource === "smokejumper") {
+        if (getSmokejumpers() <= 0) { show_notification(scene, out_smokejumpers); return; }
+        if (cooldown[6] > 0)        { show_notification(scene, n_cooldown);        return; }
+    }
+
+    // 4) ACTUAL DEPLOY LOGIC
     let asset = new AnimatedSprite(3);
 
-    // Deploy animations
-    if (activated_resource === "hose") {
-        if (getHose() > 0) {
-            if (cooldown[0] == 0) {
-                setHose(-1);
-                asset.useHose(scene, x, y, fireSprite);
-                asset.startTimer(0, scene, c_hose, 750, 50);
-                coins += 100;
-                
-            } else {
-                show_notification(scene, n_cooldown);
-            }
+    if (activated_resource === "hose" && !paused) {
+        setHose(-1);
+        asset.useHose(scene, x, y, fireSprite);
+        asset.startTimer(0, scene, c_hose, 750, 50);
 
-            scene.time.delayedCall(t_hose, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-        } else {
-            console.log("Sorry! You ran out!");
-            
-            // Notification to player that they are out of firehoses
-            show_notification(scene, out_hoses);
-        }
+        scene.time.delayedCall(t_hose, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
+            const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 2);
+            bank.setText(`${coins}`);
+        });
     }
-    if (activated_resource === "extinguisher") {
-        if (getExtinguisher() > 0) {
-            if (cooldown[1] == 0) {
-                setExtinguisher(-1);
-                asset.useFireExtinguisher(scene, x, y, fireSprite);
-                asset.startTimer(1, scene, c_extinguisher, 750, 130);
-                coins += 50;
-                bank.setText(`${coins}`);
-            } else {
-                show_notification(scene, n_cooldown);
-            }
+    else if (activated_resource === "extinguisher" && !paused) {
+        setExtinguisher(-1);
+        asset.useFireExtinguisher(scene, x, y, fireSprite);
+        asset.startTimer(1, scene, c_extinguisher, 750, 130);
 
-            scene.time.delayedCall(t_extinguisher, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-
-        } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of fire extinguishers
-            show_notification(scene, out_extinguishers);
-        }
+        scene.time.delayedCall(t_extinguisher, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
+            const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene);
+            bank.setText(`${coins}`);
+        });
     }
-    if (activated_resource === "helicopter") {
-        if (getHelicopter() > 0) {
-            if (cooldown[2] == 0) {
-                setHelicopter(-1);
-                asset.useHelicopter(scene, x, y, fireSprite);
-                asset.startTimer(2, scene, c_helicopter, 750, 210);
-                coins += 300;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
+    else if (activated_resource === "helicopter" && !paused) {
+        setHelicopter(-1);
+        asset.useHelicopter(scene, x, y, fireSprite);
+        asset.startTimer(2, scene, c_helicopter, 750, 210);
 
-            scene.time.delayedCall(t_helicopter, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-            
-        } else {
-            console.log("Sorry! You ran out!");
+        scene.time.delayedCall(t_helicopter, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const size    = mapScene.TILE_SIZE;
+            const tx      = Math.floor(fireSprite.x / size);
+            const ty      = Math.floor(fireSprite.y / size);
+            const deltas  = [[0,0],[0,-1],[0,1],[1,0],[-1,0]];
 
-            // Notification to player that they are out of helicopters
-            show_notification(scene, out_helicopters);
-        }
+            deltas.forEach(([dx,dy]) => {
+                const nx = tx+dx, ny = ty+dy;
+                if (nx>=0 && nx<mapScene.map.width && ny>=0 && ny<mapScene.map.height) {
+                    extinguishTile(mapScene.map.grid[ny][nx], nx, ny, mapScene);
+                }
+            });
+            bank.setText(`${coins}`);
+        });
     }
-    if (activated_resource === "firetruck") {
-        if (getFiretruck() > 0) {
-            if (cooldown[3] == 0) {
-                setFiretruck(-1);
-                asset.useFiretruck(scene, x, y, fireSprite);
-                asset.startTimer(3, scene, c_firetruck, 750, 290);
-                coins += 200;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
+    else if (activated_resource === "firetruck" && !paused) {
+        setFiretruck(-1);
+        asset.useFiretruck(scene, x, y, fireSprite);
+        asset.startTimer(3, scene, c_firetruck, 750, 290);
 
-            scene.time.delayedCall(t_firetruck, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-
-        } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of firetrucks
-            show_notification(scene, out_firetrucks);
-        }
+        scene.time.delayedCall(t_firetruck, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
+            const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
+            bank.setText(`${coins}`);
+        });
     }
-    if (activated_resource === "airtanker") {
-        if (getAirtanker() > 0) {
-            if (cooldown[4] == 0) {
-                setAirtanker(-1);
-                asset.useAirtanker(scene, x, y, fireSprite);
-                asset.startTimer(4, scene, c_airtanker, 750, 370);
-                coins += 500;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
+    else if (activated_resource === "airtanker" && !paused) {
+        setAirtanker(-1);
+        asset.useAirtanker(scene, x, y, fireSprite);
+        asset.startTimer(4, scene, c_airtanker, 750, 370);
 
-            scene.time.delayedCall(t_airtanker, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
+        scene.time.delayedCall(t_airtanker, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const tx      = Math.floor(x / mapScene.TILE_SIZE);
+            const ty      = Math.floor(y / mapScene.TILE_SIZE);
+            const dir     = direction || dropDirection;
+            const deltas  = dir === "vertical"
+                ? [[0,-2],[0,-1],[0,0],[0,1],[0,2]]
+                : [[-2,0],[-1,0],[0,0],[1,0],[2,0]];
 
-        } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of airtankers
-            show_notification(scene, out_airtankers);
-        }
+            deltas.forEach(([dx,dy]) => {
+                const nx = tx+dx, ny = ty+dy;
+                if (nx>=0 && nx<mapScene.map.width && ny>=0 && ny<mapScene.map.height) {
+                    const nbr = mapScene.map.grid[ny][nx];
+                    if (nbr.burnStatus !== "burnt") {
+                        extinguishTile(nbr, nx, ny, mapScene);
+                    }
+                }
+            });
+            bank.setText(`${coins}`);
+        });
     }
-    if (activated_resource === "hotshot-crew") {
-        if (getHotshotCrew() > 0) {
-            if (cooldown[5] == 0) {
-                setHotshotCrew(-1);
-                asset.useHotshotCrew(scene, x, y, fireSprite);
-                asset.startTimer(5, scene, c_hotshotcrew, 750, 450);
-                coins += 300;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
+    else if (activated_resource === "hotshot-crew") {
+        const mapScene = scene.scene.get('MapScene');
+        const tx       = Math.floor(x / mapScene.TILE_SIZE);
+        const ty       = Math.floor(y / mapScene.TILE_SIZE);
+        const tile     = mapScene.map.grid[ty][tx];
 
-            scene.time.delayedCall(t_hotshotcrew, () => {
-                scene.events.emit('extinguishFire', fireSprite);
-                bank.setText(`${coins}`);
-            })
-
-        } else {
-            console.log("Sorry! You ran out!");
-
-            // Notification to player that they are out of hotshot crews
-            show_notification(scene, out_hotshots);
-        }
+    if (tile.burnStatus !== "unburned") {
+        show_notification(scene, "Hotshots can only deploy on unburned tiles!");
+        return;
     }
-    if (activated_resource === "smokejumper") {
-        if (getSmokejumpers() > 0) {
-            if (cooldown[6] == 0) {
-                setSmokejumpers(-1);
-                asset.useSmokejumpers(scene, x, y, fireSprite);
-                asset.startTimer(6, scene, 750, 530);
-                coins += 1000;
-            } else {
-                show_notification(scene, n_cooldown);
-            }
 
-            scene.time.delayedCall(t_smokejumpers_plane + t_smokejumpers_ground, () => {
+        const asset2 = new AnimatedSprite(3);
+        asset2.useHotshotCrew(scene, x, y);
+        setHotshotCrew(-1);
+        asset2.startTimer(5, scene, c_hotshotcrew, 750, 450);
+
+        scene.time.delayedCall(t_hotshotcrew, () => {
+            const dir    = direction || dropDirection;
+            const deltas = dir === "vertical"
+                ? [[0,-2],[0,-1],[0,1],[0,2]]
+                : [[-2,0],[-1,0],[1,0],[2,0]];
+
+            if (tile.burnStatus !== "burnt") {
+                tile.burnStatus = "not-burnt";
+                extinguishTile(tile, tx, ty, mapScene);
+            }
+            deltas.forEach(([dx,dy]) => {
+                const nx = tx+dx, ny = ty+dy;
+                if (nx>=0 && nx<mapScene.map.width && ny>=0 && ny<mapScene.map.height) {
+                    const nbr = mapScene.map.grid[ny][nx];
+                    if (nbr.burnStatus !== "burnt") {
+                        nbr.burnStatus = "not-burnt";
+                        extinguishTile(nbr, nx, ny, mapScene);
+                    }
+                }
+            });
+            bank.setText(`${coins}`);
+        });
+    }
+    else if (activated_resource === "smokejumper" && !paused) {
+        setSmokejumpers(-1);
+        asset.useSmokejumpers(scene, x, y, fireSprite);
+        asset.startTimer(6, scene, 750, 530);
+
+        scene.time.delayedCall(
+            t_smokejumpers_plane + t_smokejumpers_ground,
+            () => {
                 scene.events.emit('extinguishFire', fireSprite);
                 bank.setText(`${coins}`);
-            })
-
-        } else {
-            console.log("Sorry! You ran out!");
-
-            show_notification(scene, out_smokejumpers);
-        }
+            }
+        );
     }
 }

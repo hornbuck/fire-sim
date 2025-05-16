@@ -8,7 +8,8 @@ import Phaser from 'phaser';
 import MapScene from './MapScene.js';
 import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { createDrawnButton } from '../components/ButtonManager.js';
 
 
 /**
@@ -33,9 +34,22 @@ export default class LoginScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
+        // Stop MapScene
+        if (this.scene.isActive('MapScene')) {
+            this.scene.stop('MapScene');
+        }
+
+        // remove any captures so W/A/S/D go to the browser again
+        this.input.keyboard.removeCapture([
+            Phaser.Input.Keyboard.KeyCodes.W,
+            Phaser.Input.Keyboard.KeyCodes.A,
+            Phaser.Input.Keyboard.KeyCodes.S,
+            Phaser.Input.Keyboard.KeyCodes.DÍ
+        ]);
+
         // Add a fun title text with a retro arcade feel.
-        this.add.text(400, 100, 'Please Log In', {
-            fontSize: '36px',
+        this.add.text(400, 150, 'Log In', {
+            fontSize: '25px',
             fill: '#FFD700',
             fontFamily: '"Press Start 2P", cursive',
             stroke: '#000',
@@ -44,41 +58,39 @@ export default class LoginScene extends Phaser.Scene {
 
         // Create a DOM element for the email input.
         const emailInput = this.add.dom(400, 200, 'input', {
-            width: '200px',
+            width: '500px',
             height: '30px',
             fontSize: '16px',
             padding: '5px',
         }).setOrigin(0.5);
         emailInput.node.setAttribute('type', 'email');
         emailInput.node.setAttribute('name', 'email');
-        emailInput.node.setAttribute('placeholder', 'Enter Email');
+        emailInput.node.setAttribute('placeholder', 'Email');
         emailInput.node.classList.add('input-field');
 
         // Create a DOM element for the password input.
         const passwordInput = this.add.dom(400, 260, 'input', {
-            width: '200px',
+            width: '500px',
             height: '30px',
             fontSize: '16px',
             padding: '5px',
         }).setOrigin(0.5);
         passwordInput.node.setAttribute('type', 'password');
         passwordInput.node.setAttribute('name', 'password');
-        passwordInput.node.setAttribute('placeholder', 'Enter Password');
+        passwordInput.node.setAttribute('placeholder', 'Password');
         passwordInput.node.classList.add('input-field');
 
         // Create a DOM element for the Login button.
         const loginButton = this.add.dom(470, 320, 'button', {
-            width: '100px',
+            width: '140px',
             height: '30px',
-            font: '16px "Georgia", serif',
-            padding: { x: 15, y: 10 },
-            fontSize: '20px',
-            color: '#fff',
-            backgroundColor: '#8B0000',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-        }, 'Login').setOrigin(0.5);
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#228B22',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'LOGIN').setOrigin(0.5);
 
         // Add a click event listener to the login button.
         loginButton.addListener('click');
@@ -96,44 +108,83 @@ export default class LoginScene extends Phaser.Scene {
                 .then((userCredential) => {
                     console.log('Login successful:', userCredential);
                     // Transition to game after successful login
+                    // Reenable the MapScene and UIScene input
+                    this.scene.start('MapScene');
+                    this.scene.launch('UIScene');
+
+                                
                     this.startGame();
                 })
                 .catch((error) => {
                     console.error('Login error:', error);
                     alert(`Login failed: ${error.message}`);
                 });
+
+
+
         });
 
         // Create a DOM element for the "Back to Signup" button.
         const signupButton = this.add.dom(315, 320, 'button', {
-            width: '120px',
+            width: '140px',
             height: '30px',
-            font: '16px "Georgia", serif',
-            padding: { x: 15, y: 10 },
-            fontSize: '20px',
-            color: '#fff',
-            backgroundColor: '#556B2F',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-        }, 'New User?').setOrigin(0.5);
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#555555',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'NEW USER?').setOrigin(0.5);
 
         signupButton.addListener('click');
         signupButton.on('click', () => {
             this.scene.start('SignupScene');
         });
+        
+        // Listen to Firebase auth changes
+        auth.onAuthStateChanged(user => {
+            // If there’s a user, show the logout button
+            if (user) {
+                // Create the Logout button in the top-left
+                this.logoutButton = this.add.dom(50, 20, 'button', {
+                    width: '100px',
+                    height: '30px',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    backgroundColor: '#8B0000',
+                    fontFamily: '"Press Start 2P", cursive',
+                    border: '2px solid #FFFFFF',
+                    cursor: 'pointer'
+                }, 'LOGOUT')
+                    .setOrigin(0, 0);
+
+                this.logoutButton.addListener('click');
+                this.logoutButton.on('click', () => {
+                    signOut(auth)
+                    .then(() => {
+                        console.log('User logged out');
+                        this.startGame()
+                    })
+                    .catch(err => console.error('Logout failed:', err));
+                });
+             } else if (this.logoutButton) {
+            // No user: remove the button if it exists
+            this.logoutButton.destroy();
+            this.logoutButton = null;
+            }
+        });
 
         // Create a PLAY button to bypass login and go directly to the game
-        const toGame = this.add.dom(700, 20, 'button', {
-            width: '130px',
-            height: '40px',
-            fontSize: '16px',
-            color: '#fff',
-            backgroundColor: '#4169E1',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-        }, 'PLAY').setOrigin(0.5);
+        const toGame = this.add.dom(395, 370, 'button', {
+            width: '200px',
+            height: '30px',
+            fontSize: '14px',
+            color: '#FFFFFF',
+            backgroundColor: '#8B0000',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'MAIN MENU').setOrigin(0.5);
 
         toGame.addListener('click');
         toGame.on('click', () => {

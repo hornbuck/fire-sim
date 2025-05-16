@@ -1,5 +1,6 @@
 import TerrainTile from "./TerrainTile.js";
-import { burn } from "./AnimatedSprites.js";
+
+const GLOBAL_SPREAD_FACTOR = 0.25;
 
 class FireSpread {
     /**
@@ -14,7 +15,6 @@ class FireSpread {
         console.log("Weather object received:", this.weather);
     }
 
-
     /**
      * Simulates one step of fire spread on the map.
      * 
@@ -25,26 +25,31 @@ class FireSpread {
      * @returns {void} This method does not return any value. It updates the grid by spreading fire to adjacent tiles.
      */
     simulateFireStep() {
-        const burningTiles = []; // Store tiles that were burning at start
-    
+        const burningTiles = [];
         for (let y = 0; y < this.map.height; y++) {
             for (let x = 0; x < this.map.width; x++) {
                 const tile = this.map.grid[y][x];
-    
                 if (tile.burnStatus === "burning") {
-                    burningTiles.push({ tile, x, y }); // Collect tiles that were burning
+                    burningTiles.push({ tile, x, y });
                 }
             }
         }
-    
+
+        // no active files -> return 0
+        if (burningTiles.length === 0) {
+            return 0;
+        }
+
+        // otherwise spread fire as before
         let spreadCount = 0;
-    
-        // Process only tiles that were burning at the start of this step
         burningTiles.forEach(({ tile, x, y }) => {
             spreadCount += this.processBurningTile(tile, this.map.grid, x, y);
         });
-    
+
+        // See if there were any fires for win-checking
+        return burningTiles.length;
     }
+
     
 
     /**
@@ -131,7 +136,6 @@ class FireSpread {
     
             // Check if the tile has a fire sprite and extinguish it
             if (tile.fireS) {
-                setTimeout(() => { 
                     tile.fireS.extinguishFire(); 
                     
                     // Update tile terrain in order to show burnt sprite
@@ -141,15 +145,17 @@ class FireSpread {
                         tile.terrain = 'burned-shrub';
                     } else if (tile.terrain === 'tree') {
                         tile.terrain = 'burned-tree';
+                    } else if (tile.terrain === 'grass-house') {
+                        tile.terrain = 'burned-grass-house';
+                    } else if (tile.terrain === 'sand-house') {
+                        tile.terrain = 'burned-sand-house';
+                    } else if (tile.terrain === 'dirt-house') {
+                        tile.terrain = 'burned-dirt-house';
                     }
-            
+
                     // Update the tile's sprite to show it burned
                     this.updateSprite(x, y);
-            
-                }, 2000); // 2 second delay
             }
-            
-    
             // Call function to update tile sprite
             this.updateSprite(x, y);
         }
@@ -174,7 +180,7 @@ class FireSpread {
         // If the burning tile is a tree, give it a bonus for fire spread.
         let sourceBonus = 0;
         if (tile.terrain === 'tree') {
-            sourceBonus = 30; // Adjust this bonus as needed.
+            sourceBonus = 30;
         }
         
         for (const neighbor of neighbors) {
@@ -199,21 +205,20 @@ class FireSpread {
      * the wind direction. If the neighboring tile is in the direction the wind is blowing, it returns `true`, 
      * indicating that the fire will spread faster to that tile. If not, it returns `false`.
      * 
-     * @param {TerrainTile} tile - The tile currently being processed for fire spread.
-     * @param {TerrainTile} neighbor - The neighboring tile being checked for downwind status.
+     * @param {TerrainTile} src - The tile currently being processed for fire spread.
+     * @param {TerrainTile} nbr - The neighboring tile being checked for downwind status.
      * @returns {boolean} `true` if the neighboring tile is downwind and fire spreads faster toward it, 
      *          `false` otherwise.
      */
-    isTileDownwind(tile, neighbor) {
-        const { windDirection } = this.weather;
-    
-        if (windDirection === 'N' && neighbor.y < tile.y) return true; // Fire spreads faster southward
-        if (windDirection === 'S' && neighbor.y > tile.y) return true; // Fire spreads faster northward
-        if (windDirection === 'E' && neighbor.x > tile.x) return true; // Fire spreads faster westward
-        if (windDirection === 'W' && neighbor.x < tile.x) return true; // Fire spreads faster eastward
-    
+    isTileDownwind(src, nbr) {
+        const dir = this.weather.windDirection;
+        if (dir === 'N' && nbr.y > src.y) return true;  // blowing north-to-south
+        if (dir === 'S' && nbr.y < src.y) return true;
+        if (dir === 'E' && nbr.x < src.x) return true;
+        if (dir === 'W' && nbr.x > src.x) return true;
         return false;
-    }
+      }
+      
     
 
     /**
@@ -239,23 +244,44 @@ class FireSpread {
      *
      * @returns {number} - Returns 1 if the tile ignited, otherwise 0.
      */
-    attemptIgnite(neighborTile, isDownwind, sourceBonus = 0) {
-        if (neighborTile.burnStatus !== "unburned") return 0; // Prevent re-ignition
-        
-        let ignitionChance = this.calculateIgnitionChance(neighborTile);
-        
-        if (isDownwind) {
-            ignitionChance += this.weather.windSpeed * 0.7;
-        }
-        
-        ignitionChance += sourceBonus;  // Add bonus if the burning tile is a tree (crown fire effect)
-        
-        if (ignitionChance > 70) {  // Threshold value; adjust as needed.
-            neighborTile.burnStatus = "burning";
-            return 1;
-        }
-        return 0;
+ attemptIgnite(neighborTile, isDownwind, sourceBonus = 0) {
+    // only consider truly unburned tiles
+    if (neighborTile.burnStatus !== "unburned" || neighborTile.flammability <= 0) {
+      return 0;
     }
+
+    // **Special‑case grass**: always catch
+    if (neighborTile.terrain === 'grass') {
+      neighborTile.burnStatus = 'burning';
+      return 1;
+    }
+
+    // 1) base + weather
+    let ignitionChance = this.calculateIgnitionChance(neighborTile);
+
+    // 2) no longer globally dampened
+    ignitionChance *= GLOBAL_SPREAD_FACTOR;
+
+    // 3) downwind bonus
+    if (isDownwind) {
+      ignitionChance += this.weather.windSpeed * 0.7;
+    }
+
+    // 4) crown‑fire bonus for trees
+    ignitionChance += sourceBonus;
+
+    // 5) scale by risk
+    const riskFactor = { low: 0.5, medium: 1.0, high: 1.5 }[this.weather.getRiskCategory()];
+    ignitionChance *= riskFactor;
+
+    // 6) roll to ignite
+    if (Math.random() * 100 < ignitionChance) {
+      neighborTile.burnStatus = 'burning';
+      return 1;
+    }
+    return 0;
+  }
+    
     
     
     

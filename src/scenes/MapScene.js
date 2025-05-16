@@ -2,6 +2,14 @@ import Map from '../components/MapGenerator.js';
 import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
+import { bank } from "../components/ui.js";
+import { getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
+import { auth, db } from '../firebaseConfig.js';
+import { collection, collectionGroup, doc, getDocs,getDoc, limit, orderBy, query, setDoc } from 'firebase/firestore';
+
+
+
+export let paused = true;
 
 export default class MapScene extends Phaser.Scene {
     constructor() {
@@ -21,17 +29,25 @@ export default class MapScene extends Phaser.Scene {
         this.UI_WIDTH = 100;      // Width of UI area on right side
         
         // Fire simulation settings
-        this.FIRE_SPREAD_INTERVAL = 8000; // Fire spread frequency in milliseconds
-
+        this.FIRE_SPREAD_INTERVAL = 12000; // Fire step interval (ms)
+        
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds
-
         this.lastFireSpreadTime = 0;
         this.isFireSimRunning = false;
+
+        this.selectedTile = null; // Track the currently selected tile
+        this.lastTileSnapshot = null; // Track the last tile snapshot for undo functionality
+        this.tileInfoUpdateInterval = 500; // Interval for tile info updates in milliseconds
+        this.lastTileInfoUpdate = 0; // Track the last tile info update time
         
         // Camera state variables
         this.currentZoom = 1;
         this.isPanning = false;
+        this.panVector = { x:0, y:0 };
+
+        // Player's score
+        this.score = 0;
     }
 
     preload() {
@@ -42,16 +58,28 @@ export default class MapScene extends Phaser.Scene {
         this.load.image('grass', 'assets/64x64-Map-Tiles/grass.png');
         this.load.image('shrub', 'assets/64x64-Map-Tiles/Shrubs/shrubs-on-sand.png');
         this.load.image('tree', 'assets/64x64-Map-Tiles/Trees/trees-on-light-dirt.png');
+        this.load.image('dirt-house', 'assets/64x64-Map-Tiles/dirt-house.png');
+        this.load.image('sand-house', 'assets/64x64-Map-Tiles/sand-house.png');
+        this.load.image('grass-house', 'assets/64x64-Map-Tiles/grass-house.png');
         
         // Preload burned terrain assets
         this.load.image('burned-grass', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass.png');
         this.load.image('burned-shrub', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-shrubs-on-sand.png');
         this.load.image('burned-tree', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-trees-on-light-dirt.png');
+        this.load.image('burned-dirt-house', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-dirt-house.png');
+        this.load.image('burned-sand-house', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-sand-house.png');
+        this.load.image('burned-grass-house', 'assets/64x64-Map-Tiles/Burned%20Tiles/burned-grass-house.png');
 
         // Preload extinguished terrain assets
         this.load.image('extinguished-grass', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/grass.png');
         this.load.image('extinguished-shrub', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/shrub.png');
         this.load.image('extinguished-tree', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/tree.png');
+        this.load.image('extinguished-dirt-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/dirt-house.png');
+        this.load.image('extinguished-sand-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/sand-house.png');
+        this.load.image('extinguished-grass-house', 'assets/64x64-Map-Tiles/Extinguished%20Tiles/grass-house.png');
+
+        // Preload firebreak
+        this.load.image('fire-break', 'assets/64x64-Map-Tiles/fire-break.png');
         
         // Preload animation assets
         this.load.spritesheet('water-sheet', 'assets/64x64-Map-Tiles/splash-sheet.png', {
@@ -66,6 +94,8 @@ export default class MapScene extends Phaser.Scene {
     create() {
         console.log("MapScene Create Starting");
 
+        this.input.mouse.disableContextMenu();
+
         // Generate and render the map
         this.initializeMap();
         
@@ -77,6 +107,9 @@ export default class MapScene extends Phaser.Scene {
             this.scene.launch('UIScene');
         }
 
+        // Init handler for deployment direction prompt
+        initDirectionHandler(this);
+
         // Set up input events
         this.input.on('pointerdown', this.handleTileClick, this);
 
@@ -86,6 +119,14 @@ export default class MapScene extends Phaser.Scene {
         // Add event listener for fire extinguishing
         this.events.on('extinguishFire', this.handleFireExtinguish, this);
 
+        // Tile stats highlight
+        this.selectionMarker = this.add.graphics();
+        this.selectionMarker.lineStyle(3, 0x00ffff, 1); // Cyan border
+        this.selectionMarker.strokeRect(0, 0, this.TILE_SIZE, this.TILE_SIZE);
+        this.selectionMarker.setVisible(false);
+
+        this.selectionMarker.setDepth(100);
+
         console.log("MapScene Create Finished");
     }
 
@@ -94,6 +135,10 @@ export default class MapScene extends Phaser.Scene {
         console.log("Setting up MapScene event listeners");
         this.scene.get('UIScene').events.on('toggleFire', this.toggleFireSimulation, this);
         this.scene.get('UIScene').events.on('restartGame', this.initializeMap, this);
+
+        const ui = this.scene.get('UIScene');
+        ui.events.on('panStart', this.onPanStart, this);
+        ui.events.on('panStop',  this.onPanStop,  this);
     }
     
     setupCameraControls() {
@@ -119,7 +164,7 @@ export default class MapScene extends Phaser.Scene {
         
         // Create a camera that doesn't include the UI area
         this.cameras.main.setBounds(0, 0, this.mapPixelWidth, this.mapPixelHeight);
-        this.cameras.main.setViewport(0, 0, viewportWidth, viewportHeight);
+        this.cameras.main.setViewport(0, 0, this.cameras.main.width, this.cameras.main.height);
         
         // Center the camera on the map
         this.cameras.main.centerOn(this.mapPixelWidth / 2, this.mapPixelHeight / 2);
@@ -153,49 +198,15 @@ export default class MapScene extends Phaser.Scene {
             }
         });
         
-        // Set up panning with middle mouse button or right mouse button
-        this.input.on('pointerdown', (pointer) => {
-            // Only start panning with middle or right button and if pointer is in map area
-            if ((pointer.middleButtonDown() || pointer.rightButtonDown()) && pointer.x < viewportWidth) {
-                this.isPanning = true;
-                this.lastPanPosition = { x: pointer.x, y: pointer.y };
-                
-                // Change cursor to grabbing
-                this.input.setDefaultCursor('grabbing');
-            }
-        });
-        
-        this.input.on('pointermove', (pointer) => {
-            if (this.isPanning) {
-                // Calculate the difference since last position
-                const deltaX = pointer.x - this.lastPanPosition.x;
-                const deltaY = pointer.y - this.lastPanPosition.y;
-                
-                // Move the camera
-                this.cameras.main.scrollX -= deltaX / this.currentZoom;
-                this.cameras.main.scrollY -= deltaY / this.currentZoom;
-                
-                // Update last position
-                this.lastPanPosition = { x: pointer.x, y: pointer.y };
-            }
-        });
-        
-        this.input.on('pointerup', () => {
-            if (this.isPanning) {
-                this.isPanning = false;
-                this.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
-            }
-        });
-        
         // Keyboard controls for panning (WASD or arrow keys)
-        this.cursors = this.input.keyboard.createCursorKeys();
+         this.cursors = this.input.keyboard.createCursorKeys();
         
-        // Add WASD keys
-        this.wasd = {
-            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+         // Add WASD keys
+         this.wasd = {
+             up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+             down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+             right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
         };
         
         // Add zoom keys
@@ -252,7 +263,7 @@ export default class MapScene extends Phaser.Scene {
         });
 
         // Initialize weather and fire simulation
-        this.weather = new Weather(68, 30, 15, 'N');
+        this.weather = new Weather(this.MAP_WIDTH, this.MAP_HEIGHT);
         this.fireSpread = new FireSpread(this.map, this.weather);
 
         // Reset state variables
@@ -296,14 +307,11 @@ export default class MapScene extends Phaser.Scene {
             
             // Force some initial fire spread for visual effect
             this.time.delayedCall(1000, () => {
-                for (let i = 0; i < 4; i++) {
-                    this.updateFireSpread();
-                }
+                this.simulateInitialSpread(4);
                 this.isFireSimRunning = false;
-                
-                // Notify UI of fire state
                 this.events.emit('fireSimToggled', this.isFireSimRunning);
             });
+            
         });
 
         // Notify UI of initial state
@@ -315,6 +323,13 @@ export default class MapScene extends Phaser.Scene {
             pixelWidth: this.mapPixelWidth,
             pixelHeight: this.mapPixelHeight
         });
+
+        
+        // Set player coins in bank to 0
+        if (this.scene.isActive('UIScene')) {  
+            setCoins(getCoins());
+            bank.setText(`${getCoins()}`);
+        }
     }
 
     renderMap(map, tileSize) {
@@ -343,41 +358,56 @@ export default class MapScene extends Phaser.Scene {
         });
     }
 
-    handleTileClick(pointer) {
-        // Ignore clicks if in panning mode
-        if (this.isPanning) {
-            return;
-        }
-        
-        // Ignore clicks in the UI area
-        const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
-        if (pointer.x > viewportWidth) {
-            return;
-        }
-        
-        // Convert screen coordinates to world coordinates
-        const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-        
-        // Calculate tile coordinates based on world point
-        let tileX = Math.floor(worldPoint.x / this.TILE_SIZE);
-        let tileY = Math.floor(worldPoint.y / this.TILE_SIZE);
+handleTileClick(pointer) {
+    if (this.isPanning) return;
 
-        // Ensure click is within map bounds
-        if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
-            let clickedTile = this.map.getTile(tileX, tileY);
-            
-            if (clickedTile) {
-                console.log(`Clicked on ${clickedTile.terrain} at (${tileX}, ${tileY})`);
-                
-                // Send tile info to UIScene
-                this.events.emit('tileInfo', {
-                    ...clickedTile,
-                    screenX: pointer.x,
-                    screenY: pointer.y
-                });
+    const viewportWidth = this.cameras.main.width - this.UI_WIDTH;
+    if (pointer.x > viewportWidth) return;
+
+    // Calculate tile coordinates
+    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+    const tileX = Math.floor(worldPoint.x / this.TILE_SIZE);
+    const tileY = Math.floor(worldPoint.y / this.TILE_SIZE);
+
+    // Ensure click is within map bounds
+    if (tileX < 0 || tileX >= this.map.width || tileY < 0 || tileY >= this.map.height) return;
+
+    const clickedTile = this.map.getTile(tileX, tileY);
+    if (!clickedTile) return;
+
+    // —— DEPLOYMENT MODE GUARD ——  
+    if (mode === "deployment") {
+if (activated_resource === "hotshot-crew"   ||
+    activated_resource === "hotshotcrew") {
+            // Hotshots can drop on any tile:
+            const xPx = tileX * this.TILE_SIZE;
+            const yPx = tileY * this.TILE_SIZE;
+            use_resource(this, xPx, yPx, null);
+        } else {
+            // All other tools must target an existing fire sprite
+            const fireSprite = clickedTile.fireSprite;
+            if (!fireSprite) {
+                // (Optional) show a “No fire here” notification
+                return;
             }
+            use_resource(this, fireSprite.x, fireSprite.y, fireSprite);
         }
+        return;  // skip the normal tile-info UI after deploying
     }
+
+    // —— NORMAL TILE SELECTION UI ——  
+    this.selectedTile = clickedTile;
+    this.selectionMarker
+        .setVisible(true)
+        .setPosition(tileX * this.TILE_SIZE, tileY * this.TILE_SIZE);
+    this.lastTileInfoSnapshot = { ...clickedTile };
+
+    this.events.emit("tileInfo", {
+        ...clickedTile,
+        screenX: pointer.x,
+        screenY: pointer.y
+    });
+}
 
     startFire() {
         console.log("Starting fire initialization...");
@@ -434,7 +464,10 @@ export default class MapScene extends Phaser.Scene {
                             candidateTile.terrain && 
                             (candidateTile.terrain === 'tree' || 
                              candidateTile.terrain === 'shrub' || 
-                             candidateTile.terrain === 'grass')) {
+                             candidateTile.terrain === 'grass' ||
+                             candidateTile.terrain === 'dirt_house' ||
+                             candidateTile.terrain === 'sand_house' ||
+                             candidateTile.terrain === 'grass_house')) {
                             
                             startX = x;
                             startY = y;
@@ -503,81 +536,158 @@ export default class MapScene extends Phaser.Scene {
         return true; // Indicate successful fire start
     }
 
+    simulateInitialSpread(rounds = 4) {
+        let burningCoords = [];
+    
+        // Collect all current burning tiles
+        for (let y = 0; y < this.map.height; y++) {
+            for (let x = 0; x < this.map.width; x++) {
+                const tile = this.map.grid[y][x];
+                if (tile.burnStatus === "burning") {
+                    burningCoords.push({ x, y });
+                }
+            }
+        }
+    
+        let visited = new Set(burningCoords.map(c => `${c.x},${c.y}`));
+    
+        for (let i = 0; i < rounds; i++) {
+            let newCoords = [];
+    
+            burningCoords.forEach(({ x, y }) => {
+                const neighbors = this.fireSpread.getNeighbors(x, y);
+    
+                neighbors.forEach(({ x: nx, y: ny }) => {
+                    const neighbor = this.map.grid[ny][nx];
+                    const key = `${nx},${ny}`;
+    
+                    if (!visited.has(key) && this.fireSpread.canIgnite(neighbor)) {
+                        neighbor.burnStatus = "burning";
+    
+                        if (!neighbor.fireS && neighbor.sprite) {
+                            const blaze = new AnimatedSprite(3);
+                            blaze.lightFire(this, neighbor.sprite, this.flameGroup);
+                            neighbor.fireS = blaze;
+                        }
+    
+                        newCoords.push({ x: nx, y: ny });
+                        visited.add(key);
+                    }
+                });
+            });
+    
+            burningCoords = newCoords;
+        }
+    
+        console.log("Simulated initial non-burning fire burst.");
+    }
+    
     updateFireSpread() {
-        console.log("Simulating fire step...");
-        this.fireSpread.simulateFireStep();
+        // returns how many tiles WERE burning
+        const activeFires = this.fireSpread.simulateFireStep();
 
-        // Update burning tiles with visual effects
-        this.map.grid.forEach((row) => {
-            row.forEach((tile) => {
+        if (activeFires === 0) {
+            console.log("You win!");
+            this.isFireSimRunning = false;
+            this.events.emit('gameWon');
+            this.events.emit('fireSimToggled', false);
+            this.sendScoreToDB();
+            return;
+        }
+
+        // if still fires, just make sure any newly burning tiles get their flame sprite:
+        this.map.grid.forEach(row =>
+            row.forEach(tile => {
                 if (tile.burnStatus === "burning" && !tile.fireS) {
-                    let blaze = new AnimatedSprite(3);
+                    const blaze = new AnimatedSprite(3);
                     blaze.lightFire(this, tile.sprite, this.flameGroup);
                     tile.fireS = blaze;
                 }
-            });
-        });
+            })
+        );
     }
+
 
     toggleFireSimulation() {
         console.log("Toggle fire simulation called");
         this.isFireSimRunning = !this.isFireSimRunning;
         console.warn(`Fire Simulation ${this.isFireSimRunning ? "Started" : "Stopped"}`);
+        paused = !this.isFireSimRunning; // stops the player from using assets when the game is paused
         
         // Notify UIScene
         this.events.emit('fireSimToggled', this.isFireSimRunning);
     }
 
-    updateWeatherOverTime() {
-        // Random adjustments for dynamic weather
-        let tempChange = Phaser.Math.Between(-2, 2);
-        let windChange = Phaser.Math.Between(-1, 1);
-        let humidityChange = Phaser.Math.Between(-3, 3);
-    
-        // Apply changes within limits
-        let newTemp = this.weather.temperature + tempChange;
-        let newWind = Phaser.Math.Clamp(this.weather.windSpeed + windChange, 0, 100);
-        let newHumidity = Phaser.Math.Clamp(this.weather.humidity + humidityChange, 0, 100);
-    
-        // Occasional wind direction change
-        let newWindDirection = this.weather.windDirection;
-        if (Phaser.Math.Between(1, 10) === 1) {
-            const directions = ["N", "E", "S", "W"];
-            newWindDirection = Phaser.Utils.Array.GetRandom(directions);
-        }
-    
-        // Update weather object
-        this.weather.updateWeather(newTemp, newHumidity, newWind, newWindDirection);
-    
-        // Notify UI about weather change
-        this.events.emit('weatherUpdated', this.weather);
-    }
-
     update(time, delta) {
-        // Update game time
-        this.elapsedTime += delta / 1000;
-        
-        // Notify UI about time update
-        this.events.emit('updateGameClock', this.elapsedTime);
-        
-        // Handle fire spread at interval
-        if (this.isFireSimRunning && 
-            this.elapsedTime - this.lastFireSpreadTime >= this.FIRE_SPREAD_INTERVAL / 1000) {
+        if (this.isFireSimRunning) {
+          // 1) Advance game clock
+          this.elapsedTime += delta / 1000;
+          this.events.emit('updateGameClock', this.elapsedTime);
+      
+          // 2) Compute progress toward next fire step
+          const timeSinceLastStep = this.elapsedTime - this.lastFireSpreadTime;
+          const stepDuration   = this.FIRE_SPREAD_INTERVAL / 1000;
+          const stepProgress   = (timeSinceLastStep / stepDuration) * 100;
+          this.scene.get('UIScene').updateFireProgress(stepProgress);
+      
+          // 3) When it’s time for the next spread:
+          if (timeSinceLastStep >= stepDuration) {
+            // a) “Catch up” weather by the same elapsed milliseconds
+            this.weather.updateOverTime(stepDuration * 1000);
+            this.events.emit('weatherUpdated', this.weather);
+      
+            // b) Reset timer and actually spread fire
             this.lastFireSpreadTime = this.elapsedTime;
             this.updateFireSpread();
-            this.updateWeatherOverTime();
+          }
         }
         
+        
+
         // Handle keyboard camera controls
+        if (!this.scene.isActive('LoginScene')) {
         this.handleCameraControls(delta);
+        }     
         
         // Scale fire sprites based on camera zoom
         if (this.flameGroup && this.flameGroup.getChildren().length > 0) {
             this.flameGroup.getChildren().forEach(flameSprite => {
-                // Apply inverse zoom scale to maintain visual size
                 flameSprite.setScale(1 / this.currentZoom);
             });
         }
+
+        // Update selected tile info less frequently
+        if (this.selectedTile) {
+            this.lastTileInfoUpdate += delta;
+            if (this.lastTileInfoUpdate >= this.tileInfoUpdateInterval) {
+                this.lastTileInfoUpdate = 0;
+        
+                const currentSnapshot = {
+                    fuel: this.selectedTile.fuel,
+                    burnStatus: this.selectedTile.burnStatus,
+                    terrain: this.selectedTile.terrain
+                };
+        
+                const hasChanged = JSON.stringify(currentSnapshot) !== JSON.stringify(this.lastTileSnapshot);
+                if (hasChanged) {
+                    this.events.emit('tileInfo', {
+                        ...this.selectedTile,
+                        screenX: this.input.activePointer.x,
+                        screenY: this.input.activePointer.y
+                    });
+        
+                    this.lastTileSnapshot = { ...currentSnapshot };
+                }
+            }
+        }
+    }
+
+    onPanStart(dir) {
+        this.panVector = dir;
+      }
+    
+      onPanStop() {
+        this.panVector = { x: 0, y: 0 };
     }
     
     handleCameraControls(delta) {
@@ -585,10 +695,10 @@ export default class MapScene extends Phaser.Scene {
         const adjustedSpeed = this.CAMERA_SPEED / this.currentZoom;
         
         // Calculate camera movement based on keyboard input
-        const moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
+        let moveX = ((this.cursors.left.isDown || this.wasd.left.isDown) ? -adjustedSpeed : 0) +
                       ((this.cursors.right.isDown || this.wasd.right.isDown) ? adjustedSpeed : 0);
         
-        const moveY = ((this.cursors.up.isDown || this.wasd.up.isDown) ? -adjustedSpeed : 0) +
+        let moveY = ((this.cursors.up.isDown || this.wasd.up.isDown) ? -adjustedSpeed : 0) +
                       ((this.cursors.down.isDown || this.wasd.down.isDown) ? adjustedSpeed : 0);
         
         // Move camera
@@ -609,6 +719,15 @@ export default class MapScene extends Phaser.Scene {
             this.cameras.main.setZoom(this.currentZoom);
             zoomChanged = true;
         }
+
+        moveX += this.panVector.x * adjustedSpeed;
+        moveY += this.panVector.y * adjustedSpeed;
+
+        // apply it:
+        if (moveX || moveY) {
+        this.cameras.main.scrollX += moveX;
+        this.cameras.main.scrollY += moveY;
+        }
         
         if (zoomChanged) {
             this.events.emit('zoomChanged', this.currentZoom);
@@ -617,36 +736,34 @@ export default class MapScene extends Phaser.Scene {
     }
 
     handleFireExtinguish(fireSprite) {
-        // Convert fire sprite position to tile coordinates
-        const startX = (this.cameras.main.width - this.mapPixelWidth) / 2;
-        const startY = (this.cameras.main.height - this.mapPixelHeight) / 2;
-
         let tileX = Math.floor((fireSprite.x) / this.TILE_SIZE);
         let tileY = Math.floor((fireSprite.y) / this.TILE_SIZE);
-
-        console.log(`Attempting to extinguish fire at (${tileX}, ${tileY})`);
 
         // Ensure the tile is within bounds
         if (tileX >= 0 && tileX < this.map.width && tileY >= 0 && tileY < this.map.height) {
             let tile = this.map.grid[tileY][tileX];
             
             if (tile) {
-                console.log(`Current tile terrain: ${tile.terrain}, burnStatus: ${tile.burnStatus}`);
-                
                 // Update burn status
                 tile.burnStatus = 'extinguished';
+                this.score += 1;
+                this.events.emit('scoreUpdated', this.score);
+                console.log("Score: ", this.score);
                 
                 // Update tile terrain in order to show extinguished sprite
-                let originalTerrain = tile.terrain;
-                if (tile.terrain.includes('grass') || tile.terrain === 'grass') {
+                if (tile.terrain === 'grass') {
                     tile.terrain = 'extinguished-grass';
                 } else if (tile.terrain.includes('shrub') || tile.terrain === 'shrub') {
                     tile.terrain = 'extinguished-shrub';
                 } else if (tile.terrain.includes('tree') || tile.terrain === 'tree') {
                     tile.terrain = 'extinguished-tree';
+                } else if (tile.terrain.includes('dirt-house') || tile.terrain === 'dirt-house') {
+                    tile.terrain = 'extinguished-dirt-house';
+                } else if (tile.terrain.includes('sand-house') || tile.terrain === 'sand-house') {
+                    tile.terrain = 'extinguished-sand-house';
+                } else if (tile.terrain.includes('grass-house') || tile.terrain === 'grass-house') {
+                    tile.terrain = 'extinguished-grass-house';
                 }
-                
-                console.log(`Changed terrain from ${originalTerrain} to ${tile.terrain}`);
         
                 // Update the tile's sprite to show it extinguished
                 this.fireSpread.updateSprite(tileX, tileY);
@@ -656,13 +773,187 @@ export default class MapScene extends Phaser.Scene {
                     tile.fireS.extinguishFire();
                     tile.fireS = null;
                 }
-
-                console.log(`Fire extinguished successfully at (${tileX}, ${tileY})`);
-            } else {
-                console.warn(`No tile found at coordinates (${tileX}, ${tileY})`);
             }
-        } else {
-            console.warn(`Coordinates out of bounds: (${tileX}, ${tileY})`);
         }
     }
+
+    //-----------------------Firestore------------------------------//
+
+    /**
+     * Orchestrates the full flow of saving the current score
+     * and then fetching the highest score back.
+     */
+    sendScoreToDB() {
+        // Grab the final score from wherever you’ve stored it
+        const finalScore = this.score;
+
+        // Save it into the user’s subcollection
+        this.saveUserScore(finalScore);
+
+        // Then immediately retrieve the highest score (for display, etc.)
+        // this.getHighestScore();
+    }
+
+    /**
+     * Saves a single score document under
+     * users/{uid}/scores in Firestore.
+     * @param {number} scoreParameter – The score to save
+     */
+    async saveUserScore(scoreParameter) {
+        // Get the currently signed‑in user
+        const user = auth.currentUser;
+
+        if (user) {
+            // Create a new doc reference in users/{uid}/scores
+            const scoreDocRef = doc(
+                collection(db, "users", user.uid, "scores")
+            );
+
+            try {
+                // Write the score to Firestore
+                await setDoc(scoreDocRef, { score: scoreParameter });
+                console.log("Score saved successfully");
+            } catch (error) {
+                // Log any errors during the write
+                console.error("Error saving score", error);
+            }
+        } else {
+            // No user signed in, so we can’t save
+            console.log("User not signed in");
+        }
+    }
+
+    /**
+     * Fetches the single highest score in the
+     * users/{uid}/scores subcollection.
+     * @returns {Promise<number|null>} – Highest score or null
+     */
+    async getHighestScore() {
+        const user = auth.currentUser;
+
+        if (user) {
+            // Reference to the scores collection for this user
+            const scoreRef = collection(db, "users", user.uid, "scores");
+
+            // Query: order by score descending, limit to 1
+            const q = query(scoreRef, orderBy("score", "desc"), limit(1));
+
+            try {
+                // Execute the query
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // Print and return the top score
+                    const topScore = querySnapshot.docs[0].data().score;
+                    console.log(topScore);
+                    return topScore;
+                } else {
+                    // No scores found for this user
+                    console.log("No scores found");
+                    return null;
+                }
+            } catch (error) {
+                // Handle any errors fetching documents
+                console.error("Error fetching scores", error);
+                return null;
+            }
+        } else {
+            // No user signed in, so we can’t read
+            console.log("User not signed in");
+            return null;
+        }
+    }
+
+    async getTopNScores(n) {
+        // 1) Ensure there’s a signed‑in user
+        const user = auth.currentUser;
+        if (!user) {
+            console.log("User not signed in");
+            return [];
+        }
+
+        // 2) Reference the user’s "scores" subcollection
+        const scoreRef = collection(db, "users", user.uid, "scores");
+
+        // 3) Build a query ordered by "score" descending, limited to n entries
+        const q = query(
+        scoreRef,
+        orderBy("score", "desc"),
+        limit(n)
+        );
+
+        try {
+            // 4) Execute and collect the scores
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                console.log("No scores found");
+                return [];
+            }
+
+            // Map each document to its numeric score
+            const topScores = querySnapshot.docs.map(doc =>
+            doc.data().score
+            );
+
+            console.log(`Top ${n} scores:`, topScores);
+            return topScores;
+
+        } catch (error) {
+            // 5) Error handling
+            console.error("Error fetching top scores", error);
+            return [];
+        }
+    }
+
+    /**
+   * Helper: fetch top N scores across all users
+   */
+  async getGlobalTopNScores(n) {
+  // 1) Set up a collection‑group query on every "scores" subcollection
+  const scoresGroup = collectionGroup(db, "scores");
+
+  // 2) Order by "score" descending and limit to the top N
+  const q = query(
+    scoresGroup,
+    orderBy("score", "desc"),
+    limit(n)
+  );
+
+  try {
+    // 3) Execute the scores query
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
+      console.log("No global scores found");
+      return [];
+    }
+
+    // 4) For each score doc, fetch the corresponding user profile
+    const detailed = await Promise.all(
+      snapshot.docs.map(async scoreDoc => {
+        // Extract the UID from the path: "users/{uid}/scores/{docId}"
+        const [, uid] = scoreDoc.ref.path.split('/');
+
+        // Fetch the user's profile document
+        const userSnap = await getDoc(doc(db, "users", uid));
+        // Use displayName if available, otherwise fallback to UID
+        const displayName = userSnap.exists()
+          ? userSnap.data().displayName
+          : uid;
+
+        // Return a combined object with score and displayName
+        return {
+          userId: uid,
+          displayName,
+          score: scoreDoc.data().score
+        };
+      })
+    );
+
+    return detailed;  // [ { userId, displayName, score }, … ]
+  } catch (err) {
+    console.error("Error fetching global top scores:", err);
+    return [];
+  }
+}
 }

@@ -4,6 +4,8 @@ import MapScene from './MapScene.js';
 import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig.js";
 
 
 /**
@@ -29,155 +31,127 @@ export default class SignupScene extends Phaser.Scene {
      */
     create() {
 
-        // Add a title text.
-        this.add.text(300, 100, 'Sign Up', { fontSize: '32px', color: '#fff' });
+        // remove any captures so W/A/S/D go to the browser again
+        this.input.keyboard.removeCapture([
+            Phaser.Input.Keyboard.KeyCodes.W,
+            Phaser.Input.Keyboard.KeyCodes.A,
+            Phaser.Input.Keyboard.KeyCodes.S,
+            Phaser.Input.Keyboard.KeyCodes.D
+        ]);
 
-        // Create the Name input field.
-        const nameInput = this.add.dom(400, 170, 'input', {
-            width: '200px',
-            height: '30px',
-            fontSize: '16px',
-            padding: '5px',
+        // Title
+        this.add.text(400, 120, 'Sign Up', {
+            fontSize: '25px',
+            fill: '#FFD700',
+            fontFamily: '"Press Start 2P", cursive',
+            stroke: '#000',
+            strokeThickness: 4
         }).setOrigin(0.5);
-        nameInput.node.setAttribute('type', 'text');
-        nameInput.node.setAttribute('name', 'name');
-        nameInput.node.setAttribute('placeholder', 'Name');
-        nameInput.node.classList.add('input-field');
-
-        // Create the Email input field.
-        const emailInput = this.add.dom(400, 220, 'input', {
-            width: '200px',
+    
+        // Input fields
+        const fields = [
+            { placeholder: 'Username', y: 180, type: 'text' },
+            { placeholder: 'Email', y: 230, type: 'email' },
+            { placeholder: 'Password', y: 280, type: 'password' },
+            { placeholder: 'Repeat Password', y: 330, type: 'password' },
+        ];
+    
+        const inputRefs = {};
+    
+        fields.forEach(field => {
+            const input = this.add.dom(400, field.y, 'input', {
+                width: '500px',
+                height: '30px',
+                fontSize: '16px',
+                padding: '5px',
+            }).setOrigin(0.5);
+            input.node.setAttribute('type', field.type);
+            input.node.setAttribute('placeholder', field.placeholder);
+            input.node.classList.add('input-field');
+            inputRefs[field.placeholder] = input;
+        });
+    
+        // SIGN UP button
+        const signupButton = this.add.dom(470, 390, 'button', {
+            width: '140px',
             height: '30px',
-            fontSize: '16px',
-            padding: '5px',
-        }).setOrigin(0.5);
-        emailInput.node.setAttribute('type', 'email');
-        emailInput.node.setAttribute('name', 'email');
-        emailInput.node.setAttribute('placeholder', 'Email');
-        emailInput.node.classList.add('input-field');
-
-        // Create the Password input field.
-        const passwordInput = this.add.dom(400, 270, 'input', {
-            width: '200px',
-            height: '30px',
-            fontSize: '16px',
-            padding: '5px',
-        }).setOrigin(0.5);
-        passwordInput.node.setAttribute('type', 'password');
-        passwordInput.node.setAttribute('name', 'password');
-        passwordInput.node.setAttribute('placeholder', 'Password');
-        passwordInput.node.classList.add('input-field');
-
-        // Create the Repeat Password input field.
-        const repeatPasswordInput = this.add.dom(400, 320, 'input', {
-            width: '200px',
-            height: '30px',
-            fontSize: '16px',
-            padding: '5px',
-        }).setOrigin(0.5);
-        repeatPasswordInput.node.setAttribute('type', 'password');
-        repeatPasswordInput.node.setAttribute('name', 'repeatPassword');
-        repeatPasswordInput.node.setAttribute('placeholder', 'Repeat Password');
-        repeatPasswordInput.node.classList.add('input-field');
-
-        // Create the SignUp button.
-        // Create a DOM element for the Login button.
-        const signupButton = this.add.dom(460, 380, 'button', {
-            width: '100px',
-            height: '30px',
-            font: '16px "Georgia", serif',
-            padding: { x: 15, y: 10 },
-            fontSize: '20px',
-            color: '#fff',
-            backgroundColor: '#8B0000',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            depth: '3',
-        }, 'Sign Up').setOrigin(0.5);
-
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#228B22',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'SIGN UP').setOrigin(0.5);
+    
         signupButton.addListener('click');
         signupButton.on('click', () => {
-            const name = nameInput.node.value.trim();
-            const email = emailInput.node.value.trim();
-            const password = passwordInput.node.value;
-            const repeatPassword = repeatPasswordInput.node.value;
-
-            // Validate input fields.
+            const name = inputRefs['Username'].node.value.trim();
+            const email = inputRefs['Email'].node.value.trim();
+            const password = inputRefs['Password'].node.value;
+            const repeatPassword = inputRefs['Repeat Password'].node.value;
+    
             if (!name || !email || !password || !repeatPassword) {
                 alert('Please fill in all fields.');
                 return;
             }
-
             if (password !== repeatPassword) {
                 alert('Passwords do not match.');
                 return;
             }
-
-            // Use Firebase Authentication to create the user.
+    
             createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // User successfully created.
-                    const user = userCredential.user;
-                    // Update the user's profile with the display name.
-                    updateProfile(user, { displayName: name })
-                        .then(() => {
-                            console.log('Login successful:', userCredential);
+            .then(async (userCredential) => {
+                const user = userCredential.user;
 
-                            // Stop SignupScene
-                            this.scene.stop('SignupScene');
+                // 1) Update the Auth profile
+                await updateProfile(user, { displayName: name });
 
-                            // Start MapScene and UIScene
-                            this.scene.start('MapScene');
-                            this.scene.launch('UIScene');
-
-                        })
-                        .catch((error) => {
-                            console.error('Profile update error:', error);
-                            alert('Failed to update profile: ' + error.message);
-                        });
-                })
-                .catch((error) => {
-                    console.error('Sign up error:', error);
-                    alert('Sign up failed: ' + error.message);
+                // 2) Also write to Firestore under /users/{uid}
+                await setDoc(doc(db, "users", user.uid), {
+                displayName: name,
+                email:       user.email,
+                createdAt:   new Date()
                 });
+
+                // 3) Now you can safely launch your game scenes
+                this.scene.start('MapScene');
+                this.scene.launch('UIScene');
+                this.startGame();
+            })
+            .catch(err => alert('Sign up failed: ' + err.message));
         });
-
-        // Optional: Create a button to go back to the Login scene.
-        // Create a DOM element for the "Back to Signup" button.
-        const loginButton = this.add.dom(315, 380, 'button', {
-            width: '100px',
+    
+        // LOGIN button
+        const loginButton = this.add.dom(315, 390, 'button', {
+            width: '140px',
             height: '30px',
-            font: '16px "Georgia", serif',
-            padding: { x: 15, y: 10 },
-            fontSize: '20px',
-            color: '#fff',
-            backgroundColor: '#556B2F',
-            border: '3px solid #FFD700',
-            borderRadius: '10px',
-            cursor: 'pointer',
-        }, 'Login').setOrigin(0.5);
-
+            fontSize: '12px',
+            color: '#FFFFFF',
+            backgroundColor: '#555555',
+            fontFamily: '"Press Start 2P", cursive',
+            border: '2px solid #FFFFFF',
+            cursor: 'pointer'
+        }, 'LOGIN').setOrigin(0.5);
+    
         loginButton.addListener('click');
         loginButton.on('click', () => {
             this.scene.start('LoginScene');
         });
-
-        // Optional: Create a button to go back to the Login scene.
-        const toGame = this.add.dom(700, 20, 'button', {
-            width: '130px',
-            height: '40px',
-            fontSize: '16px',
-        }, 'PLAY').setOrigin(0.5);
-
-        toGame.addListener('click');
-        toGame.on('click', () => {
-            // Stop SignupScene
-            this.scene.stop('SignupScene');
-
-            // Start MapScene and UIScene
-            this.scene.start('MapScene');
-            this.scene.launch('UIScene');
-        });
     }
+
+     /**
+     * Start the game from the beginning by reloading the page
+     * This ensures a clean state for all scenes
+     */
+    startGame() {
+        console.log("Restarting game...");
+        
+        // Store a flag in sessionStorage to indicate we want to skip intro
+        // and go directly to the game after reload
+        sessionStorage.setItem('skipIntro', 'true');
+        
+        // Force a complete reload of the page
+        window.location.reload();
+    }
+    
 }

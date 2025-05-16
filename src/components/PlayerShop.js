@@ -1,10 +1,20 @@
-import { bank } from "./ui.js";
-import { show_notification, getCoins, setCoins } from "./DeploymentClickEvents.js";
+import { bank, all_assets } from "./ui.js";
+import { show_notification, getCoins, setCoins, deactivate } from "./DeploymentClickEvents.js";
 import { getHose, setHose, getExtinguisher, setExtinguisher, getHelicopter, setHelicopter, getFiretruck, setFiretruck, getAirtanker, setAirtanker, getHotshotCrew, setHotshotCrew, getSmokejumpers, setSmokejumpers} from "./assetValues.js";
-import { s_hose, s_extinguisher, s_helicopter, s_firetruck, s_airtanker, s_hotshotcrew, s_smokejumpers, s_total,
-    hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText
+import { open_shop, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText
  } from "./ui.js";
 
+ // Initialize purchase quantity for each asset
+let s_hose;
+let s_extinguisher;
+let s_helicopter;
+let s_firetruck;
+let s_airtanker;
+let s_hotshotcrew;
+let s_smokejumpers;
+let s_total = 0;
+
+// Initialize asset counts in the shop
 let cart_toggle = true;
 
 let hose_counter = 0;
@@ -15,6 +25,153 @@ let airtanker_counter = 0;
 let hotshotcrew_counter = 0;
 let smokejumper_counter = 0;
 let total_cost = 0;
+
+
+export function createNewShop(scene) {
+    
+    // Initialize asset shop amounts
+    s_hose = scene.add.text(310, 210, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_extinguisher = scene.add.text(535, 210, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_helicopter = scene.add.text(310, 277, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_firetruck = scene.add.text(535, 277, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_airtanker = scene.add.text(310, 347, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_hotshotcrew = scene.add.text(535, 347, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_smokejumpers = scene.add.text(310, 417, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    s_total = scene.add.text(210, 483, '0', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '20px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setDepth(600).setVisible(false);
+  
+    // Spawn player shop sprites
+    let shop = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'shop').setScale(1).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let close = scene.add.sprite(180, 70, 'close').setScale(0.23).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let remove_button = scene.add.sprite(400, 540, 'remove-button').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let purchase = scene.add.sprite(570, 500, 'purchase').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let no_funds = scene.add.sprite(scene.cameras.main.width / 2, scene.cameras.main.height / 2, 'no-funds').setScale(1).setDepth(1100).setOrigin(0.5, 0.5).setVisible(false);
+    
+    let add_hose = scene.add.sprite(360, 210, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_extinguisher = scene.add.sprite(590, 210, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_helicopter = scene.add.sprite(360, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_firetruck = scene.add.sprite(590, 277, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_airtanker = scene.add.sprite(360, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_hotshotcrew = scene.add.sprite(590, 347, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+    let add_smokejumpers = scene.add.sprite(360, 417, 'add-to-cart').setScale(0.15).setDepth(501).setOrigin(0.5, 0.5).setVisible(false);
+
+    // Add Price Tag Sprites
+    let price_hose = scene.add.sprite(380, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_hose_text = scene.add.text(393, 170, '$150', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_extinguisher = scene.add.sprite(620, 180, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_extinguisher_text = scene.add.text(633, 170, '$25', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_helicopter = scene.add.sprite(390, 250, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_helicopter_text = scene.add.text(403, 240, '$300', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_firetruck = scene.add.sprite(620, 250, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_firetruck_text = scene.add.text(633, 240, '$250', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_airtanker = scene.add.sprite(390, 320, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_airtanker_text = scene.add.text(403, 310, '$250', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_hotshotcrew = scene.add.sprite(620, 320, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_hotshotcrew_text = scene.add.text(633, 310, '$700', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+    let price_smokejumpers = scene.add.sprite(532, 390, 'price-tag').setScale(0.3).setDepth(500).setOrigin(0.5, 0.5).setVisible(false);
+    let price_smokejumpers_text = scene.add.text(545, 380, '$250', {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '12px',
+        fill: '#000000',
+        align: 'center',
+        wordWrap: { width: 80 },
+    }).setOrigin(0.5, 0.5).setDepth(600).setVisible(false);
+
+    // Load player shop
+    setupShop(scene, open_shop, shop, close, remove_button, purchase, no_funds, add_hose, add_extinguisher, add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers,
+        price_hose, price_hose_text, price_extinguisher, price_extinguisher_text, price_helicopter, price_helicopter_text, price_firetruck, price_firetruck_text, price_airtanker, 
+        price_airtanker_text, price_hotshotcrew, price_hotshotcrew_text, price_smokejumpers, price_smokejumpers_text);
+}
 
 export function manageShop(scene, purchase, no_funds, add_hose, add_extinguisher,
     add_helicopter, add_firetruck, add_airtanker, add_hotshotcrew, add_smokejumpers) {
@@ -242,6 +399,9 @@ export function setupShop (scene, open_shop, shop, close, remove_button, purchas
     open_shop.on(
         "pointerdown",
         function (pointer, localX, localY, event) {
+            deactivate(all_assets);
+            scene.input.setDefaultCursor('url(assets/cursors/glove.png), pointer');
+            
             shop.setVisible(true);
             close.setVisible(true);
             remove_button.setVisible(true);

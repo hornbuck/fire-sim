@@ -37,6 +37,8 @@
     "firebase": "^11.3.0",
     "perlin-noise-3d": "^0.5.4",
     "phaser": "^3.87.0",
+    "simplex-noise": "^4.0.3",
+    "webfontloader": "^1.6.28",
     "workbox-webpack-plugin": "^7.3.0"
   }
 }

@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
-import IntroScene from './scenes/IntroScene.js';
+import MenuScene from './scenes/MenuScene.js';
+import TutorialScene from './scenes/TutorialScene.js';
 import SignupScene from "./scenes/signupScene.js";
 import LoginScene from "./scenes/loginScene.js";
 import MapScene from './scenes/MapScene.js';
 import UIScene from './scenes/UIScene.js';
+import ProfileScene from './scenes/profileScene.js';
+import LeaderboardScene from './scenes/leaderboardScene.js';
 
 // Log to confirm app.js is running
 console.log("Phaser Game Initializing...");
@@ -13,7 +16,7 @@ const config = {
     width: 800,
     height: 600,
     parent: 'game-container',
-    scene: [IntroScene, SignupScene, LoginScene, MapScene, UIScene],
+    scene: [MenuScene, TutorialScene, SignupScene, LoginScene, MapScene, UIScene, ProfileScene, LeaderboardScene],
     backgroundColor: '#282c34',
     scale: {
         mode: Phaser.Scale.FIT,
