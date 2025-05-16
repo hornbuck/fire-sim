@@ -3,7 +3,7 @@ import FireSpread from '../components/FireSpread.js';
 import Weather from '../components/Weather.js';
 import AnimatedSprite from '../components/AnimatedSprites.js';
 import { bank } from "../components/ui.js";
-import { getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
+import { setCoins, getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
 import { auth, db } from '../firebaseConfig.js';
 import { collection, collectionGroup, doc, getDocs,getDoc, limit, orderBy, query, setDoc } from 'firebase/firestore';
 
