@@ -549,7 +549,7 @@ export default class UIScene extends Phaser.Scene {
         
         this.zoomText = this.add.text(
             baseX - 30,
-            576,
+            40,
             'Zoom: 100%',
             {
                 fontFamily: '"Press Start 2P"',
