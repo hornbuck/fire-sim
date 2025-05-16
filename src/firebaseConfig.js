@@ -1,6 +1,9 @@
 // IMPORTS
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
+import {getFirestore, doc, collection, setDoc, 
+        query, getDocs, orderBy, limit} from 'firebase/firestore'
+
 
 
 //Firebase configuration
@@ -19,4 +22,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Auth ✅
 const auth = getAuth(app);
 
-export { auth };
+// // Initialize Firestore ✅
+const db = getFirestore(app);
+
+export { auth, db };

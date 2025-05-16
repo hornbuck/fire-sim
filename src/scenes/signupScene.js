@@ -4,6 +4,8 @@ import MapScene from './MapScene.js';
 import UIScene from './UIScene.js';
 import { auth } from '../firebaseConfig.js';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig.js";
 
 
 /**
@@ -28,6 +30,15 @@ export default class SignupScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
+
+        // remove any captures so W/A/S/D go to the browser again
+        this.input.keyboard.removeCapture([
+            Phaser.Input.Keyboard.KeyCodes.W,
+            Phaser.Input.Keyboard.KeyCodes.A,
+            Phaser.Input.Keyboard.KeyCodes.S,
+            Phaser.Input.Keyboard.KeyCodes.D
+        ]);
+
         // Title
         this.add.text(400, 120, 'Sign Up', {
             fontSize: '25px',
@@ -39,7 +50,7 @@ export default class SignupScene extends Phaser.Scene {
     
         // Input fields
         const fields = [
-            { placeholder: 'Name', y: 180, type: 'text' },
+            { placeholder: 'Username', y: 180, type: 'text' },
             { placeholder: 'Email', y: 230, type: 'email' },
             { placeholder: 'Password', y: 280, type: 'password' },
             { placeholder: 'Repeat Password', y: 330, type: 'password' },
@@ -49,7 +60,7 @@ export default class SignupScene extends Phaser.Scene {
     
         fields.forEach(field => {
             const input = this.add.dom(400, field.y, 'input', {
-                width: '250px',
+                width: '500px',
                 height: '30px',
                 fontSize: '16px',
                 padding: '5px',
@@ -74,7 +85,7 @@ export default class SignupScene extends Phaser.Scene {
     
         signupButton.addListener('click');
         signupButton.on('click', () => {
-            const name = inputRefs['Name'].node.value.trim();
+            const name = inputRefs['Username'].node.value.trim();
             const email = inputRefs['Email'].node.value.trim();
             const password = inputRefs['Password'].node.value;
             const repeatPassword = inputRefs['Repeat Password'].node.value;
@@ -89,16 +100,25 @@ export default class SignupScene extends Phaser.Scene {
             }
     
             createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    updateProfile(userCredential.user, { displayName: name })
-                        .then(() => {
-                            this.scene.stop('SignupScene');
-                            this.scene.start('MapScene');
-                            this.scene.launch('UIScene');
-                        })
-                        .catch(err => alert('Profile update error: ' + err.message));
-                })
-                .catch(err => alert('Sign up failed: ' + err.message));
+            .then(async (userCredential) => {
+                const user = userCredential.user;
+
+                // 1) Update the Auth profile
+                await updateProfile(user, { displayName: name });
+
+                // 2) Also write to Firestore under /users/{uid}
+                await setDoc(doc(db, "users", user.uid), {
+                displayName: name,
+                email:       user.email,
+                createdAt:   new Date()
+                });
+
+                // 3) Now you can safely launch your game scenes
+                this.scene.start('MapScene');
+                this.scene.launch('UIScene');
+                this.startGame();
+            })
+            .catch(err => alert('Sign up failed: ' + err.message));
         });
     
         // LOGIN button
@@ -117,6 +137,21 @@ export default class SignupScene extends Phaser.Scene {
         loginButton.on('click', () => {
             this.scene.start('LoginScene');
         });
+    }
+
+     /**
+     * Start the game from the beginning by reloading the page
+     * This ensures a clean state for all scenes
+     */
+    startGame() {
+        console.log("Restarting game...");
+        
+        // Store a flag in sessionStorage to indicate we want to skip intro
+        // and go directly to the game after reload
+        sessionStorage.setItem('skipIntro', 'true');
+        
+        // Force a complete reload of the page
+        window.location.reload();
     }
     
 }
