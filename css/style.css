@@ -264,16 +264,17 @@ textarea {
 }
 
 .input-field {
-  box-sizing: border-box;
-  flex-grow: 1;
-  min-width: 0;
-  height: 50px;
-  padding: 1em;
-  font: inherit;
-  border-radius: 0 10px 10px 0;
-  border: 2px solid var(--input-color);
-  border-left: none;
+  width: 220px;            /* was likely 200px */
+  background-color: #2D3436;
+  color: #FFFFFF;
+  font-family: "Press Start 2P", cursive;
+  border: 1px solid #888;
+  padding: 6px;
+  font-size: 10px;         /* Slightly smaller for tight fit */
+  box-sizing: border-box;  /* ensures padding/border don’t expand width */
 }
+
+
 
 
 
