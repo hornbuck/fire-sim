@@ -19,7 +19,7 @@ const config = {
     scene: [MenuScene, TutorialScene, SignupScene, LoginScene, MapScene, UIScene, ProfileScene, LeaderboardScene],
     backgroundColor: '#282c34',
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.EXPAND,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     dom: {

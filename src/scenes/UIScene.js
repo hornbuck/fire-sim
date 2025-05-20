@@ -11,8 +11,8 @@ export default class UIScene extends Phaser.Scene {
         super('UIScene');
         
         // UI Layout constants
-        this.SCREEN_WIDTH = 800;
-        this.SCREEN_HEIGHT = 600;
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT =  window.innerHeight;
         this.UI_SIDEBAR_WIDTH = 100;
         this.GAME_AREA_WIDTH = this.SCREEN_WIDTH - this.UI_SIDEBAR_WIDTH;
         
@@ -98,8 +98,8 @@ export default class UIScene extends Phaser.Scene {
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
 
         this.pauseText = this.add.text(
-            this.SCREEN_WIDTH / 2,
-            this.SCREEN_HEIGHT / 2,
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
             "Game Paused",
             {
                 fontFamily: '"Press Start 2P"',
@@ -119,9 +119,9 @@ export default class UIScene extends Phaser.Scene {
         // Top bar background
         const topBarHeight = 60;
         const topBar = this.add.rectangle(
-            this.SCREEN_WIDTH / 2,
+            this.cameras.main.width / 2,
             topBarHeight / 2,
-            this.SCREEN_WIDTH,
+            this.cameras.main.width,
             topBarHeight,
             0x2d3436 // Dark gray
         );
@@ -616,7 +616,7 @@ export default class UIScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Create a container for the info button
-        this.infoButtonContainer = this.add.container(575, 540, [infoBg, infoButton])
+        this.infoButtonContainer = this.add.container(575, this.scale.height - 60, [infoBg, infoButton])
             .setScrollFactor(0);
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 

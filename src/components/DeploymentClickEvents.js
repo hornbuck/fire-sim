@@ -317,7 +317,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     if (activated_resource === "hose" && !paused) {
         setHose(-1);
         asset.useHose(scene, x, y, fireSprite);
-        asset.startTimer(0, scene, c_hose, 750, 50);
+        asset.startTimer(0, scene, c_hose, scene.game.scale.width - 50, 40);
 
         scene.time.delayedCall(t_hose, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -330,7 +330,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     else if (activated_resource === "extinguisher" && !paused) {
         setExtinguisher(-1);
         asset.useFireExtinguisher(scene, x, y, fireSprite);
-        asset.startTimer(1, scene, c_extinguisher, 750, 130);
+        asset.startTimer(1, scene, c_extinguisher, scene.game.scale.width - 50, 125);
 
         scene.time.delayedCall(t_extinguisher, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -343,7 +343,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     else if (activated_resource === "helicopter" && !paused) {
         setHelicopter(-1);
         asset.useHelicopter(scene, x, y, fireSprite);
-        asset.startTimer(2, scene, c_helicopter, 750, 210);
+        asset.startTimer(2, scene, c_helicopter, scene.game.scale.width - 50, 210);
 
         scene.time.delayedCall(t_helicopter, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -364,7 +364,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     else if (activated_resource === "firetruck" && !paused) {
         setFiretruck(-1);
         asset.useFiretruck(scene, x, y, fireSprite);
-        asset.startTimer(3, scene, c_firetruck, 750, 290);
+        asset.startTimer(3, scene, c_firetruck, scene.game.scale.width - 50, 295);
 
         scene.time.delayedCall(t_firetruck, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -377,7 +377,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     else if (activated_resource === "airtanker" && !paused) {
         setAirtanker(-1);
         asset.useAirtanker(scene, x, y, fireSprite);
-        asset.startTimer(4, scene, c_airtanker, 750, 370);
+        asset.startTimer(4, scene, c_airtanker, scene.game.scale.width - 50, 380);
 
         scene.time.delayedCall(t_airtanker, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -414,7 +414,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
         const asset2 = new AnimatedSprite(3);
         asset2.useHotshotCrew(scene, x, y);
         setHotshotCrew(-1);
-        asset2.startTimer(5, scene, c_hotshotcrew, 750, 450);
+        asset2.startTimer(5, scene, c_hotshotcrew, scene.game.scale.width - 50, 465);
 
         scene.time.delayedCall(t_hotshotcrew, () => {
             const dir    = direction || dropDirection;
@@ -442,7 +442,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     else if (activated_resource === "smokejumper" && !paused) {
         setSmokejumpers(-1);
         asset.useSmokejumpers(scene, x, y, fireSprite);
-        asset.startTimer(6, scene, 750, 530);
+        asset.startTimer(6, scene, scene.game.scale.width - 50, 550);
 
         scene.time.delayedCall(
             t_smokejumpers_plane + t_smokejumpers_ground,
