@@ -1,5 +1,5 @@
 class Weather {
-    constructor(temperature = 68, humidity = 70, windSpeed = 0, windDirection = 'N') {
+    constructor(temperature = 68, humidity = 70, windSpeed = 10, windDirection = 'N') {
       // Initialize weather conditions with defaults
       // (Fahrenheit for temperature, mph for wind speed)
       this.temperature    = temperature;
@@ -14,7 +14,7 @@ class Weather {
     this.humidity    = parseFloat((80 - (this.temperature - 32) * 0.5).toFixed(1));
     this.windSpeed   = parseFloat(Phaser.Math.Clamp(
       this.windSpeed + Phaser.Math.FloatBetween(-2, 2),
-      0, 50
+      0, 30
     ).toFixed(1));
 
     if (Math.random() < 0.01) {
@@ -25,7 +25,7 @@ class Weather {
     this.ageHours = parseFloat(this.ageHours.toFixed(2));
   }
 
-  
+
     getRiskCategory() {
       const score = this.getWeatherInfluence();
       if (score < 3)   return 'low';
