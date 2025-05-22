@@ -4,25 +4,25 @@ const fieldManualContent = `
 TERRAIN TYPES & BEHAVIOR
 -----------------------
 🌳 Trees
-- Low flammability (0.3)
+- Low flammability
 - High fuel content (6)
 - Burns slowly but intensely
-- Includes: Dirt House 🏠 (flammability 5, fuel 4)
+- Includes: Dirt House 🏠 (fuel 4)
 - Best controlled with: Smokejumpers, Hotshot Crews, Airtankers
 
 🌿 Shrubs
-- High flammability (2.5)
+- High flammability
 - Medium fuel content (4)
 - Moderate burn rate
-- Includes: Sand House 🏠 (flammability 3, fuel 6)
+- Includes: Sand House 🏠 (fuel 6)
 - Best controlled with: Firetrucks
 
 🌱 Grass
-- Medium flammability (0.8)
+- Medium flammability
 - Low fuel content (2)
 - Burns quickly
-- Includes: Grass House 🏠 (flammability 7, fuel 4)
-- Best controlled with: Water Hoses (2 fuel), Fire Extinguishers (1 fuel)
+- Includes: Grass House 🏠 (fuel 4)
+- Best controlled with: Water Hoses, Fire Extinguishers
 
 💧 Water
 - No flammability or fuel
@@ -31,35 +31,41 @@ TERRAIN TYPES & BEHAVIOR
 FIREFIGHTING RESOURCES
 ---------------------
 💧 Water Hose
-- Reduces 2 fuel per use
-- Single tile range
-- Quick deployment, short cooldown
-
-🧯 Fire Extinguisher
-- Reduces 1 fuel per use
-- Single tile range
-- Extremely fast, lowest cost
-
-🚒 Firetruck
 - Reduces 3 fuel per use
 - Single tile range
-- Strong vs shrubs and shrub-structures
+- Fast deployment, short cooldown
+- May require multiple uses on high-fuel terrain
+
+🧯 Fire Extinguisher
+- Reduces 2 fuel per use
+- Single tile range
+- Extremely fast, lowest cost
+- Best for light fuels like grass
+
+🚒 Firetruck
+- Reduces 4 fuel per use
+- Single tile range
+- Strong vs shrubs and most structures
 
 🚁 Helicopter
-- Extinguishes fire across 5 tiles (cross pattern)
-- Does not reduce fuel, just extinguishes
+- Instantly extinguishes 5 tiles in a cross pattern
+- Ignores fuel amount — guaranteed to put out fire
+- Best for clustered fires
 
 ✈️ Airtanker
-- Extinguishes 5-tile line (horizontal or vertical)
-- Great for clearing dense fire paths
+- Instantly extinguishes a 5-tile line (horizontal or vertical)
+- Bypasses fuel — great for fire lines or dense terrain
 
 👥 Hotshot Crew
 - Converts 5-tile line into firebreaks
-- Must be placed on unburned terrain
+- Must be deployed on unburned, flammable terrain
+- Prevents future spread, does not extinguish
 
 🪂 Smokejumpers
-- Parachute in to extinguish a burning tile
-- Rapid response to hot zones
+- Instantly extinguish a single burning tile
+- Always successful regardless of fuel
+- Ideal for remote or high-priority targets
+
 
 STRATEGIC TIPS
 -------------
