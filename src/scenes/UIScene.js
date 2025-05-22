@@ -563,10 +563,14 @@ export default class UIScene extends Phaser.Scene {
 
         // Toggle with F key
         this.input.keyboard.on('keydown-F', () => {
-            const visible = this.fieldManualContainer.visible;
-            this.fieldManualContainer.setVisible(!visible);
-            // Explicitly set zoom state when toggling with F key
-            this.scene.get('MapScene').disableZoom = !visible;
+            const inactiveScenes = ['LoginScene', 'SignupScene', 'ProfileScene', 'LeaderboardScene'];
+            const isAnyActive = inactiveScenes.some(scene => this.scene.isActive(scene));
+            
+            if (!isAnyActive) {
+                const visible = this.fieldManualContainer.visible;
+                this.fieldManualContainer.setVisible(!visible);
+                this.scene.get('MapScene').disableZoom = !visible;
+            }
         });
 
         // Handle manual button click
