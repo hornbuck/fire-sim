@@ -284,13 +284,13 @@ export function show_tooltip(resource, resourceName, x, y, scene) {
 function getTooltipContent(resourceName) {
     switch(resourceName.replace('-tooltip', '')) {
         case 'hose':
-            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 2.\nSingle tile coverage.";
+            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 3.\nSingle tile coverage.";
         case 'extinguisher':
-            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 1.\nSingle tile coverage.";
+            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 2.\nSingle tile coverage.";
         case 'helicopter':
             return "HELICOPTER\n\nAerial water drops.\nFully extinguishes.\nAffects 5 tiles in cross pattern.";
         case 'firetruck':
-            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 3.\nSingle tile coverage.";
+            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 4.\nSingle tile coverage.";
         case 'airtanker':
             return "AIR TANKER\n\nLarge retardant drop.\nFully extinguishes.\nAffects 5 tiles in a line.";
         case 'hotshot-crew':
