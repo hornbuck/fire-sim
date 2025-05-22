@@ -308,8 +308,6 @@ export default class UIScene extends Phaser.Scene {
         smokejumperText.x = this.scale.width - 50;
         smokejumperTextBg.x = this.scale.width - 50;
 
-        timerSprite.x = this.scale.width;
-
         this.pauseText.x = this.scale.width / 2;
         //this.uiContainer.scaleX = this.scale.width; --> BUG: makes assets disappear
 
