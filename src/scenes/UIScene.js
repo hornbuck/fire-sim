@@ -563,6 +563,38 @@ export default class UIScene extends Phaser.Scene {
             updateScrollIndicators();
         });
 
+        // Enable touch drag scrolling for mobile devices
+        let isDragging = false;
+        let dragStartY = 0;
+        let contentStartY = 0;
+
+        // Enable input on manualText for dragging
+        manualText.setInteractive({ draggable: false });
+
+        manualText.on('pointerdown', (pointer) => {
+            isDragging = true;
+            dragStartY = pointer.y;
+            contentStartY = manualText.y;
+        });
+
+        this.input.on('pointerup', () => {
+            isDragging = false;
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (!isDragging || !this.fieldManualContainer.visible) return;
+
+            const deltaY = pointer.y - dragStartY;
+            const newY = Phaser.Math.Clamp(
+                contentStartY + deltaY,
+                scrollConfig.maxY,
+                scrollConfig.startY
+            );
+            manualText.y = newY;
+            updateScrollIndicators();
+        });
+
+
         // When manual visibility changes, update MapScene zoom state
         this.fieldManualContainer.on('setVisible', (visible) => {
             const mapScene = this.scene.get('MapScene');
