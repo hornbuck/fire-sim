@@ -4,56 +4,70 @@ const fieldManualContent = `
 TERRAIN TYPES & BEHAVIOR
 -----------------------
 🌳 Trees
-- High fuel content
+- Low flammability (0.3)
+- High fuel content (6)
 - Burns slowly but intensely
-- Best controlled with: 
+- Includes: Dirt House 🏠 (flammability 5, fuel 4)
+- Best controlled with: Smokejumpers, Hotshot Crews, Airtankers
 
 🌿 Shrubs
-- Medium fuel content
+- High flammability (2.5)
+- Medium fuel content (4)
 - Moderate burn rate
-- Best controlled with: 
+- Includes: Sand House 🏠 (flammability 3, fuel 6)
+- Best controlled with: Firetrucks
 
 🌱 Grass
-- Low fuel content
+- Medium flammability (0.8)
+- Low fuel content (2)
 - Burns quickly
-- Best controlled with: 
+- Includes: Grass House 🏠 (flammability 7, fuel 4)
+- Best controlled with: Water Hoses (2 fuel), Fire Extinguishers (1 fuel)
 
-🏠 Structures
-- Medium fuel content (8)
-- Priority protection targets
-- Best controlled with: Multiple resources
+💧 Water
+- No flammability or fuel
+- Natural firebreak
 
 FIREFIGHTING RESOURCES
 ---------------------
 💧 Water Hose
-- Quick deployment
-- Short range
-- Effective on grass fires
+- Reduces 2 fuel per use
+- Single tile range
+- Quick deployment, short cooldown
 
 🧯 Fire Extinguisher
-- TBD
-
-🚁 Helicopter
-- TBD
+- Reduces 1 fuel per use
+- Single tile range
+- Extremely fast, lowest cost
 
 🚒 Firetruck
-- TBD
+- Reduces 3 fuel per use
+- Single tile range
+- Strong vs shrubs and shrub-structures
+
+🚁 Helicopter
+- Extinguishes fire across 5 tiles (cross pattern)
+- Does not reduce fuel, just extinguishes
 
 ✈️ Airtanker
-- TBD
+- Extinguishes 5-tile line (horizontal or vertical)
+- Great for clearing dense fire paths
 
 👥 Hotshot Crew
-- TBD
+- Converts 5-tile line into firebreaks
+- Must be placed on unburned terrain
+
 🪂 Smokejumpers
-- TBD
+- Parachute in to extinguish a burning tile
+- Rapid response to hot zones
 
 STRATEGIC TIPS
 -------------
 1. Create firebreaks AHEAD of the fire
-2. Use terrain to your advantage
-3. Protect structures first
-4. Watch the wind direction
-5. Coordinate multiple resources
+2. Use terrain and water to slow spread
+3. Prioritize saving structures
+4. Watch wind direction closely
+5. Coordinate multiple assets for best results
 
 Press 'F' to close manual
 `;

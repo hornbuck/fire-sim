@@ -130,6 +130,7 @@ export function deactivate(sprites) {
 }
 
 function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
+    const originalFuel = tile.fuel;
     tile.fuel = Math.max(0, tile.fuel - amount);
 
     if (tile.fuel === 0) {
@@ -137,8 +138,12 @@ function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
         coins += reward;
         bank.setText(`${coins}`);
         scene.events.emit('extinguishFire', fireSprite);
+    } else if (originalFuel > amount) {
+        // 🔥 New notification to clarify partial suppression
+        show_notification(scene, "🔥 Not enough power to fully extinguish fire!");
     }
 }
+
 
 
 function extinguishTile(tile, tileX, tileY, mapScene) {
@@ -331,7 +336,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 2);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
             bank.setText(`${coins}`);
         });
     }
@@ -344,7 +349,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 2);
             bank.setText(`${coins}`);
         });
     }
@@ -378,7 +383,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 4);
             bank.setText(`${coins}`);
         });
     }

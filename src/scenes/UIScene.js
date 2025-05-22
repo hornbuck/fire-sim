@@ -561,6 +561,50 @@ export default class UIScene extends Phaser.Scene {
             scrollInstructions
         ]);
 
+        // == Close Button for Field Manual ==
+        const closeBtnContainer = this.add.container(670, 65).setScrollFactor(0);
+
+        // Text "X"
+        const closeText = this.add.text(4, 4, '❌', {
+            fontSize: '24px',
+            color: '#ffffff',
+            padding: { top: 6, bottom: 0 }  // Add top padding
+        })
+        .setOrigin(0.5)
+        .setInteractive();
+
+
+        // Hover effect: slight scale bounce
+        closeText.on('pointerover', () => {
+            this.tweens.add({
+                targets: closeText,
+                scale: 1.2,
+                duration: 100,
+                ease: 'Power1'
+            });
+        });
+        closeText.on('pointerout', () => {
+            this.tweens.add({
+                targets: closeText,
+                scale: 1,
+                duration: 100,
+                ease: 'Power1'
+            });
+        });
+
+        // Click to close
+        closeText.on('pointerdown', () => {
+            this.fieldManualContainer.setVisible(false);
+            this.scene.get('MapScene').disableZoom = false;
+        });
+
+        // Add to container
+        closeBtnContainer.add(closeText);
+        this.fieldManualContainer.add(closeBtnContainer);
+        // == End of Field Manual Close Button ==
+
+
+
         // Toggle with F key
         this.input.keyboard.on('keydown-F', () => {
             const visible = this.fieldManualContainer.visible;
@@ -570,8 +614,8 @@ export default class UIScene extends Phaser.Scene {
         });
 
         // Handle manual button click
-        const manualButton = this.add.text(500, -10, "📖", {
-            fontSize: '24px'
+        const manualButton = this.add.text(492, -16, "📖", {
+            fontSize: '36px'
         })
         .setInteractive()
         .on('pointerdown', () => {
@@ -675,7 +719,7 @@ export default class UIScene extends Phaser.Scene {
         
         this.tileInfoText = this.add.text(10, 10, 'Click a tile for info', { // Default text
             fontFamily: '"Press Start 2P"',
-            fontSize: '12px',
+            fontSize: '10px',
             color: '#888888', // Dimmed color for default state
             wordWrap: { width: 230 }
         }).setOrigin(0, 0);
@@ -1031,15 +1075,33 @@ export default class UIScene extends Phaser.Scene {
     }
     // Helper to get friendly terrain names
     getTerrainName(terrain) {
-        return {
+        // Handle burned variants first
+        if (terrain.startsWith('burned-')) {
+            const base = terrain.slice(7); // strip 'burned-' prefix
+            const burnedMap = {
+                'tree': '🔥 Burned Forest',
+                'shrub': '🔥 Burned Shrubland',
+                'grass': '🔥 Burned Grassland',
+                'dirt-house': '🔥 Burned Structure',
+                'grass-house': '🔥 Burned Structure',
+                'sand-house': '🔥 Burned Structure',
+                'house': '🔥 Burned Structure' // fallback for generic
+            };
+            return burnedMap[base] || '🔥 Burned Area';
+        }
+
+        // Regular terrain names
+        const terrainMap = {
             'tree': '🌳 Forest',
             'shrub': '🌿 Shrubland',
             'grass': '🌱 Grassland',
+            'dirt-house': '🏠 Structure',
             'grass-house': '🏠 Structure',
             'sand-house': '🏠 Structure',
-            'dirt-house': '🏠 Structure',
             'water': '💧 Water',
             'fire-break': '🚧 Firebreak'
-        }[terrain] || terrain;
+        };
+
+        return terrainMap[terrain] || terrain;
     }
 }
