@@ -4,7 +4,7 @@ import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
 import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
-import { deactivate } from '../components/DeploymentClickEvents.js';
+import fieldManualContent from '../utils/FieldManual.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
@@ -31,7 +31,7 @@ export default class UIScene extends Phaser.Scene {
         this.WEATHER_PANEL_Y = 200;
         this.FIRE_BUTTON_X = 140;
         this.FIRE_BUTTON_Y = 50;
-        this.TILE_INFO_X = 10;
+        this.TILE_INFO_X = 100;
         this.TILE_INFO_Y = 80;
         this.ZOOM_PERCENT_TEXT_X = 176;
         this.ZOOM_PERCENT_TEXT_Y = 550;
@@ -76,10 +76,14 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('left', 'assets/UI/left.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
         this.load.image('Title', 'assets/UI/Title.png')
-        this.load.image('drop_direction_vertical', 'assets/UI/drop_direction_vertical.png');
-        this.load.image('drop_direction_horizontal', 'assets/UI/drop_direction_horizontal.png');
         this.load.image('toggle_ui_off', 'assets/UI/toggle_ui_off.png')
         this.load.image('toggle_ui_on', 'assets/UI/toggle_ui_on.png')
+    }
+
+    generateBar(current, max, length = 10) {
+    const filledLength = Math.round((current / max) * length);
+    const emptyLength = length - filledLength;
+    return `[${'█'.repeat(filledLength)}${'-'.repeat(emptyLength)}] ${current.toFixed(1)} / ${max}`;
     }
 
     create() {
@@ -93,10 +97,45 @@ export default class UIScene extends Phaser.Scene {
         this.bottomBarContainer = this.add.container(0, this.scale.height - 60);
 
         this.uiToggleButtonContainer = this.add.container(0, 0).setScrollFactor(0);
+
+        // Create Field Manual container
+        this.fieldManualContainer = this.add.container(0, 0).setDepth(100).setVisible(false);
+
+        // Background box
+        const background = this.add.rectangle(400, 300, 600, 500, 0x000000, 0.9);
+        background.setStrokeStyle(2, 0xffffff);
+
+        // Manual text content
+        const manualText = this.add.text(120, 120, fieldManualContent, {
+            fontSize: '16px',
+            wordWrap: { width: 560 },
+            color: '#FFFFFF'
+        });
+
+        // Add to container
+        this.fieldManualContainer.add([background, manualText]);
+
+        // Scroll support example (optional vertical offset)
+        this.input.keyboard.on('keydown-UP', () => {
+            if (this.fieldManualContainer.visible) manualText.y -= 20;
+        });
+        this.input.keyboard.on('keydown-DOWN', () => {
+            if (this.fieldManualContainer.visible) manualText.y += 20;
+        });
+
+        this.input.keyboard.on('keydown-F', () => {
+    const visible = this.fieldManualContainer.visible;
+    this.fieldManualContainer.setVisible(!visible);
+});
+
+
+
+
     
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
 
+        // Pop-up notifies user that game is paused
         this.pauseText = this.add.text(
             this.SCREEN_WIDTH / 2,
             this.SCREEN_HEIGHT / 2,
@@ -134,7 +173,6 @@ export default class UIScene extends Phaser.Scene {
         this.uiContainer.add(this.topBarContainer);
     
         // Add and position UI elements in the top bar container
-    
         this.hamburgerMenu = new HamburgerMenu(this, {
             x: 40,
             y: 30,
@@ -381,17 +419,26 @@ export default class UIScene extends Phaser.Scene {
         this.tileInfoText = this.add.text(-500, -500, 
             "Select tile", {
                 fontFamily: '"Press Start 2P"',
-                fontSize: '14px',
-                fontStyle: 'normal',
-                fill: "#ffffff",
-                backgroundColor: "#2d3436",
-                padding: { x: 14, y: 10 },
+                fontSize: '16px',
+                fontStyle: 'bold',
+                fill: "#ffff00", // Bright yellow for visibility
+                backgroundColor: "rgba(0, 0, 0, 0.85)",
+                padding: { x: 16, y: 12 },
                 align: "left",
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: "#000000",
+                    blur: 4,
+                    stroke: true,
+                    fill: true
+                }
             })
+
             .setDepth(-1)
             .setScrollFactor(0)
 
-                // --- Score Text ---
+        // --- Score Text ---
         this.scoreText = this.add.text(550, 15, "Score: 0", {
             fontFamily: '"Press Start 2P"',
             fontSize: '16px',
@@ -621,7 +668,7 @@ export default class UIScene extends Phaser.Scene {
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 
         // Create info panel (initially hidden)
-        this.infoPanel = this.add.container(175, 175)
+        this.infoPanel = this.add.container(160, 164)
             .setScrollFactor(0)
             .setVisible(false);
 
@@ -654,7 +701,7 @@ export default class UIScene extends Phaser.Scene {
             color: '#FFFFFF'
         }).setOrigin(0, 0);
 
-        this.infoPanelWind = this.add.text(-130, 0, 'Wind: N/A', {
+        this.infoPanelWind = this.add.text(-130, 10, 'Wind: N/A', {
             fontFamily: '"Press Start 2P"',
             fontSize: '12px',
             color: '#FFFFFF'
@@ -756,31 +803,44 @@ export default class UIScene extends Phaser.Scene {
         this.gameClockText.setText(`Time: ${formattedTime}`);
     }
 
-    // Handler for tile information updates
-    updateTileInfo(tile) {
-        console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
-        
-        if (this.tileInfoText) {
-            this.tileInfoText.setText(
-                `Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`
-            );
-            this.tileInfoText.setVisible(true);
-            this.tileInfoText.setDepth(100);
+// Handler for tile information updates
+updateTileInfo(tile) {
+    console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
 
-            // Store the selected tile reference so the info panel can use it
-            this.selectedTile = tile;  // Add this line
+    const mapScene = this.scene.get('MapScene');
+    const weather = mapScene.weather;
 
-            // Remove any hide timer if one exists
-            if (this.tileInfoHideTimer) {
-                this.tileInfoHideTimer.remove();
-                this.tileInfoHideTimer = null;
-            }
+    if (this.tileInfoText) {
+        const flammabilityBar = this.generateBar(tile.flammability, 7.0);
+        const fuelBar = this.generateBar(tile.fuel, tile.initialFuel);
+        const windBar = this.generateBar(weather.windSpeed, 50);
 
-            this.updateInfoPanel();
-        } else {
-            console.warn("tileInfoText is not defined in UIScene!");
+        this.tileInfoText.setText(
+            `🔥 Fire Risk: ${weather.getRiskCategory().toUpperCase()}\n` +
+            `💨 Wind: ${windBar} ${weather.windDirection}\n` +
+            `🪵 Flammability: ${flammabilityBar}\n` +
+            `⛽ Fuel: ${fuelBar}`
+        );
+
+        this.tileInfoText.setVisible(true);
+        this.tileInfoText.setDepth(100);
+
+        // Store the selected tile reference so the info panel can use it
+        this.selectedTile = tile;
+
+        // Remove any hide timer if one exists
+        if (this.tileInfoHideTimer) {
+            this.tileInfoHideTimer.remove();
+            this.tileInfoHideTimer = null;
         }
+
+        this.updateInfoPanel();
+    } else {
+        console.warn("tileInfoText is not defined in UIScene!");
     }
+}
+
+
 
     updateWindDisplay(weather) {
         // 1) Fill proportionally: max 50 mph = full width
@@ -812,10 +872,9 @@ updateFireButton(isRunning) {
     // Show or hide the pause message
     if (this.pauseText) {
         this.pauseText.setVisible(!isRunning);
-    }
-
-    
+    }   
 }
+
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
@@ -837,30 +896,35 @@ updateFireButton(isRunning) {
         console.log(`Map size changed: ${mapInfo.width}x${mapInfo.height} tiles, ${mapInfo.pixelWidth}x${mapInfo.pixelHeight} pixels`);
     }
 
-    updateInfoPanel() {
-        // Update tile info if available
-        if (this.selectedTile) {
-            this.infoPanelTile.setText(
-                `Terrain: ${this.selectedTile.terrain}\n` +
-                `Flammability: ${this.selectedTile.flammability}\n` +
-                `Fuel: ${this.selectedTile.fuel}\n` +
-                `Status: ${this.selectedTile.burnStatus}`
-            );
-        } else {
-            this.infoPanelTile.setText('Tile: No tile selected');
-        }
-        
-        // Update weather info if available
-        const mapScene = this.scene.get('MapScene');
-        if (mapScene.weather) {
-            this.infoPanelWind.setText(
-                `Wind Direction: ${mapScene.weather.windDirection}\n` +
-                `Wind Speed: ${mapScene.weather.windSpeed} mph\n` +
-                `Temperature: ${mapScene.weather.temperature}°F\n` +
-                `Humidity: ${mapScene.weather.humidity}%`
-            );
-            
-            this.infoPanelRisk.setText(`Risk: ${mapScene.weather.getRiskCategory()}`);
-        }
+updateInfoPanel() {
+    const mapScene = this.scene.get('MapScene');
+    const weather = mapScene.weather;
+
+    if (this.selectedTile) {
+        const flammabilityBar = this.generateBar(this.selectedTile.flammability, 7.0);
+        const fuelBar = this.generateBar(this.selectedTile.fuel, this.selectedTile.initialFuel);
+
+        this.infoPanelTile.setText(
+            `🪵 Flammability:\n\n${flammabilityBar}\n\n` +
+            `⛽ Fuel:\n\n${fuelBar}\n\n`
+        );
+    } else {
+        this.infoPanelTile.setText('No tile selected\n\n');
     }
+
+    if (weather) {
+        const windBar = this.generateBar(weather.windSpeed, 50);
+
+        this.infoPanelWind.setText(
+            `\n\n💨 Wind:\n${windBar} ${weather.windDirection}\n\n`
+        );
+
+        this.infoPanelRisk.setText(
+            `\n🔥 Fire Risk: ${weather.getRiskCategory().toUpperCase()}\n\n`
+        );
+    }
+}
+
+
+
 }

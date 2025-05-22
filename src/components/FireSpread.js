@@ -11,8 +11,6 @@ class FireSpread {
     constructor(map, weather) {
         this.map = map;       // The map object
         this.weather = weather; // Weather object
-        console.log("Map object received: ", this.map)
-        console.log("Weather object received:", this.weather);
     }
 
     /**

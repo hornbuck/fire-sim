@@ -9,22 +9,22 @@ class Weather {
       this.ageHours       = 0;
     }
   
-    updateOverTime(deltaSeconds) {
-      // 1. Smooth diurnal swing for temperature:
-      this.temperature = 50 + 20 * Math.sin(2 * Math.PI * (this.ageHours / 24));
-      // 2. Inverse-humidity trend:
-      this.humidity    = 80 - (this.temperature - 32) * 0.5;
-      // 3. Wind as a random walk:
-      this.windSpeed   = Phaser.Math.Clamp(
-        this.windSpeed + Phaser.Math.FloatBetween(-2, 2),
-        0, 50
-      );
-      // 4. Occasionally shift direction:
-      if (Math.random() < 0.01) {
-        this.windDirection = ['N','S','E','W'][Phaser.Math.Between(0,3)];
-      }
-      this.ageHours += deltaSeconds / 3600;
+  updateOverTime(deltaSeconds) {
+    this.temperature = parseFloat((50 + 20 * Math.sin(2 * Math.PI * (this.ageHours / 24))).toFixed(1));
+    this.humidity    = parseFloat((80 - (this.temperature - 32) * 0.5).toFixed(1));
+    this.windSpeed   = parseFloat(Phaser.Math.Clamp(
+      this.windSpeed + Phaser.Math.FloatBetween(-2, 2),
+      0, 50
+    ).toFixed(1));
+
+    if (Math.random() < 0.01) {
+      this.windDirection = ['N','S','E','W'][Phaser.Math.Between(0,3)];
     }
+
+    this.ageHours += deltaSeconds / 3600;
+    this.ageHours = parseFloat(this.ageHours.toFixed(2));
+  }
+
   
     getRiskCategory() {
       const score = this.getWeatherInfluence();

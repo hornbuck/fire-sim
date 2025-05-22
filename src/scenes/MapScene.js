@@ -29,7 +29,7 @@ export default class MapScene extends Phaser.Scene {
         this.UI_WIDTH = 100;      // Width of UI area on right side
         
         // Fire simulation settings
-        this.FIRE_SPREAD_INTERVAL = 12000; // Fire step interval (ms)
+        this.FIRE_SPREAD_INTERVAL = 1000; // Fire step interval (ms)
         
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds
@@ -119,13 +119,18 @@ export default class MapScene extends Phaser.Scene {
         // Add event listener for fire extinguishing
         this.events.on('extinguishFire', this.handleFireExtinguish, this);
 
+        this.input.on('pointermove', this.updateDeploymentPreview, this);
+
         // Tile stats highlight
         this.selectionMarker = this.add.graphics();
         this.selectionMarker.lineStyle(3, 0x00ffff, 1); // Cyan border
         this.selectionMarker.strokeRect(0, 0, this.TILE_SIZE, this.TILE_SIZE);
         this.selectionMarker.setVisible(false);
-
         this.selectionMarker.setDepth(100);
+
+        this.previewOverlay = this.add.graphics();
+        this.previewOverlay.setDepth(99); // Below selectionMarker, above terrain
+
 
         console.log("MapScene Create Finished");
     }
@@ -607,6 +612,51 @@ if (activated_resource === "hotshot-crew"   ||
         );
     }
 
+updateDeploymentPreview(pointer) {
+    // Only draw if we're in deployment mode with an active resource
+    if (mode !== "deployment" || !activated_resource) {
+        this.previewOverlay.clear();
+        return;
+    }
+
+    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+    const tx = Math.floor(worldPoint.x / this.TILE_SIZE);
+    const ty = Math.floor(worldPoint.y / this.TILE_SIZE);
+
+    // Clear any previous overlay
+    this.previewOverlay.clear();
+
+    const dir = this.dropDirection || "horizontal";  // Default to horizontal if not set
+
+    // 🔥 Hotshot Crew - Firebreak Line Preview
+    if (activated_resource === "hotshot-crew") {
+        this.previewOverlay.lineStyle(2, 0xffd700, 1); // Yellow border
+
+        for (let offset = -2; offset <= 2; offset++) {
+            const nx = dir === "vertical" ? tx + offset : tx;
+            const ny = dir === "horizontal" ? ty + offset : ty;
+
+            if (nx >= 0 && nx < this.map.width && ny >= 0 && ny < this.map.height) {
+                this.previewOverlay.strokeRect(
+                    nx * this.TILE_SIZE,
+                    ny * this.TILE_SIZE,
+                    this.TILE_SIZE,
+                    this.TILE_SIZE
+                );
+            }
+        }
+    }
+
+    // 💨 Airtanker - Circular Drop Zone Preview
+    if (activated_resource === "airtanker") {
+        this.previewOverlay.lineStyle(2, 0x00ffff, 1); // Cyan border
+        this.previewOverlay.strokeCircle(
+            tx * this.TILE_SIZE + this.TILE_SIZE / 2,
+            ty * this.TILE_SIZE + this.TILE_SIZE / 2,
+            this.TILE_SIZE * 2.5 // Radius preview
+        );
+    }
+}
 
     toggleFireSimulation() {
         console.log("Toggle fire simulation called");
@@ -640,6 +690,7 @@ if (activated_resource === "hotshot-crew"   ||
             this.lastFireSpreadTime = this.elapsedTime;
             this.updateFireSpread();
           }
+          
         }
         
         
