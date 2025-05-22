@@ -675,6 +675,7 @@ updateDeploymentPreview(pointer) {
     }
 
     update(time, delta) {
+        
         if (this.isFireSimRunning) {
           // 1) Advance game clock
           this.elapsedTime += delta / 1000;
