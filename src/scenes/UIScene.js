@@ -1,4 +1,7 @@
-import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
+import { sidebar, createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop,
+    hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper, hoseTextBg, extinguisherTextBg, helicopterTextBg, firetruckTextBg, airtankerTextBg,
+    hotshotcrewTextBg, smokejumperTextBg, timerSprite
+ } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
@@ -11,8 +14,8 @@ export default class UIScene extends Phaser.Scene {
         super('UIScene');
         
         // UI Layout constants
-        this.SCREEN_WIDTH = 800;
-        this.SCREEN_HEIGHT = 600;
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT =  window.innerHeight;
         this.UI_SIDEBAR_WIDTH = 100;
         this.GAME_AREA_WIDTH = this.SCREEN_WIDTH - this.UI_SIDEBAR_WIDTH;
         
@@ -100,8 +103,8 @@ export default class UIScene extends Phaser.Scene {
 
         // Pop-up notifies user that game is paused
         this.pauseText = this.add.text(
-            this.SCREEN_WIDTH / 2,
-            this.SCREEN_HEIGHT / 2,
+            this.scale.width / 2,
+            this.cameras.main.height / 2,
             "Game Paused",
             {
                 fontFamily: '"Press Start 2P"',
@@ -120,10 +123,10 @@ export default class UIScene extends Phaser.Scene {
     
         // Top bar background
         const topBarHeight = 60;
-        const topBar = this.add.rectangle(
-            this.SCREEN_WIDTH / 2,
+        let topBar = this.add.rectangle(
+            this.scale.width / 2,
             topBarHeight / 2,
-            this.SCREEN_WIDTH,
+            this.cameras.main.width,
             topBarHeight,
             0x2d3436 // Dark gray
         );
@@ -261,6 +264,36 @@ export default class UIScene extends Phaser.Scene {
 
     // update function
     update() {
+
+        // Dynamically Move UI Elements when Screen Size Changes
+        sidebar.x = this.scale.width - 110 / 2;
+        hose.x = this.scale.width - 50;
+        hoseText.x = this.scale.width - 50;
+        hoseTextBg.x = this.scale.width - 50;
+        extinguisher.x = this.scale.width - 50;
+        extinguisherText.x = this.scale.width - 50;
+        extinguisherTextBg.x = this.scale.width - 50;
+        helicopter.x = this.scale.width - 50;
+        helicopterText.x = this.scale.width - 50;
+        helicopterTextBg.x = this.scale.width - 50;
+        firetruck.x = this.scale.width - 50;
+        firetruckText.x = this.scale.width - 50;
+        firetruckTextBg.x = this.scale.width - 50;
+        airtanker.x = this.scale.width - 50;
+        airtankerText.x = this.scale.width - 50;
+        airtankerTextBg.x = this.scale.width - 50;
+        hotshotcrew.x = this.scale.width - 50;
+        hotshotcrewText.x = this.scale.width - 50;
+        hotshotcrewTextBg.x = this.scale.width - 50;
+        smokejumper.x = this.scale.width - 50;
+        smokejumperText.x = this.scale.width - 50;
+        smokejumperTextBg.x = this.scale.width - 50;
+
+        timerSprite.x = this.scale.width;
+
+        this.pauseText.x = this.scale.width / 2;
+        //this.uiContainer.scaleX = this.scale.width; --> BUG: makes assets disappear
+
         // Update resource counts
         if (this.hoseText) {
             this.hoseText.setText(`${getHose()} left`);
@@ -902,10 +935,70 @@ export default class UIScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Create a container for the info button
-        this.infoButtonContainer = this.add.container(575, 540, [infoBg, infoButton])
+        this.infoButtonContainer = this.add.container(575, this.scale.height - 60, [infoBg, infoButton])
             .setScrollFactor(0);
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 
+        // Create info panel (initially hidden)
+        this.infoPanel = this.add.container(175, 175)
+            .setScrollFactor(0)
+            .setVisible(false);
+
+        // Add background for info panel
+        const infoPanelBg = this.add.rectangle(0, 0, 300, 200, 0x333333, 0.9)
+            .setOrigin(0.5)
+            .setStrokeStyle(2, 0xFFFFFF);
+
+        // Add close button for info panel
+        const closeButton = this.add.text(130, -85, 'X', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5)
+        .setInteractive()
+        .on('pointerdown', () => {
+            this.infoPanel.setVisible(false);
+        });
+
+        // Create text elements for the info panel
+        this.infoPanelTitle = this.add.text(0, -85, 'Game Info', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+
+        this.infoPanelTile = this.add.text(-130, -60, 'Tile: N/A', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        this.infoPanelWind = this.add.text(-130, 0, 'Wind: N/A', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        this.infoPanelRisk = this.add.text(-130, 60, 'Risk: N/A', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        // Add all elements to the info panel
+        this.infoPanel.add([
+            infoPanelBg,
+            this.infoPanelTitle,
+            closeButton,
+            this.infoPanelTile,
+            this.infoPanelWind,
+            this.infoPanelRisk
+        ]);
+
+        // Add the info panel to the UI container
+        this.uiContainer.add(this.infoPanel);
+
+        // Add click handler to info button
         infoBg.on('pointerdown', () => {
         const visible = !this.weatherPanel.visible;
         this.weatherPanel.setVisible(visible);
@@ -1029,6 +1122,8 @@ export default class UIScene extends Phaser.Scene {
             this.pauseText.setVisible(!isRunning);
         }   
     }
+}
+
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
                         medium:'#ffff00',

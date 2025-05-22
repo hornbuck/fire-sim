@@ -17,9 +17,16 @@ const config = {
     height: 600,
     parent: 'game-container',
     scene: [MenuScene, TutorialScene, SignupScene, LoginScene, MapScene, UIScene, ProfileScene, LeaderboardScene],
+    callbacks: {
+        postBoot: function (game) {
+          // In v3.15, you have to override Phaser's default styles
+          game.canvas.style.width = '100%';
+          game.canvas.style.height = '100%';
+        }
+    },
     backgroundColor: '#282c34',
     scale: {
-        mode: Phaser.Scale.FIT,
+        mode: Phaser.Scale.EXPAND,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     dom: {
