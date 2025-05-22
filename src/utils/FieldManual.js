@@ -1,36 +1,61 @@
 const fieldManualContent = `
-🚒 FireSim Field Manual
+🔥 WILDFIRE CONTROL FIELD MANUAL 🔥
 
-🔥 How Fire Spreads
-Grass ignites easily and burns quickly.
-Shrubs spread faster once lit.
-Trees (crown fires) spread rapidly tree to tree once ignited.
-Structures burn if nearby vegetation catches fire.
-Wind and weather amplify spread when risk is HIGH.
+TERRAIN TYPES & BEHAVIOR
+-----------------------
+🌳 Trees
+- High fuel content
+- Burns slowly but intensely
+- Best controlled with: 
 
-🚨 Asset Effectiveness
-Grass: 🚶 Firefighters
-Shrub: 🚒 Fire Trucks
-Trees: ✈️ Air Tankers, 👷 Hotshots
-Structures: 🚒 Fire Trucks, ✈️ Air Tankers
+🌿 Shrubs
+- Medium fuel content
+- Moderate burn rate
+- Best controlled with: 
 
-🧠 Deployment Tips
-- Block fires at narrow gaps or near water.
-- Use powerful assets on high-risk terrain.
-- Don’t waste airtankers on grass.
-- Use deployment previews to plan.
+🌱 Grass
+- Low fuel content
+- Burns quickly
+- Best controlled with: 
 
-🔄 Fire Advance Cycle
-1. Countdown: Plan before fire advances.
-2. Warning: “⚠️ FIRE ADVANCING!”
-3. Advance: Fire spreads to new tiles.
+🏠 Structures
+- Medium fuel content (8)
+- Priority protection targets
+- Best controlled with: Multiple resources
 
-🏆 Winning Strategy
-- Control spread early.
-- Defend structures and trees.
-- Deploy wisely before each advance.
+FIREFIGHTING RESOURCES
+---------------------
+💧 Water Hose
+- Quick deployment
+- Short range
+- Effective on grass fires
 
-Use UP/DOWN to scroll. Press F to close.
+🧯 Fire Extinguisher
+- TBD
+
+🚁 Helicopter
+- TBD
+
+🚒 Firetruck
+- TBD
+
+✈️ Airtanker
+- TBD
+
+👥 Hotshot Crew
+- TBD
+🪂 Smokejumpers
+- TBD
+
+STRATEGIC TIPS
+-------------
+1. Create firebreaks AHEAD of the fire
+2. Use terrain to your advantage
+3. Protect structures first
+4. Watch the wind direction
+5. Coordinate multiple resources
+
+Press 'F' to close manual
 `;
 
 export default fieldManualContent;
