@@ -8,11 +8,11 @@ export default class TerrainTile {
     static FUEL_TREE = 6;
     static FLAM_WATER = 0;
     static FUEL_WATER = 0;
-    static FLAM_GRASS_HOUSE = 7;
+    static FLAM_GRASS_HOUSE = 0.7;
     static FUEL_GRASS_HOUSE = 4;
-    static FLAM_SAND_HOUSE = 3;
+    static FLAM_SAND_HOUSE = 0.3;
     static FUEL_SAND_HOUSE = 6;
-    static FLAM_DIRT_HOUSE = 5;
+    static FLAM_DIRT_HOUSE = 0.5;
     static FUEL_DIRT_HOUSE = 4;
 
     constructor(x, y, terrain) {
