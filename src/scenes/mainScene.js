@@ -331,6 +331,7 @@ export class MainScene extends Phaser.Scene {
      * @param hoseLimit - The number of firehose uses.
      */
     update(time, delta) {
+
         this.updateGameClock(delta); // Increment game clock by delta time (ms)
 
         // Handle fire spread every 5 seconds

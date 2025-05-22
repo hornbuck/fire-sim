@@ -1,4 +1,7 @@
-import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
+import { sidebar, createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop,
+    hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper, hoseTextBg, extinguisherTextBg, helicopterTextBg, firetruckTextBg, airtankerTextBg,
+    hotshotcrewTextBg, smokejumperTextBg, timerSprite
+ } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
@@ -98,7 +101,7 @@ export default class UIScene extends Phaser.Scene {
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
 
         this.pauseText = this.add.text(
-            this.cameras.main.width / 2,
+            this.scale.width / 2,
             this.cameras.main.height / 2,
             "Game Paused",
             {
@@ -118,8 +121,8 @@ export default class UIScene extends Phaser.Scene {
     
         // Top bar background
         const topBarHeight = 60;
-        const topBar = this.add.rectangle(
-            this.cameras.main.width / 2,
+        let topBar = this.add.rectangle(
+            this.scale.width / 2,
             topBarHeight / 2,
             this.cameras.main.width,
             topBarHeight,
@@ -280,6 +283,36 @@ export default class UIScene extends Phaser.Scene {
 
     // update function
     update() {
+
+        // Dynamically Move UI Elements when Screen Size Changes
+        sidebar.x = this.scale.width - 110 / 2;
+        hose.x = this.scale.width - 50;
+        hoseText.x = this.scale.width - 50;
+        hoseTextBg.x = this.scale.width - 50;
+        extinguisher.x = this.scale.width - 50;
+        extinguisherText.x = this.scale.width - 50;
+        extinguisherTextBg.x = this.scale.width - 50;
+        helicopter.x = this.scale.width - 50;
+        helicopterText.x = this.scale.width - 50;
+        helicopterTextBg.x = this.scale.width - 50;
+        firetruck.x = this.scale.width - 50;
+        firetruckText.x = this.scale.width - 50;
+        firetruckTextBg.x = this.scale.width - 50;
+        airtanker.x = this.scale.width - 50;
+        airtankerText.x = this.scale.width - 50;
+        airtankerTextBg.x = this.scale.width - 50;
+        hotshotcrew.x = this.scale.width - 50;
+        hotshotcrewText.x = this.scale.width - 50;
+        hotshotcrewTextBg.x = this.scale.width - 50;
+        smokejumper.x = this.scale.width - 50;
+        smokejumperText.x = this.scale.width - 50;
+        smokejumperTextBg.x = this.scale.width - 50;
+
+        timerSprite.x = this.scale.width;
+
+        this.pauseText.x = this.scale.width / 2;
+        //this.uiContainer.scaleX = this.scale.width; --> BUG: makes assets disappear
+
         // Update resource counts
         if (this.hoseText) {
             this.hoseText.setText(`${getHose()} left`);

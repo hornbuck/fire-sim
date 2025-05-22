@@ -619,6 +619,7 @@ if (activated_resource === "hotshot-crew"   ||
     }
 
     update(time, delta) {
+        
         if (this.isFireSimRunning) {
           // 1) Advance game clock
           this.elapsedTime += delta / 1000;
