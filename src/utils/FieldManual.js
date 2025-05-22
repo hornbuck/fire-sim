@@ -7,21 +7,21 @@ TERRAIN TYPES & BEHAVIOR
 - Low flammability
 - High fuel content (6)
 - Burns slowly but intensely
-- Includes: Dirt House 🏠 (fuel 4)
+- Includes: Dirt House 🏠 (fuel 6)
 - Best controlled with: Smokejumpers, Hotshot Crews, Airtankers
 
 🌿 Shrubs
 - High flammability
 - Medium fuel content (4)
 - Moderate burn rate
-- Includes: Sand House 🏠 (fuel 6)
+- Includes: Sand House 🏠 (fuel 4)
 - Best controlled with: Firetrucks
 
 🌱 Grass
 - Medium flammability
 - Low fuel content (2)
 - Burns quickly
-- Includes: Grass House 🏠 (fuel 4)
+- Includes: Grass House 🏠 (fuel 2)
 - Best controlled with: Water Hoses, Fire Extinguishers
 
 💧 Water
