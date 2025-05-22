@@ -621,7 +621,7 @@ export default class UIScene extends Phaser.Scene {
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 
         // Create info panel (initially hidden)
-        this.infoPanel = this.add.container(400, 300)
+        this.infoPanel = this.add.container(175, 175)
             .setScrollFactor(0)
             .setVisible(false);
 
@@ -816,7 +816,6 @@ updateFireButton(isRunning) {
 
     
 }
-
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',

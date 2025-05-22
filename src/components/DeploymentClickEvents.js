@@ -215,15 +215,78 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
     );
 }
 
-export function show_tooltip (resource, resourceName, x, y, scene) {
-    let tooltip = scene.add.sprite(x, y, resourceName);
-    tooltip.setVisible(false);
+// This is the updated show_tooltip function for src/components/ui.js
+
+// Replace the existing show_tooltip function with this one:
+export function show_tooltip(resource, resourceName, x, y, scene) {
+    // Define tooltip content based on resource name
+    let tooltipContent = getTooltipContent(resourceName);
+    
+    // Shift tooltip position to the left to avoid covering the icon
+    // Original x is 660, move it left by 120 pixels
+    const tooltipX = x - 50;
+    
+    // Create a text object with proper styling
+    let tooltip = scene.add.text(tooltipX, y, tooltipContent, {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '10px',
+        color: '#FFFFFF',
+        backgroundColor: '#2d3436',
+        padding: { x: 10, y: 8 },
+        align: 'center',
+        wordWrap: { width: 180 }
+    })
+    .setOrigin(0.5, 0.5)
+    .setDepth(1000)
+    .setScrollFactor(0)
+    .setVisible(false);
+    
+    // Add a border to the tooltip background
+    const bounds = tooltip.getBounds();
+    const border = scene.add.rectangle(
+        tooltipX, 
+        y, 
+        bounds.width + 5, 
+        bounds.height + 5, 
+        0xFFFFFF, 
+        0.3
+    )
+    .setDepth(999)
+    .setScrollFactor(0)
+    .setVisible(false);
+    
+    // Show/hide tooltip on hover
     resource.on('pointerover', function() {
         tooltip.setVisible(true);
+        border.setVisible(true);
     });
+    
     resource.on('pointerout', function() {
         tooltip.setVisible(false);
+        border.setVisible(false);
     });
+}
+
+// Helper function to get tooltip content based on resource name
+function getTooltipContent(resourceName) {
+    switch(resourceName.replace('-tooltip', '')) {
+        case 'hose':
+            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 2.\nSingle tile coverage.";
+        case 'extinguisher':
+            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 1.\nSingle tile coverage.";
+        case 'helicopter':
+            return "HELICOPTER\n\nAerial water drops.\nFully extinguishes.\nAffects 5 tiles in cross pattern.";
+        case 'firetruck':
+            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 3.\nSingle tile coverage.";
+        case 'airtanker':
+            return "AIR TANKER\n\nLarge retardant drop.\nFully extinguishes.\nAffects 5 tiles in a line.";
+        case 'hotshot-crew':
+            return "HOTSHOT CREW\n\nCreates firebreaks.\nWorks on UNBURNED tiles only.\nProtects line of 5 tiles.";
+        case 'smokejumper':
+            return "SMOKEJUMPERS\n\nParachute into remote areas.\nImmediately extinguishes.\nSingle tile coverage.";
+        default:
+            return "Resource information unavailable";
+    }
 }
 
 // Notification to player that they are out of specified asset
@@ -259,7 +322,7 @@ export function show_notification (scene, target, message = null) {
         target.setVisible(true);
     
         scene.time.delayedCall(1000, () => {
-         target.setVisible(false);
+            target.setVisible(false);
         });
     }
 }
