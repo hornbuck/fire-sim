@@ -1122,7 +1122,8 @@ export default class UIScene extends Phaser.Scene {
             this.pauseText.setVisible(!isRunning);
         }   
     }
-}
+
+
 
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
@@ -1131,7 +1132,8 @@ export default class UIScene extends Phaser.Scene {
         this.riskText
         .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
         .setStyle({ fill: colorMap[risk] });
-        }      
+        }
+          
     
     // Handler for zoom changes
     handleZoomChange(zoomLevel) {
@@ -1200,3 +1202,4 @@ export default class UIScene extends Phaser.Scene {
         return terrainMap[terrain] || terrain;
     }
 }
+
