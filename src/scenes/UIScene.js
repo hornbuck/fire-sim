@@ -166,6 +166,12 @@ export default class UIScene extends Phaser.Scene {
             onClick: () => {
                 console.log("Restart clicked");
                 this.events.emit('restartGame');
+
+                // Send user score to db during restart
+                const mapScene = this.scene.get('MapScene');
+                if (mapScene && typeof mapScene.sendScoreToDB === 'function') {
+                mapScene.sendScoreToDB();
+                }
             }
         });
         this.topBarContainer.add([restart.button, restart.buttonText]);
