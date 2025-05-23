@@ -130,6 +130,7 @@ export function deactivate(sprites) {
 }
 
 function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
+    const originalFuel = tile.fuel;
     tile.fuel = Math.max(0, tile.fuel - amount);
 
     if (tile.fuel === 0) {
@@ -137,8 +138,12 @@ function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
         coins += reward;
         bank.setText(`${coins}`);
         scene.events.emit('extinguishFire', fireSprite);
+    } else if (originalFuel > amount) {
+        // 🔥 New notification to clarify partial suppression
+        show_notification(scene, "🔥 Not enough power to fully extinguish fire!");
     }
 }
+
 
 
 function extinguishTile(tile, tileX, tileY, mapScene) {
@@ -279,13 +284,13 @@ export function show_tooltip(resource, resourceName, x, y, scene) {
 function getTooltipContent(resourceName) {
     switch(resourceName.replace('-tooltip', '')) {
         case 'hose':
-            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 2.\nSingle tile coverage.";
+            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 3.\nSingle tile coverage.";
         case 'extinguisher':
-            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 1.\nSingle tile coverage.";
+            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 2.\nSingle tile coverage.";
         case 'helicopter':
             return "HELICOPTER\n\nAerial water drops.\nFully extinguishes.\nAffects 5 tiles in cross pattern.";
         case 'firetruck':
-            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 3.\nSingle tile coverage.";
+            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 4.\nSingle tile coverage.";
         case 'airtanker':
             return "AIR TANKER\n\nLarge retardant drop.\nFully extinguishes.\nAffects 5 tiles in a line.";
         case 'hotshot-crew':
@@ -394,7 +399,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 2);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
             bank.setText(`${coins}`);
         });
     }
@@ -407,7 +412,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 2);
             bank.setText(`${coins}`);
         });
     }
@@ -441,7 +446,7 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 4);
             bank.setText(`${coins}`);
         });
     }
@@ -483,10 +488,10 @@ else if (activated_resource === "hotshot-crew" && !paused) {
         return;
     }
 
-        const asset2 = new AnimatedSprite(3);
-        asset2.useHotshotCrew(scene, x, y);
-        setHotshotCrew(-1);
-        asset2.startTimer(5, scene, c_hotshotcrew, scene.game.scale.width - 50, 465);
+    const asset2 = new AnimatedSprite(3);
+    asset2.useHotshotCrew(scene, x, y);
+    setHotshotCrew(-1);
+    asset2.startTimer(5, scene, c_hotshotcrew, scene.game.scale.width - 50, 465);
 
     scene.time.delayedCall(t_hotshotcrew, () => {
         const dir = direction || dropDirection;

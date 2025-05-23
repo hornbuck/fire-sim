@@ -4,56 +4,76 @@ const fieldManualContent = `
 TERRAIN TYPES & BEHAVIOR
 -----------------------
 🌳 Trees
-- High fuel content
+- Low flammability
+- High fuel content (6)
 - Burns slowly but intensely
-- Best controlled with: 
+- Includes: Dirt House 🏠 (fuel 6)
+- Best controlled with: Smokejumpers, Hotshot Crews, Airtankers
 
 🌿 Shrubs
-- Medium fuel content
+- High flammability
+- Medium fuel content (4)
 - Moderate burn rate
-- Best controlled with: 
+- Includes: Sand House 🏠 (fuel 4)
+- Best controlled with: Firetrucks
 
 🌱 Grass
-- Low fuel content
+- Medium flammability
+- Low fuel content (2)
 - Burns quickly
-- Best controlled with: 
+- Includes: Grass House 🏠 (fuel 2)
+- Best controlled with: Water Hoses, Fire Extinguishers
 
-🏠 Structures
-- Medium fuel content (8)
-- Priority protection targets
-- Best controlled with: Multiple resources
+💧 Water
+- No flammability or fuel
+- Natural firebreak
 
 FIREFIGHTING RESOURCES
 ---------------------
 💧 Water Hose
-- Quick deployment
-- Short range
-- Effective on grass fires
+- Reduces 3 fuel per use
+- Single tile range
+- Fast deployment, short cooldown
+- May require multiple uses on high-fuel terrain
 
 🧯 Fire Extinguisher
-- TBD
-
-🚁 Helicopter
-- TBD
+- Reduces 2 fuel per use
+- Single tile range
+- Extremely fast, lowest cost
+- Best for light fuels like grass
 
 🚒 Firetruck
-- TBD
+- Reduces 4 fuel per use
+- Single tile range
+- Strong vs shrubs and most structures
+
+🚁 Helicopter
+- Instantly extinguishes 5 tiles in a cross pattern
+- Ignores fuel amount — guaranteed to put out fire
+- Best for clustered fires
 
 ✈️ Airtanker
-- TBD
+- Instantly extinguishes a 5-tile line (horizontal or vertical)
+- Bypasses fuel — great for fire lines or dense terrain
 
 👥 Hotshot Crew
-- TBD
+- Converts 5-tile line into firebreaks
+- Must be deployed on unburned, flammable terrain
+- Prevents future spread, does not extinguish
+
 🪂 Smokejumpers
-- TBD
+- Instantly extinguish a single burning tile
+- Always successful regardless of fuel
+- Ideal for remote or high-priority targets
+
 
 STRATEGIC TIPS
 -------------
 1. Create firebreaks AHEAD of the fire
-2. Use terrain to your advantage
-3. Protect structures first
-4. Watch the wind direction
-5. Coordinate multiple resources
+2. Use terrain and water to slow spread
+3. Prioritize saving structures
+4. Watch wind direction closely
+5. Coordinate multiple assets for best results
 
 Press 'F' to close manual
 `;

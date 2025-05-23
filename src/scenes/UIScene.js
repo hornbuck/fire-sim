@@ -289,8 +289,6 @@ export default class UIScene extends Phaser.Scene {
         smokejumperText.x = this.scale.width - 50;
         smokejumperTextBg.x = this.scale.width - 50;
 
-        timerSprite.x = this.scale.width;
-
         this.pauseText.x = this.scale.width / 2;
         //this.uiContainer.scaleX = this.scale.width; --> BUG: makes assets disappear
 
@@ -563,6 +561,38 @@ export default class UIScene extends Phaser.Scene {
             updateScrollIndicators();
         });
 
+        // Enable touch drag scrolling for mobile devices
+        let isDragging = false;
+        let dragStartY = 0;
+        let contentStartY = 0;
+
+        // Enable input on manualText for dragging
+        manualText.setInteractive({ draggable: false });
+
+        manualText.on('pointerdown', (pointer) => {
+            isDragging = true;
+            dragStartY = pointer.y;
+            contentStartY = manualText.y;
+        });
+
+        this.input.on('pointerup', () => {
+            isDragging = false;
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (!isDragging || !this.fieldManualContainer.visible) return;
+
+            const deltaY = pointer.y - dragStartY;
+            const newY = Phaser.Math.Clamp(
+                contentStartY + deltaY,
+                scrollConfig.maxY,
+                scrollConfig.startY
+            );
+            manualText.y = newY;
+            updateScrollIndicators();
+        });
+
+
         // When manual visibility changes, update MapScene zoom state
         this.fieldManualContainer.on('setVisible', (visible) => {
             const mapScene = this.scene.get('MapScene');
@@ -594,6 +624,50 @@ export default class UIScene extends Phaser.Scene {
             scrollInstructions
         ]);
 
+        // == Close Button for Field Manual ==
+        const closeBtnContainer = this.add.container(670, 65).setScrollFactor(0);
+
+        // Text "X"
+        const closeText = this.add.text(4, 4, '❌', {
+            fontSize: '24px',
+            color: '#ffffff',
+            padding: { top: 6, bottom: 0 }  // Add top padding
+        })
+        .setOrigin(0.5)
+        .setInteractive();
+
+
+        // Hover effect: slight scale bounce
+        closeText.on('pointerover', () => {
+            this.tweens.add({
+                targets: closeText,
+                scale: 1.2,
+                duration: 100,
+                ease: 'Power1'
+            });
+        });
+        closeText.on('pointerout', () => {
+            this.tweens.add({
+                targets: closeText,
+                scale: 1,
+                duration: 100,
+                ease: 'Power1'
+            });
+        });
+
+        // Click to close
+        closeText.on('pointerdown', () => {
+            this.fieldManualContainer.setVisible(false);
+            this.scene.get('MapScene').disableZoom = false;
+        });
+
+        // Add to container
+        closeBtnContainer.add(closeText);
+        this.fieldManualContainer.add(closeBtnContainer);
+        // == End of Field Manual Close Button ==
+
+
+
         // Toggle with F key
         this.input.keyboard.on('keydown-F', () => {
             const inactiveScenes = ['LoginScene', 'SignupScene', 'ProfileScene', 'LeaderboardScene'];
@@ -607,8 +681,8 @@ export default class UIScene extends Phaser.Scene {
         });
 
         // Handle manual button click
-        const manualButton = this.add.text(500, -10, "📖", {
-            fontSize: '24px'
+        const manualButton = this.add.text(492, -16, "📖", {
+            fontSize: '36px'
         })
         .setInteractive()
         .on('pointerdown', () => {
@@ -712,7 +786,7 @@ export default class UIScene extends Phaser.Scene {
         
         this.tileInfoText = this.add.text(10, 10, 'Click a tile for info', { // Default text
             fontFamily: '"Press Start 2P"',
-            fontSize: '12px',
+            fontSize: '10px',
             color: '#888888', // Dimmed color for default state
             wordWrap: { width: 230 }
         }).setOrigin(0, 0);
@@ -899,6 +973,66 @@ export default class UIScene extends Phaser.Scene {
             .setScrollFactor(0);
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 
+        // Create info panel (initially hidden)
+        this.infoPanel = this.add.container(175, 175)
+            .setScrollFactor(0)
+            .setVisible(false);
+
+        // Add background for info panel
+        const infoPanelBg = this.add.rectangle(0, 0, 300, 200, 0x333333, 0.9)
+            .setOrigin(0.5)
+            .setStrokeStyle(2, 0xFFFFFF);
+
+        // Add close button for info panel
+        const closeButton = this.add.text(130, -85, 'X', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5)
+        .setInteractive()
+        .on('pointerdown', () => {
+            this.infoPanel.setVisible(false);
+        });
+
+        // Create text elements for the info panel
+        this.infoPanelTitle = this.add.text(0, -85, 'Game Info', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '16px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5);
+
+        this.infoPanelTile = this.add.text(-130, -60, 'Tile: N/A', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        this.infoPanelWind = this.add.text(-130, 0, 'Wind: N/A', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        this.infoPanelRisk = this.add.text(-130, 60, 'Risk: N/A', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        // Add all elements to the info panel
+        this.infoPanel.add([
+            infoPanelBg,
+            this.infoPanelTitle,
+            closeButton,
+            this.infoPanelTile,
+            this.infoPanelWind,
+            this.infoPanelRisk
+        ]);
+
+        // Add the info panel to the UI container
+        this.uiContainer.add(this.infoPanel);
+
+        // Add click handler to info button
         infoBg.on('pointerdown', () => {
         const visible = !this.weatherPanel.visible;
         this.weatherPanel.setVisible(visible);
@@ -1022,6 +1156,9 @@ export default class UIScene extends Phaser.Scene {
             this.pauseText.setVisible(!isRunning);
         }   
     }
+
+
+
     updateRiskDisplay(risk) {
         const colorMap = { low:   '#00ff00',
                         medium:'#ffff00',
@@ -1029,7 +1166,8 @@ export default class UIScene extends Phaser.Scene {
         this.riskText
         .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
         .setStyle({ fill: colorMap[risk] });
-        }      
+        }
+          
     
     // Handler for zoom changes
     handleZoomChange(zoomLevel) {
@@ -1068,15 +1206,34 @@ export default class UIScene extends Phaser.Scene {
     }
     // Helper to get friendly terrain names
     getTerrainName(terrain) {
-        return {
+        // Handle burned variants first
+        if (terrain.startsWith('burned-')) {
+            const base = terrain.slice(7); // strip 'burned-' prefix
+            const burnedMap = {
+                'tree': '🔥 Burned Forest',
+                'shrub': '🔥 Burned Shrubland',
+                'grass': '🔥 Burned Grassland',
+                'dirt-house': '🔥 Burned Structure',
+                'grass-house': '🔥 Burned Structure',
+                'sand-house': '🔥 Burned Structure',
+                'house': '🔥 Burned Structure' // fallback for generic
+            };
+            return burnedMap[base] || '🔥 Burned Area';
+        }
+
+        // Regular terrain names
+        const terrainMap = {
             'tree': '🌳 Forest',
             'shrub': '🌿 Shrubland',
             'grass': '🌱 Grassland',
+            'dirt-house': '🏠 Structure',
             'grass-house': '🏠 Structure',
             'sand-house': '🏠 Structure',
-            'dirt-house': '🏠 Structure',
             'water': '💧 Water',
             'fire-break': '🚧 Firebreak'
-        }[terrain] || terrain;
+        };
+
+        return terrainMap[terrain] || terrain;
     }
 }
+
