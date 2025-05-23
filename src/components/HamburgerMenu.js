@@ -29,6 +29,7 @@ export default class HamburgerMenu {
                 { text: 'Profile', key: 'profile' },
                 { text: 'Leaderboard', key: 'leaderboard'},
                 { text: 'Login/Logout', key: 'login' },
+                { text: 'Main Menu', key: 'menu' },
                 // Uncomment once accessibility is implemented
                 //{ text: 'Accessibility', key: 'accessibility' },
                 //{ text: 'Settings', key: 'settings' },
@@ -208,9 +209,14 @@ export default class HamburgerMenu {
                 } else {
                     // If not logged in, navigate to login scene
                     if (this.scene.scene) {
-                        this.scene.scene.start('LoginScene');
+                        this.scene.scene.launch('LoginScene');
                     }
                 }
+                this.toggleMenu();
+                break;
+            case 'menu':
+                // Back to main menu
+                window.location.reload();
                 this.toggleMenu();
                 break;
             // Uncomment and implement these cases as needed

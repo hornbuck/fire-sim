@@ -34,17 +34,31 @@ export default class LoginScene extends Phaser.Scene {
      * Sets up the scene, including buttons and user input fields
      */
     create() {
-        // Stop MapScene
-        if (this.scene.isActive('MapScene')) {
-            this.scene.stop('MapScene');
-        }
+        // remove any captures so W/A/S/D go to the browser again
+        this.input.keyboard.removeCapture([
+            Phaser.Input.Keyboard.KeyCodes.W,
+            Phaser.Input.Keyboard.KeyCodes.A,
+            Phaser.Input.Keyboard.KeyCodes.S,
+            Phaser.Input.Keyboard.KeyCodes.D,
+        ]);
+        
+        // Brings elements of scene to the top
+        this.scene.bringToTop();
+
+        // full‐screen semi‑transparent overlay
+        const { width, height } = this.scale;
+
+        // draw a dark overlay behind everything
+        this.add.rectangle(0, 0, width, height, 0x000000, .90)
+        .setOrigin(0)
+        .setInteractive();
 
         // remove any captures so W/A/S/D go to the browser again
         this.input.keyboard.removeCapture([
             Phaser.Input.Keyboard.KeyCodes.W,
             Phaser.Input.Keyboard.KeyCodes.A,
             Phaser.Input.Keyboard.KeyCodes.S,
-            Phaser.Input.Keyboard.KeyCodes.DÍ
+            Phaser.Input.Keyboard.KeyCodes.D,
         ]);
 
         // Add a fun title text with a retro arcade feel.
@@ -54,7 +68,9 @@ export default class LoginScene extends Phaser.Scene {
             fontFamily: '"Press Start 2P", cursive',
             stroke: '#000',
             strokeThickness: 4
-        }).setOrigin(0.5);
+        })
+        .setOrigin(0.5)
+        .setDepth(1000);
 
         // Create a DOM element for the email input.
         const emailInput = this.add.dom(400, 200, 'input', {
@@ -174,23 +190,23 @@ export default class LoginScene extends Phaser.Scene {
             }
         });
 
-        // Create a PLAY button to bypass login and go directly to the game
-        const toGame = this.add.dom(395, 370, 'button', {
-            width: '200px',
-            height: '30px',
-            fontSize: '14px',
-            color: '#FFFFFF',
-            backgroundColor: '#8B0000',
+        // “X” close button in top-right
+        const closeBtn = this.add.text(30, 10, '✕', {
+            fontSize: '24px',
+            color: '#fff',
+            backgroundColor: 'transparent',
             fontFamily: '"Press Start 2P", cursive',
-            border: '2px solid #FFFFFF',
-            cursor: 'pointer'
-        }, 'MAIN MENU').setOrigin(0.5);
+        })
+        .setOrigin(1, 0)                // align top-right corner
+        .setInteractive({ useHandCursor: true })
+        .setDepth(1000)
+        .on('pointerdown', () => 
+            this.scene.stop(),
+        );
 
-        toGame.addListener('click');
-        toGame.on('click', () => {
-            console.log("PLAY button clicked - starting game");
-            this.startGame();
-        });
+        // optional hover effect
+        closeBtn.on('pointerover',  () => closeBtn.setStyle({ color: '#f00' }));
+        closeBtn.on('pointerout',   () => closeBtn.setStyle({ color: '#fff' }));
     }
 
     /**

@@ -700,10 +700,11 @@ updateDeploymentPreview(pointer) {
           
         }
         
-        
 
         // Handle keyboard camera controls
-        if (!this.scene.isActive('LoginScene')) {
+        if (!this.scene.isActive('LoginScene') 
+            && !this.scene.isActive('SignupScene')) 
+        {
         this.handleCameraControls(delta);
         }     
         
