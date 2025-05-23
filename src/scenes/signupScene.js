@@ -39,6 +39,15 @@ export default class SignupScene extends Phaser.Scene {
             Phaser.Input.Keyboard.KeyCodes.D
         ]);
 
+        // Brings elements of scene to the top
+        this.scene.bringToTop();
+
+        const { width, height } = this.scale;
+
+        this.add.rectangle(0, 0, width, height, 0x000000, .90)
+        .setOrigin(0)
+        .setInteractive();
+
         // Title
         this.add.text(400, 120, 'Sign Up', {
             fontSize: '25px',
@@ -131,12 +140,30 @@ export default class SignupScene extends Phaser.Scene {
             fontFamily: '"Press Start 2P", cursive',
             border: '2px solid #FFFFFF',
             cursor: 'pointer'
-        }, 'LOGIN').setOrigin(0.5);
+        }, '<--').setOrigin(0.5);
     
         loginButton.addListener('click');
         loginButton.on('click', () => {
             this.scene.start('LoginScene');
         });
+
+        // “X” close button in top-right
+        const closeBtn = this.add.text(30, 10, '✕', {
+            fontSize: '24px',
+            color: '#fff',
+            backgroundColor: 'transparent',
+            fontFamily: '"Press Start 2P", cursive',
+        })
+        .setOrigin(1, 0)                // align top-right corner
+        .setInteractive({ useHandCursor: true })
+        .setDepth(1000)
+        .on('pointerdown', () => 
+            this.scene.stop(),
+        );
+
+        // optional hover effect
+        closeBtn.on('pointerover',  () => closeBtn.setStyle({ color: '#f00' }));
+        closeBtn.on('pointerout',   () => closeBtn.setStyle({ color: '#fff' }));
     }
 
      /**

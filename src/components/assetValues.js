@@ -7,7 +7,7 @@ export let extinguisher = 5;
 export let helicopter = 3;
 export let firetruck = 3;
 export let airtanker = 2;
-export let hotshotcrew = 1;
+export let hotshotcrew = 3;
 export let smokejumper = 5;
 
 // Get the number of HOSE assets (useful for external files)

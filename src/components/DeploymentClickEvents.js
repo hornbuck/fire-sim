@@ -29,6 +29,14 @@ export function initDirectionHandler(mapScene) {
     });
 }
 
+function isValidFireBreakTile(tile) {
+    const unmodifiableTerrains = ['water', 'burned-grass', 'burned-shrub', 'burned-tree', 'burned-grass-house', 'burned-sand-house', 'burned-dirt-house'];
+    return tile && 
+           tile.burnStatus !== 'burning' &&
+           tile.burnStatus !== 'burnt' &&
+           !unmodifiableTerrains.includes(tile.terrain);
+}
+
 
 // Global cooldown variable
 // --> This is an array where each index represents an asset, in the following order:
@@ -122,6 +130,7 @@ export function deactivate(sprites) {
 }
 
 function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
+    const originalFuel = tile.fuel;
     tile.fuel = Math.max(0, tile.fuel - amount);
 
     if (tile.fuel === 0) {
@@ -129,8 +138,12 @@ function reduceFuelAndMaybeExtinguish(tile, fireSprite, scene, amount = 1) {
         coins += reward;
         bank.setText(`${coins}`);
         scene.events.emit('extinguishFire', fireSprite);
+    } else if (originalFuel > amount) {
+        // 🔥 New notification to clarify partial suppression
+        show_notification(scene, "🔥 Not enough power to fully extinguish fire!");
     }
 }
+
 
 
 function extinguishTile(tile, tileX, tileY, mapScene) {
@@ -215,15 +228,78 @@ export function activate_resource (index, resource, resourceName, ONcursorURL, O
     );
 }
 
-export function show_tooltip (resource, resourceName, x, y, scene) {
-    let tooltip = scene.add.sprite(x, y, resourceName);
-    tooltip.setVisible(false);
+// This is the updated show_tooltip function for src/components/ui.js
+
+// Replace the existing show_tooltip function with this one:
+export function show_tooltip(resource, resourceName, x, y, scene) {
+    // Define tooltip content based on resource name
+    let tooltipContent = getTooltipContent(resourceName);
+    
+    // Shift tooltip position to the left to avoid covering the icon
+    // Original x is 660, move it left by 120 pixels
+    const tooltipX = x - 50;
+    
+    // Create a text object with proper styling
+    let tooltip = scene.add.text(tooltipX, y, tooltipContent, {
+        fontFamily: '"Press Start 2P"',
+        fontSize: '10px',
+        color: '#FFFFFF',
+        backgroundColor: '#2d3436',
+        padding: { x: 10, y: 8 },
+        align: 'center',
+        wordWrap: { width: 180 }
+    })
+    .setOrigin(0.5, 0.5)
+    .setDepth(1000)
+    .setScrollFactor(0)
+    .setVisible(false);
+    
+    // Add a border to the tooltip background
+    const bounds = tooltip.getBounds();
+    const border = scene.add.rectangle(
+        tooltipX, 
+        y, 
+        bounds.width + 5, 
+        bounds.height + 5, 
+        0xFFFFFF, 
+        0.3
+    )
+    .setDepth(999)
+    .setScrollFactor(0)
+    .setVisible(false);
+    
+    // Show/hide tooltip on hover
     resource.on('pointerover', function() {
         tooltip.setVisible(true);
+        border.setVisible(true);
     });
+    
     resource.on('pointerout', function() {
         tooltip.setVisible(false);
+        border.setVisible(false);
     });
+}
+
+// Helper function to get tooltip content based on resource name
+function getTooltipContent(resourceName) {
+    switch(resourceName.replace('-tooltip', '')) {
+        case 'hose':
+            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 3.\nSingle tile coverage.";
+        case 'extinguisher':
+            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 2.\nSingle tile coverage.";
+        case 'helicopter':
+            return "HELICOPTER\n\nAerial water drops.\nFully extinguishes.\nAffects 5 tiles in cross pattern.";
+        case 'firetruck':
+            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 4.\nSingle tile coverage.";
+        case 'airtanker':
+            return "AIR TANKER\n\nLarge retardant drop.\nFully extinguishes.\nAffects 5 tiles in a line.";
+        case 'hotshot-crew':
+            return "HOTSHOT CREW\n\nCreates firebreaks.\nWorks on UNBURNED tiles only.\nProtects line of 5 tiles.";
+        case 'smokejumper':
+            return "SMOKEJUMPERS\n\nParachute into remote areas.\nImmediately extinguishes.\nSingle tile coverage.";
+        default:
+            return "Resource information unavailable";
+    }
 }
 
 // Notification to player that they are out of specified asset
@@ -259,7 +335,7 @@ export function show_notification (scene, target, message = null) {
         target.setVisible(true);
     
         scene.time.delayedCall(1000, () => {
-         target.setVisible(false);
+            target.setVisible(false);
         });
     }
 }
@@ -317,9 +393,22 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     if (activated_resource === "hose" && !paused) {
         setHose(-1);
         asset.useHose(scene, x, y, fireSprite);
-        asset.startTimer(0, scene, c_hose, 750, 50);
+        asset.startTimer(0, scene, c_hose, scene.game.scale.width - 50, 40);
 
         scene.time.delayedCall(t_hose, () => {
+            const mapScene = scene.scene.get('MapScene');
+            const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
+            const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
+            bank.setText(`${coins}`);
+        });
+    }
+    else if (activated_resource === "extinguisher" && !paused) {
+        setExtinguisher(-1);
+        asset.useFireExtinguisher(scene, x, y, fireSprite);
+        asset.startTimer(1, scene, c_extinguisher, scene.game.scale.width - 50, 125);
+
+        scene.time.delayedCall(t_extinguisher, () => {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
@@ -327,23 +416,10 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             bank.setText(`${coins}`);
         });
     }
-    else if (activated_resource === "extinguisher" && !paused) {
-        setExtinguisher(-1);
-        asset.useFireExtinguisher(scene, x, y, fireSprite);
-        asset.startTimer(1, scene, c_extinguisher, 750, 130);
-
-        scene.time.delayedCall(t_extinguisher, () => {
-            const mapScene = scene.scene.get('MapScene');
-            const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
-            const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene);
-            bank.setText(`${coins}`);
-        });
-    }
     else if (activated_resource === "helicopter" && !paused) {
         setHelicopter(-1);
         asset.useHelicopter(scene, x, y, fireSprite);
-        asset.startTimer(2, scene, c_helicopter, 750, 210);
+        asset.startTimer(2, scene, c_helicopter, scene.game.scale.width - 50, 210);
 
         scene.time.delayedCall(t_helicopter, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -364,20 +440,20 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
     else if (activated_resource === "firetruck" && !paused) {
         setFiretruck(-1);
         asset.useFiretruck(scene, x, y, fireSprite);
-        asset.startTimer(3, scene, c_firetruck, 750, 290);
+        asset.startTimer(3, scene, c_firetruck, scene.game.scale.width - 50, 295);
 
         scene.time.delayedCall(t_firetruck, () => {
             const mapScene = scene.scene.get('MapScene');
             const tx = Math.floor(fireSprite.x / mapScene.TILE_SIZE);
             const ty = Math.floor(fireSprite.y / mapScene.TILE_SIZE);
-            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 3);
+            reduceFuelAndMaybeExtinguish(mapScene.map.grid[ty][tx], fireSprite, mapScene, 4);
             bank.setText(`${coins}`);
         });
     }
     else if (activated_resource === "airtanker" && !paused) {
         setAirtanker(-1);
         asset.useAirtanker(scene, x, y, fireSprite);
-        asset.startTimer(4, scene, c_airtanker, 750, 370);
+        asset.startTimer(4, scene, c_airtanker, scene.game.scale.width - 50, 380);
 
         scene.time.delayedCall(t_airtanker, () => {
             const mapScene = scene.scene.get('MapScene');
@@ -400,49 +476,50 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             bank.setText(`${coins}`);
         });
     }
-    else if (activated_resource === "hotshot-crew") {
-        const mapScene = scene.scene.get('MapScene');
-        const tx       = Math.floor(x / mapScene.TILE_SIZE);
-        const ty       = Math.floor(y / mapScene.TILE_SIZE);
-        const tile     = mapScene.map.grid[ty][tx];
+else if (activated_resource === "hotshot-crew" && !paused) {
+    const mapScene = scene.scene.get('MapScene');
+    const tx = Math.floor(x / mapScene.TILE_SIZE);
+    const ty = Math.floor(y / mapScene.TILE_SIZE);
+    const tile = mapScene.map.grid[ty][tx];
 
-    if (tile.burnStatus !== "unburned") {
-        show_notification(scene, "Hotshots can only deploy on unburned tiles!");
+    // Prevent deployment on burning or invalid tiles
+    if (!isValidFireBreakTile(tile)) {
+        show_notification(scene, "Hotshots can only deploy on unburned, modifiable tiles!");
         return;
     }
 
-        const asset2 = new AnimatedSprite(3);
-        asset2.useHotshotCrew(scene, x, y);
-        setHotshotCrew(-1);
-        asset2.startTimer(5, scene, c_hotshotcrew, 750, 450);
+    const asset2 = new AnimatedSprite(3);
+    asset2.useHotshotCrew(scene, x, y);
+    setHotshotCrew(-1);
+    asset2.startTimer(5, scene, c_hotshotcrew, scene.game.scale.width - 50, 465);
 
-        scene.time.delayedCall(t_hotshotcrew, () => {
-            const dir    = direction || dropDirection;
-            const deltas = dir === "vertical"
-                ? [[0,-2],[0,-1],[0,1],[0,2]]
-                : [[-2,0],[-1,0],[1,0],[2,0]];
+    scene.time.delayedCall(t_hotshotcrew, () => {
+        const dir = direction || dropDirection;
+        const deltas = dir === "vertical"
+            ? [[0, 0], [0, -2], [0, -1], [0, 1], [0, 2]]
+            : [[0, 0], [-2, 0], [-1, 0], [1, 0], [2, 0]];
 
-            if (tile.burnStatus !== "burnt") {
-                tile.burnStatus = "not-burnt";
-                extinguishTile(tile, tx, ty, mapScene);
-            }
-            deltas.forEach(([dx,dy]) => {
-                const nx = tx+dx, ny = ty+dy;
-                if (nx>=0 && nx<mapScene.map.width && ny>=0 && ny<mapScene.map.height) {
-                    const nbr = mapScene.map.grid[ny][nx];
-                    if (nbr.burnStatus !== "burnt") {
-                        nbr.burnStatus = "not-burnt";
-                        extinguishTile(nbr, nx, ny, mapScene);
-                    }
+        deltas.forEach(([dx, dy]) => {
+            const nx = tx + dx;
+            const ny = ty + dy;
+
+            if (nx >= 0 && nx < mapScene.map.width && ny >= 0 && ny < mapScene.map.height) {
+                const targetTile = mapScene.map.grid[ny][nx];
+                if (isValidFireBreakTile(targetTile)) {
+                    targetTile.terrain = "fire-break";
+                    mapScene.fireSpread.updateSprite(nx, ny);
                 }
-            });
-            bank.setText(`${coins}`);
+            }
         });
-    }
+
+        bank.setText(`${coins}`);
+    });
+}
+
     else if (activated_resource === "smokejumper" && !paused) {
         setSmokejumpers(-1);
         asset.useSmokejumpers(scene, x, y, fireSprite);
-        asset.startTimer(6, scene, 750, 530);
+        asset.startTimer(6, scene, scene.game.scale.width - 50, 550);
 
         scene.time.delayedCall(
             t_smokejumpers_plane + t_smokejumpers_ground,
@@ -452,4 +529,6 @@ export function use_resource(scene, x, y, fireSprite, direction = null) {
             }
         );
     }
+
+    scene.previewOverlay.clear();
 }

@@ -1,18 +1,21 @@
-import { createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop } from '../components/ui.js';
+import { sidebar, createHUD, preloadHUD, hoseText, extinguisherText, helicopterText, firetruckText, airtankerText, hotshotcrewText, smokejumperText, coins, bank, open_shop,
+    hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smokejumper, hoseTextBg, extinguisherTextBg, helicopterTextBg, firetruckTextBg, airtankerTextBg,
+    hotshotcrewTextBg, smokejumperTextBg, timerSprite
+ } from '../components/ui.js';
 import { getHose, getExtinguisher, getHelicopter, getFiretruck, getAirtanker, getHotshotCrew, getSmokejumpers} from "../components/assetValues.js";
 import { createDrawnButton } from '../components/ButtonManager.js';
 import HamburgerMenu from '../components/HamburgerMenu.js';
 import AccessibilityPanel from '../components/AccessibilityPanel.js';
 import WebFontFile from '../utils/WebFontFile.js';
-import { deactivate } from '../components/DeploymentClickEvents.js';
+import fieldManualContent from '../utils/FieldManual.js';
 
 export default class UIScene extends Phaser.Scene {
     constructor() {
         super('UIScene');
         
         // UI Layout constants
-        this.SCREEN_WIDTH = 800;
-        this.SCREEN_HEIGHT = 600;
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT =  window.innerHeight;
         this.UI_SIDEBAR_WIDTH = 100;
         this.GAME_AREA_WIDTH = this.SCREEN_WIDTH - this.UI_SIDEBAR_WIDTH;
         
@@ -31,16 +34,16 @@ export default class UIScene extends Phaser.Scene {
         this.WEATHER_PANEL_Y = 200;
         this.FIRE_BUTTON_X = 140;
         this.FIRE_BUTTON_Y = 50;
-        this.TILE_INFO_X = 10;
+        this.TILE_INFO_X = 100;
         this.TILE_INFO_Y = 80;
         this.ZOOM_PERCENT_TEXT_X = 176;
         this.ZOOM_PERCENT_TEXT_Y = 550;
 
         // Wind intensity indicator
-        this.WIND_GAUGE_X = 540;
-        this.WIND_GAUGE_Y = 60;
-        this.WIND_GAUGE_WIDTH = 100;   // full width represents 50 mph
-        this.WIND_GAUGE_HEIGHT = 12;
+        this.WIND_GAUGE_X = 90;
+        this.WIND_GAUGE_Y = 30;
+        this.WIND_GAUGE_WIDTH = 140;   // full width represents 50 mph
+        this.WIND_GAUGE_HEIGHT = 16;
         
         // Style constants
         this.BUTTON_COLORS = {
@@ -76,10 +79,12 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('left', 'assets/UI/left.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
         this.load.image('Title', 'assets/UI/Title.png')
-        this.load.image('drop_direction_vertical', 'assets/UI/drop_direction_vertical.png');
-        this.load.image('drop_direction_horizontal', 'assets/UI/drop_direction_horizontal.png');
         this.load.image('toggle_ui_off', 'assets/UI/toggle_ui_off.png')
         this.load.image('toggle_ui_on', 'assets/UI/toggle_ui_on.png')
+    }
+
+    generateFuelText(current, max) {
+        return `${current.toFixed(1)}/${max.toFixed(1)}`;
     }
 
     create() {
@@ -87,19 +92,19 @@ export default class UIScene extends Phaser.Scene {
 
         // Create container to hold ALL UI elements
         this.uiContainer = this.add.container(0, 0);
-
         this.topBarContainer = this.add.container(0, 0);
-
         this.bottomBarContainer = this.add.container(0, this.scale.height - 60);
-
         this.uiToggleButtonContainer = this.add.container(0, 0).setScrollFactor(0);
-    
+        
+        
+
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
 
+        // Pop-up notifies user that game is paused
         this.pauseText = this.add.text(
-            this.SCREEN_WIDTH / 2,
-            this.SCREEN_HEIGHT / 2,
+            this.scale.width / 2,
+            this.cameras.main.height / 2,
             "Game Paused",
             {
                 fontFamily: '"Press Start 2P"',
@@ -118,10 +123,10 @@ export default class UIScene extends Phaser.Scene {
     
         // Top bar background
         const topBarHeight = 60;
-        const topBar = this.add.rectangle(
-            this.SCREEN_WIDTH / 2,
+        let topBar = this.add.rectangle(
+            this.scale.width / 2,
             topBarHeight / 2,
-            this.SCREEN_WIDTH,
+            this.cameras.main.width,
             topBarHeight,
             0x2d3436 // Dark gray
         );
@@ -134,7 +139,6 @@ export default class UIScene extends Phaser.Scene {
         this.uiContainer.add(this.topBarContainer);
     
         // Add and position UI elements in the top bar container
-    
         this.hamburgerMenu = new HamburgerMenu(this, {
             x: 40,
             y: 30,
@@ -162,6 +166,12 @@ export default class UIScene extends Phaser.Scene {
             onClick: () => {
                 console.log("Restart clicked");
                 this.events.emit('restartGame');
+
+                // Send user score to db during restart
+                const mapScene = this.scene.get('MapScene');
+                if (mapScene && typeof mapScene.sendScoreToDB === 'function') {
+                mapScene.sendScoreToDB();
+                }
             }
         });
         this.topBarContainer.add([restart.button, restart.buttonText]);
@@ -189,7 +199,7 @@ export default class UIScene extends Phaser.Scene {
         this.gameClockText.setOrigin(0.5, 0);
         this.gameClockText.setStyle({
             fontFamily: '"Press Start 2P"',
-            fontSize: '16px',
+            fontSize: '10px',
             fontStyle: 'normal',
             color: '#FFFFFF',
             align: 'center',
@@ -211,28 +221,8 @@ export default class UIScene extends Phaser.Scene {
         this.createZoomControls();
         this.createNavigationCompass();
 
-        // Controls panel
-        const controlsButtonX = this.zoomText.x + this.zoomText.width + 80; // 40px padding after zoom text
-
-        /*this.controlsButton = createDrawnButton(this, {
-            x: controlsButtonX,
-            y: 20, // Same Y as zoom buttons
-            width: 140,
-            height: 40,
-            backgroundColor: 0x555555,
-            hoverColor: 0x777777,
-            text: 'Controls',
-            fontSize: '14px',
-            onClick: () => console.log('Show controls')
-        });
-        this.bottomBarContainer.add([this.controlsButton.button, this.controlsButton.buttonText]);
-
-        this.controlsButton.button.setInteractive().on('pointerdown', () => {
-            this.controlsPanel.setVisible(!this.controlsPanel.visible);
-        });*/
-
         // HUD elements
-        createHUD(this); // Assumes you have createHUD() ready
+        createHUD(this); 
 
         // Add UI elements to bottom bar (higher depth)
         this.bottomBarContainer.add([coins, bank, open_shop]);
@@ -280,6 +270,34 @@ export default class UIScene extends Phaser.Scene {
 
     // update function
     update() {
+
+        // Dynamically Move UI Elements when Screen Size Changes
+        sidebar.x = this.scale.width - 110 / 2;
+        hose.x = this.scale.width - 50;
+        hoseText.x = this.scale.width - 50;
+        hoseTextBg.x = this.scale.width - 50;
+        extinguisher.x = this.scale.width - 50;
+        extinguisherText.x = this.scale.width - 50;
+        extinguisherTextBg.x = this.scale.width - 50;
+        helicopter.x = this.scale.width - 50;
+        helicopterText.x = this.scale.width - 50;
+        helicopterTextBg.x = this.scale.width - 50;
+        firetruck.x = this.scale.width - 50;
+        firetruckText.x = this.scale.width - 50;
+        firetruckTextBg.x = this.scale.width - 50;
+        airtanker.x = this.scale.width - 50;
+        airtankerText.x = this.scale.width - 50;
+        airtankerTextBg.x = this.scale.width - 50;
+        hotshotcrew.x = this.scale.width - 50;
+        hotshotcrewText.x = this.scale.width - 50;
+        hotshotcrewTextBg.x = this.scale.width - 50;
+        smokejumper.x = this.scale.width - 50;
+        smokejumperText.x = this.scale.width - 50;
+        smokejumperTextBg.x = this.scale.width - 50;
+
+        this.pauseText.x = this.scale.width / 2;
+        //this.uiContainer.scaleX = this.scale.width; --> BUG: makes assets disappear
+
         // Update resource counts
         if (this.hoseText) {
             this.hoseText.setText(`${getHose()} left`);
@@ -290,6 +308,8 @@ export default class UIScene extends Phaser.Scene {
             this.hotshotcrewText.setText(`${getHotshotCrew()} left`);
             this.smokejumperText.setText(`${getSmokejumpers()} left`);
         }
+        // Update weather panel
+        this.updateInfoPanel();
     }
 
     toggleUI(show = true) {
@@ -381,17 +401,26 @@ export default class UIScene extends Phaser.Scene {
         this.tileInfoText = this.add.text(-500, -500, 
             "Select tile", {
                 fontFamily: '"Press Start 2P"',
-                fontSize: '14px',
-                fontStyle: 'normal',
-                fill: "#ffffff",
-                backgroundColor: "#2d3436",
-                padding: { x: 14, y: 10 },
+                fontSize: '16px',
+                fontStyle: 'bold',
+                fill: "#ffff00", // Bright yellow for visibility
+                backgroundColor: "rgba(0, 0, 0, 0.85)",
+                padding: { x: 16, y: 12 },
                 align: "left",
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: "#000000",
+                    blur: 4,
+                    stroke: true,
+                    fill: true
+                }
             })
+
             .setDepth(-1)
             .setScrollFactor(0)
 
-                // --- Score Text ---
+        // --- Score Text ---
         this.scoreText = this.add.text(550, 15, "Score: 0", {
             fontFamily: '"Press Start 2P"',
             fontSize: '16px',
@@ -468,6 +497,336 @@ export default class UIScene extends Phaser.Scene {
             this.directionPromptContainer.add([bg, label, vertical, horizontal, cancel]);
             this.uiContainer.add(this.directionPromptContainer);
 
+        // Create Field Manual container
+        this.fieldManualContainer = this.add.container(0, 0).setDepth(100).setVisible(false);
+
+        // Background box
+        const background = this.add.rectangle(400, 300, 600, 500, 0x000000, 0.9);
+        background.setStrokeStyle(2, 0xffffff);
+
+        // Create an invisible mask for the scrollable content
+        const maskGraphics = this.add.graphics()
+            .fillStyle(0xffffff)
+            .fillRect(120, 70, 560, 460);
+        
+        // Make the mask graphics invisible but keep the masking effect
+        maskGraphics.setVisible(false);
+        
+        // Manual text content
+        const manualText = this.add.text(120, 70, fieldManualContent, {
+            fontSize: '16px',
+            wordWrap: { width: 560 },
+            color: '#FFFFFF',
+            lineSpacing: 5
+        }).setMask(new Phaser.Display.Masks.GeometryMask(this, maskGraphics));
+
+        // Add scroll indicators
+        const scrollUpIndicator = this.add.text(400, 75, '▲', {
+            fontSize: '20px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5, 0).setAlpha(0.7).setVisible(false);
+
+        const scrollDownIndicator = this.add.text(400, 525, '▼', {
+            fontSize: '20px',
+            color: '#FFFFFF'
+        }).setOrigin(0.5, 1).setAlpha(0.7).setVisible(false);
+
+        // Track scroll position and limits
+        const scrollConfig = {
+            startY: 70,
+            minY: 70,
+            maxY: -Math.max(0, manualText.height - 440), // 460 (mask height) - 20 (padding)
+            currentY: 70,
+            scrollSpeed: 15
+        };
+
+        // Update scroll indicators based on position
+        const updateScrollIndicators = () => {
+            scrollUpIndicator.setVisible(manualText.y < scrollConfig.startY);
+            scrollDownIndicator.setVisible(manualText.y > scrollConfig.maxY);
+        };
+
+        // Mouse wheel scrolling - prevent map zoom when manual is open
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            if (!this.fieldManualContainer.visible) {
+                // Make sure zoom is enabled when manual is closed
+                this.scene.get('MapScene').disableZoom = false;
+                return;
+            }
+            
+            // Stop the event from propagating to the map scene
+            pointer.event.stopPropagation();
+            pointer.event.preventDefault();
+            
+            const newY = Phaser.Math.Clamp(
+                manualText.y - Math.sign(deltaY) * scrollConfig.scrollSpeed,
+                scrollConfig.maxY,
+                scrollConfig.startY
+            );
+            manualText.y = newY;
+            updateScrollIndicators();
+        });
+
+        // Enable touch drag scrolling for mobile devices
+        let isDragging = false;
+        let dragStartY = 0;
+        let contentStartY = 0;
+
+        // Enable input on manualText for dragging
+        manualText.setInteractive({ draggable: false });
+
+        manualText.on('pointerdown', (pointer) => {
+            isDragging = true;
+            dragStartY = pointer.y;
+            contentStartY = manualText.y;
+        });
+
+        this.input.on('pointerup', () => {
+            isDragging = false;
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (!isDragging || !this.fieldManualContainer.visible) return;
+
+            const deltaY = pointer.y - dragStartY;
+            const newY = Phaser.Math.Clamp(
+                contentStartY + deltaY,
+                scrollConfig.maxY,
+                scrollConfig.startY
+            );
+            manualText.y = newY;
+            updateScrollIndicators();
+        });
+
+
+        // When manual visibility changes, update MapScene zoom state
+        this.fieldManualContainer.on('setVisible', (visible) => {
+            const mapScene = this.scene.get('MapScene');
+            if (visible) {
+                manualText.y = scrollConfig.startY;
+                updateScrollIndicators();
+                mapScene.disableZoom = true;
+            } else {
+                mapScene.disableZoom = false;
+            }
+        });
+
+        // Update scroll instructions text
+        const scrollInstructions = this.add.text(400, 510, 
+            'Use mouse wheel to scroll', { 
+            fontSize: '12px',
+            color: '#888888',
+            backgroundColor: '#000000',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5);
+
+        // Add maskGraphics to the container to ensure it's cleaned up properly
+        this.fieldManualContainer.add([
+            background,
+            maskGraphics,  // Add the mask graphics to the container
+            manualText,
+            scrollUpIndicator,
+            scrollDownIndicator,
+            scrollInstructions
+        ]);
+
+        // == Close Button for Field Manual ==
+        const closeBtnContainer = this.add.container(670, 65).setScrollFactor(0);
+
+        // Text "X"
+        const closeText = this.add.text(4, 4, '❌', {
+            fontSize: '24px',
+            color: '#ffffff',
+            padding: { top: 6, bottom: 0 }  // Add top padding
+        })
+        .setOrigin(0.5)
+        .setInteractive();
+
+
+        // Hover effect: slight scale bounce
+        closeText.on('pointerover', () => {
+            this.tweens.add({
+                targets: closeText,
+                scale: 1.2,
+                duration: 100,
+                ease: 'Power1'
+            });
+        });
+        closeText.on('pointerout', () => {
+            this.tweens.add({
+                targets: closeText,
+                scale: 1,
+                duration: 100,
+                ease: 'Power1'
+            });
+        });
+
+        // Click to close
+        closeText.on('pointerdown', () => {
+            this.fieldManualContainer.setVisible(false);
+            this.scene.get('MapScene').disableZoom = false;
+        });
+
+        // Add to container
+        closeBtnContainer.add(closeText);
+        this.fieldManualContainer.add(closeBtnContainer);
+        // == End of Field Manual Close Button ==
+
+
+
+        // Toggle with F key
+        this.input.keyboard.on('keydown-F', () => {
+            const inactiveScenes = ['LoginScene', 'SignupScene', 'ProfileScene', 'LeaderboardScene'];
+            const isAnyActive = inactiveScenes.some(scene => this.scene.isActive(scene));
+            
+            if (!isAnyActive) {
+                const visible = this.fieldManualContainer.visible;
+                this.fieldManualContainer.setVisible(!visible);
+                this.scene.get('MapScene').disableZoom = !visible;
+            }
+        });
+
+        // Handle manual button click
+        const manualButton = this.add.text(492, -16, "📖", {
+            fontSize: '36px'
+        })
+        .setInteractive()
+        .on('pointerdown', () => {
+            const visible = this.fieldManualContainer.visible;
+            this.fieldManualContainer.setVisible(!visible);
+            // Explicitly set zoom state when toggling with button
+            this.scene.get('MapScene').disableZoom = !visible;
+        })
+        .setScrollFactor(0);
+
+        // Add tooltip
+        this._createTooltip(manualButton, "Field Manual (F)");
+        this.bottomBarContainer.add(manualButton);
+
+        // Create weather info panel in top left
+        this.weatherPanel = this.add.container(20, 70);
+        
+        // Weather panel background 
+        const weatherBg = this.add.rectangle(0, 0, 250, 60, 0x000000, 0.7)
+            .setOrigin(0, 0)
+            .setStrokeStyle(1, 0xffffff);
+        
+        // Risk level and wind info combined on same line
+        this.riskText = this.add.text(10, 10, '', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        this.windText = this.add.text(10, 30, '', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FFFFFF'
+        }).setOrigin(0, 0);
+
+        this.windLabel = this.add.text(
+        this.WIND_GAUGE_X - 8,
+        this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT / 2,
+        'Wind:',
+        {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '14px',
+            color: '#FFFFFF'
+        }
+        )
+        .setOrigin(1, 0.5)
+        .setScrollFactor(0);
+
+        // —– GRAPHICAL WIND GAUGE —–
+        // background track
+        this.windGaugeBg = this.add
+        .rectangle(
+            this.WIND_GAUGE_X,
+            this.WIND_GAUGE_Y,
+            this.WIND_GAUGE_WIDTH,
+            this.WIND_GAUGE_HEIGHT,
+            0x888888,  // dark grey
+            0.7
+        )
+        .setOrigin(0, 0)
+        .setScrollFactor(0);
+
+        // fill bar (start at zero width)
+        this.windGaugeFill = this.add
+        .rectangle(
+            this.WIND_GAUGE_X,
+            this.WIND_GAUGE_Y,
+            0,
+            this.WIND_GAUGE_HEIGHT,
+            0x00ff00,
+            1
+        )
+        .setOrigin(0, 0)
+        .setScrollFactor(0);
+
+        // directional arrow (asset: 'wind-arrow' pointing up by default)
+        this.windArrow = this.add
+        .image(
+            this.WIND_GAUGE_X + this.WIND_GAUGE_WIDTH + 10,
+            this.WIND_GAUGE_Y + this.WIND_GAUGE_HEIGHT/2,
+            'wind-arrow'
+        )
+        .setDisplaySize(this.WIND_GAUGE_HEIGHT, this.WIND_GAUGE_HEIGHT)
+        .setOrigin(0.5)
+        .setScrollFactor(0);
+
+  
+        this.weatherPanel.add([weatherBg, this.riskText, this.windText, this.windGaugeBg, this.windGaugeFill, this.windArrow, this.windLabel]);
+        this.topBarContainer.add(this.weatherPanel);
+
+
+        // Initialize the panel immediately
+        this.updateInfoPanel();
+
+        // Create tile info panel that stays visible
+        this.tileInfoPanel = this.add.container(20, 140);
+        
+        const tileInfoBg = this.add.rectangle(0, 0, 250, 40, 0x000000, 0.7)
+            .setOrigin(0, 0)
+            .setStrokeStyle(1, 0xffffff);
+        
+        this.tileInfoText = this.add.text(10, 10, 'Click a tile for info', { // Default text
+            fontFamily: '"Press Start 2P"',
+            fontSize: '10px',
+            color: '#888888', // Dimmed color for default state
+            wordWrap: { width: 230 }
+        }).setOrigin(0, 0);
+
+        this.tileInfoPanel.add([tileInfoBg, this.tileInfoText]);
+        this.topBarContainer.add(this.tileInfoPanel);
+
+        // Add fire step progress container
+        this.fireStepContainer = this.add.container(0, 0).setDepth(11);
+
+        // Add countdown text
+        this.fireStepText = this.add.text(400, 40, 'Next Fire Spread: 15s', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '10px',
+            color: '#FFFFFF',
+            align: 'center'
+        }).setOrigin(0.5, 0);
+
+        // Warning text with background
+        this.fireWarningText = this.add.text(400, 60, 'FIRE SPREADING!', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            color: '#FF0000',
+            align: 'center',
+            backgroundColor: '#000000',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5, 0).setVisible(false);
+
+        // Add everything to the container
+        this.fireStepContainer.add([
+            this.fireStepText,
+            this.fireWarningText
+        ]);
+        this.topBarContainer.add(this.fireStepContainer);
     }
     
     createZoomControls() {
@@ -616,12 +975,12 @@ export default class UIScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Create a container for the info button
-        this.infoButtonContainer = this.add.container(575, 540, [infoBg, infoButton])
+        this.infoButtonContainer = this.add.container(575, this.scale.height - 60, [infoBg, infoButton])
             .setScrollFactor(0);
         this.infoButtonContainer.setDepth(100); // Ensure it's above other elements
 
         // Create info panel (initially hidden)
-        this.infoPanel = this.add.container(400, 300)
+        this.infoPanel = this.add.container(175, 175)
             .setScrollFactor(0)
             .setVisible(false);
 
@@ -681,15 +1040,13 @@ export default class UIScene extends Phaser.Scene {
 
         // Add click handler to info button
         infoBg.on('pointerdown', () => {
-            // Update info panel with current data
-            this.updateInfoPanel();
-            
-            // Toggle visibility
-            this.infoPanel.setVisible(!this.infoPanel.visible);
+        const visible = !this.weatherPanel.visible;
+        this.weatherPanel.setVisible(visible);
+        this.tileInfoPanel.setVisible(visible);
+        
         });
 
-        // Add to the bottom bar container
-        this.uiContainer.add(this.infoButtonContainer);
+ 
     }
     
     createNavigationCompass() {
@@ -726,17 +1083,29 @@ export default class UIScene extends Phaser.Scene {
 
     // Handler to update fire spread progress indicator
     updateFireProgress(percent) {
-        if (!this.fireStepBar) return;
-    
-        const maxWidth = 150;
-        const width = Phaser.Math.Clamp((percent / 100) * maxWidth, 0, maxWidth);
-        this.fireStepBar.width = width;
-    
-        // Optional color logic if you want it
-        let color = 0x00ff00;
-        if (percent > 66) color = 0xff0000;
-        else if (percent > 33) color = 0xffff00;
-        this.fireStepBar.fillColor = color;
+        if (!this.fireStepText) return;
+
+        // Calculate seconds remaining
+        const secondsLeft = Math.ceil(15 * (1 - percent / 100));
+        
+        // Update color based on urgency
+        let textColor = '#FFFFFF';
+        
+        if (percent > 85) {
+            textColor = '#FF0000';
+            // Show warning when close to spreading
+            this.fireWarningText.setVisible(true);
+        } else if (percent > 60) {
+            textColor = '#FF8C00';
+            this.fireWarningText.setVisible(false);
+        } else {
+            this.fireWarningText.setVisible(false);
+        }
+
+        // Update text
+        this.fireStepText
+            .setText(`Next Fire Spread: ${secondsLeft}s`)
+            .setColor(textColor);
     }
 
         updateScore(score) {
@@ -758,64 +1127,42 @@ export default class UIScene extends Phaser.Scene {
 
     // Handler for tile information updates
     updateTileInfo(tile) {
-        console.log(`Updating tile info: ${tile.terrain}, ${tile.flammability}, ${tile.fuel}, ${tile.burnStatus}`);
-        
-        if (this.tileInfoText) {
-            this.tileInfoText.setText(
-                `Terrain: ${tile.terrain}\nFlammability: ${tile.flammability}\nFuel: ${tile.fuel}\nBurn Status: ${tile.burnStatus}`
-            );
-            this.tileInfoText.setVisible(true);
-            this.tileInfoText.setDepth(100);
+    if (!this.tileInfoText) return;
 
-            // Store the selected tile reference so the info panel can use it
-            this.selectedTile = tile;  // Add this line
+    // Always show the terrain name
+    let text = `📍 ${this.getTerrainName(tile.terrain)}`;
 
-            // Remove any hide timer if one exists
-            if (this.tileInfoHideTimer) {
-                this.tileInfoHideTimer.remove();
-                this.tileInfoHideTimer = null;
-            }
-
-            this.updateInfoPanel();
-        } else {
-            console.warn("tileInfoText is not defined in UIScene!");
-        }
+    // If this tile had any fuel at spawn, show current/max
+    const hasFuel = typeof tile.initialFuel === 'number' && tile.initialFuel > 0;
+    if (hasFuel) {
+        const fuelLine = this.generateFuelText(tile.fuel, tile.initialFuel);
+        text += `\n⛽ Fuel: ${fuelLine}`;
     }
 
-    updateWindDisplay(weather) {
-        // 1) Fill proportionally: max 50 mph = full width
-        const pct = Phaser.Math.Clamp(weather.windSpeed / 50, 0, 1);
-        this.windGaugeFill.width = this.WIND_GAUGE_WIDTH * pct;
-        
-        // 2) Rotate arrow: map N/E/S/W to angles
-        const dirToAngle = { N: -90, E: 0, S: 90, W: 180 };
-        this.windArrow.setRotation(Phaser.Math.DegToRad(dirToAngle[weather.windDirection] || 0));
-        
-        // 3) Tint fill based on intensity
-        if (pct < 0.33) this.windGaugeFill.fillColor = 0x00ff00;
-        else if (pct < 0.66) this.windGaugeFill.fillColor = 0xffff00;
-        else this.windGaugeFill.fillColor = 0xff0000;
-    }
+    this.tileInfoText
+        .setText(text)
+        .setColor('#FFFFFF');
 
-    // updateWeatherDisplay(weather) {
-    //     this.updateWindDisplay(weather);
-    //     this.updateRiskDisplay(weather.getRiskCategory());
-    //     this.updateInfoPanel();
+    // Remove any hide timer if one exists
+    if (this.tileInfoHideTimer) {
+        this.tileInfoHideTimer.remove();
+        this.tileInfoHideTimer = null;
+    }
+    }
     // }
 
     // Handler for fire simulation toggle updates
-updateFireButton(isRunning) {
-    if (this.fireButton && this.fireButton.buttonText) {
-        this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
+    updateFireButton(isRunning) {
+        if (this.fireButton && this.fireButton.buttonText) {
+            this.fireButton.buttonText.setText(isRunning ? "Stop" : "Start");
+        }
+
+        // Show or hide the pause message
+        if (this.pauseText) {
+            this.pauseText.setVisible(!isRunning);
+        }   
     }
 
-    // Show or hide the pause message
-    if (this.pauseText) {
-        this.pauseText.setVisible(!isRunning);
-    }
-
-    
-}
 
 
     updateRiskDisplay(risk) {
@@ -825,7 +1172,8 @@ updateFireButton(isRunning) {
         this.riskText
         .setText(`Risk: ${risk.charAt(0).toUpperCase()+risk.slice(1)}`)
         .setStyle({ fill: colorMap[risk] });
-        }      
+        }
+          
     
     // Handler for zoom changes
     handleZoomChange(zoomLevel) {
@@ -839,29 +1187,59 @@ updateFireButton(isRunning) {
     }
 
     updateInfoPanel() {
-        // Update tile info if available
-        if (this.selectedTile) {
-            this.infoPanelTile.setText(
-                `Terrain: ${this.selectedTile.terrain}\n` +
-                `Flammability: ${this.selectedTile.flammability}\n` +
-                `Fuel: ${this.selectedTile.fuel}\n` +
-                `Status: ${this.selectedTile.burnStatus}`
-            );
-        } else {
-            this.infoPanelTile.setText('Tile: No tile selected');
+    const mapScene = this.scene.get('MapScene');
+    const weather  = mapScene.weather;
+    if (!weather) return;
+
+    const riskLevel = weather.getRiskCategory().toUpperCase();
+    const riskColor = { LOW:'#00ff00', MEDIUM:'#ffff00', HIGH:'#ff0000' }[riskLevel];
+    this.riskText
+        .setText(`Fire Risk: ${riskLevel}`)
+        .setColor(riskColor);
+
+    //—— GRAPHICAL WIND UPDATE ——//
+    const pct = Phaser.Math.Clamp(weather.windSpeed / 50, 0, 1);
+    // 1) fill width
+    this.windGaugeFill.width = this.WIND_GAUGE_WIDTH * pct;
+    // 2) tint by intensity
+    if (pct < 0.33)       this.windGaugeFill.fillColor = 0x00ff00;
+    else if (pct < 0.66)  this.windGaugeFill.fillColor = 0xffff00;
+    else                   this.windGaugeFill.fillColor = 0xff0000;
+    // 3) rotate arrow
+    const dirToAngle = { N:-90, E:0, S:90, W:180 };
+    const angleDeg = dirToAngle[weather.windDirection] ?? 0;
+    this.windArrow.setRotation(Phaser.Math.DegToRad(angleDeg));
+    }
+    // Helper to get friendly terrain names
+    getTerrainName(terrain) {
+        // Handle burned variants first
+        if (terrain.startsWith('burned-')) {
+            const base = terrain.slice(7); // strip 'burned-' prefix
+            const burnedMap = {
+                'tree': '🔥 Burned Forest',
+                'shrub': '🔥 Burned Shrubland',
+                'grass': '🔥 Burned Grassland',
+                'dirt-house': '🔥 Burned Structure',
+                'grass-house': '🔥 Burned Structure',
+                'sand-house': '🔥 Burned Structure',
+                'house': '🔥 Burned Structure' // fallback for generic
+            };
+            return burnedMap[base] || '🔥 Burned Area';
         }
-        
-        // Update weather info if available
-        const mapScene = this.scene.get('MapScene');
-        if (mapScene.weather) {
-            this.infoPanelWind.setText(
-                `Wind Direction: ${mapScene.weather.windDirection}\n` +
-                `Wind Speed: ${mapScene.weather.windSpeed} mph\n` +
-                `Temperature: ${mapScene.weather.temperature}°F\n` +
-                `Humidity: ${mapScene.weather.humidity}%`
-            );
-            
-            this.infoPanelRisk.setText(`Risk: ${mapScene.weather.getRiskCategory()}`);
-        }
+
+        // Regular terrain names
+        const terrainMap = {
+            'tree': '🌳 Forest',
+            'shrub': '🌿 Shrubland',
+            'grass': '🌱 Grassland',
+            'dirt-house': '🏠 Structure',
+            'grass-house': '🏠 Structure',
+            'sand-house': '🏠 Structure',
+            'water': '💧 Water',
+            'fire-break': '🚧 Firebreak'
+        };
+
+        return terrainMap[terrain] || terrain;
     }
 }
+
