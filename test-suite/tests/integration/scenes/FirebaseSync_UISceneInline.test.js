@@ -28,7 +28,7 @@ const mockGetDocs = vi.fn(() => Promise.resolve({
     let UIScene
 
     beforeEach(async () => {
-        const module = await import('../../src/scenes/UIScene.js')
+        const module = await import('../../../scenes/UIScene.js')
         UIScene = module.default
     })
 

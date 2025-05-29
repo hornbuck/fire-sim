@@ -1,15 +1,17 @@
 // vitest.config.js
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
   test: {
-    globals: true, // Allow using `describe`, `it`, `expect` globally
-    setupFiles: ['./setupTests.js'], // Your setup file with mocks
-    environment: 'jsdom', // Simulate browser for DOM APIs (e.g. Phaser UI)
-    include: ['tests/**/*.test.js'], // Adjust path if needed
-    coverage: {
-      reporter: ['text', 'json', 'html'],
-      exclude: ['mocks/', 'setupTests.js']
-    }
-  }
-})
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './test-suite/setupTests.js',
+    include: ['test-suite/tests/**/*.test.js'],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname),
+    },
+  },
+});

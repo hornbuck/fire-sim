@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import TutorialScene from '../../src/scenes/TutorialScene.js'
+import TutorialScene from '../../../../src/scenes/TutorialScene.js';
 
 describe('NewUserTutorialFlow', () => {
     let tutorial
