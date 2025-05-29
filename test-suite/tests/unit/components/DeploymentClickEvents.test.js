@@ -6,10 +6,12 @@ describe('DeploymentClickEvents', () => {
     let mockScene;
 
     beforeEach(() => {
+        const mockText = { setOrigin: vi.fn(), setAlpha: vi.fn(), setInteractive: vi.fn() };
+        const mockRectangle = { setFillStyle: vi.fn(), setOrigin: vi.fn() };
         mockScene = {
         add: {
-            text: vi.fn(() => ({ setOrigin: vi.fn(), setAlpha: vi.fn(), setInteractive: vi.fn() })),
-            rectangle: vi.fn(() => ({ setFillStyle: vi.fn(), setOrigin: vi.fn() })),
+            text: vi.fn(() => mockText),
+            rectangle: vi.fn(() => mockRectangle),
         },
         };
     });
@@ -35,12 +37,12 @@ describe('DeploymentClickEvents', () => {
     });
 
     it('sets tooltip text and displays it', () => {
-        DeploymentClickEvents.show_tooltip(mockScene, 100, 200, 'Tooltip text');
+        DeploymentClickEvents.show_tooltip(mockScene, 100, 200, 'hose-tooltip');
         expect(mockScene.add.text).toHaveBeenCalled();
     });
 
     it('updates HUD with new text', () => {
-        DeploymentClickEvents.set_text(mockScene, 100, 200, 'Status: OK');
+        DeploymentClickEvents.set_text('Status: OK', 100, 200, mockScene);
         expect(mockScene.add.rectangle).toHaveBeenCalled();
         expect(mockScene.add.text).toHaveBeenCalled();
     });
