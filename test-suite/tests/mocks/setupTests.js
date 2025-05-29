@@ -1,3 +1,4 @@
+// setupTests.js
 console.log('setupTests.js is running');
 
 import { vi } from 'vitest';
@@ -55,7 +56,6 @@ const mockRectangle = {
   on: vi.fn().mockReturnThis(),
 };
 
-// Keep a reference to the original Phaser or define one if needed
 global.Phaser ??= {};
 global.Phaser.Scene ??= class {
   constructor() {
@@ -65,13 +65,23 @@ global.Phaser.Scene ??= class {
         setDepth: vi.fn().mockReturnThis(),
         on: vi.fn().mockReturnThis(),
       })),
+      rectangle: vi.fn(() => mockRectangle),
       text: vi.fn(() => ({
         setText: vi.fn().mockReturnThis(),
         setVisible: vi.fn().mockReturnThis(),
         setScrollFactor: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
       })),
       existing: vi.fn(),
+      sprite: vi.fn(() => ({
+        setInteractive: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setScrollFactor: vi.fn().mockReturnThis(),
+        setOrigin: vi.fn().mockReturnThis(),
+        on: vi.fn().mockReturnThis(),
+      })),
     };
+
     this.input = {
       on: vi.fn(),
       keyboard: {
@@ -85,6 +95,7 @@ global.Phaser.Scene ??= class {
         })),
       },
     };
+
     this.sound = {
       play: vi.fn(),
       add: vi.fn(() => ({
@@ -92,18 +103,25 @@ global.Phaser.Scene ??= class {
         stop: vi.fn(),
       })),
     };
+
     this.time = {
       delayedCall: vi.fn((delay, callback) => {
         callback();
       }),
     };
+
     this.cameras = {
       main: {
         startFollow: vi.fn(),
         setZoom: vi.fn(),
         setBounds: vi.fn(),
+        centerX: 400,
+        centerY: 300,
+        width: 800,
+        height: 600,
       },
     };
+
     this.physics = {
       add: {
         sprite: vi.fn(() => ({
@@ -114,6 +132,7 @@ global.Phaser.Scene ??= class {
         overlap: vi.fn(),
       },
     };
+
     this.events = {
       on: vi.fn(),
       emit: vi.fn(),
@@ -142,7 +161,7 @@ global.Phaser.GameObjects = {
   },
 };
 
-// ✅ Inject mock directly onto the prototype so all Scene subclasses inherit it
+// Inject mock directly onto the prototype so all Scene subclasses inherit it
 Phaser.Scene.prototype.add ??= {};
 Phaser.Scene.prototype.add.rectangle = vi.fn(() => {
   console.log('rectangle() called from prototype - returning mocked rectangle');
