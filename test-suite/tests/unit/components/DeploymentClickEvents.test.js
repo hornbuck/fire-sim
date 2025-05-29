@@ -38,12 +38,13 @@ describe('DeploymentClickEvents', () => {
   });
 
   it('activates a resource and stores it as selected', () => {
-    DeploymentClickEvents.activate_resource(mockScene, 'hose');
+    const result = DeploymentClickEvents.activate_resource(mockScene, 'hose');
     expect(mockScene.add.sprite).toHaveBeenCalled();
     expect(mockSprite.setInteractive).toHaveBeenCalled();
   });
 
   it('deactivates the current resource', () => {
+    expect(typeof DeploymentClickEvents.deactivate_current_resource).toBe('function');
     DeploymentClickEvents.deactivate_current_resource(mockSprite);
     expect(mockSprite.removeInteractive).toHaveBeenCalled();
   });

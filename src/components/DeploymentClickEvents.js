@@ -532,3 +532,10 @@ else if (activated_resource === "hotshot-crew" && !paused) {
 
     scene.previewOverlay.clear();
 }
+
+export {
+    activate_resource,
+    deactivate_current_resource,
+    show_tooltip,
+    set_text,
+};
