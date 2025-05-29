@@ -236,8 +236,8 @@ export default class UIScene extends Phaser.Scene {
 
         // Position currency elements
         // Update the positions of coins, bank, and open_shop
-        coins.setPosition(this.scale.width - 450, 0).setDepth(10);
-        bank.setPosition(this.scale.width - 435, 0).setDepth(10);
+        coins.setPosition(window.innerWidth - 450, 0).setDepth(10);
+        bank.setPosition(window.innerWidth - 435, 0).setDepth(10);
         open_shop.setPosition(this.scale.width - 360, 0).setDepth(10);
 
         // Ensure proper depth for visibility
@@ -301,6 +301,10 @@ export default class UIScene extends Phaser.Scene {
         smokejumper.x = this.scale.width - 50;
         smokejumperText.x = this.scale.width - 50;
         smokejumperTextBg.x = this.scale.width - 50;
+
+        coins.x = this.scale.width - 170;
+        bank.x = this.scale.width - 155;
+        open_shop.x = this.scale.width - 260;
 
         this.pauseText.x = this.scale.width / 2;
         //this.uiContainer.scaleX = this.scale.width / 1.5; //--> BUG: moves wrong objects
