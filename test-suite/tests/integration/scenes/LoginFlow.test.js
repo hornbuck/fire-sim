@@ -1,3 +1,7 @@
+vi.mock('firebase/auth', async () => {
+    return await import('../mocks/firebase-auth.js')
+})
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { auth } from '../../src/firebaseConfig.js'
 import { signInWithEmailAndPassword } from 'firebase/auth'
