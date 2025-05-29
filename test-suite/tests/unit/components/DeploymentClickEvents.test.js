@@ -1,6 +1,6 @@
 import '../../mocks/setupTests.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as DeploymentClickEvents from '../../../src/components/DeploymentClickEvents.js';
+import * as DeploymentClickEvents from '../../../../src/components/DeploymentClickEvents.js';
 
 describe('DeploymentClickEvents', () => {
     let mockScene;
