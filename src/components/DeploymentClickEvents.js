@@ -282,6 +282,8 @@ export function show_tooltip(resource, resourceName, x, y, scene) {
 
 // Helper function to get tooltip content based on resource name
 function getTooltipContent(resourceName) {
+    if (typeof resourceName !== 'string') return '';
+    
     switch(resourceName.replace('-tooltip', '')) {
         case 'hose':
             return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 3.\nSingle tile coverage.";
