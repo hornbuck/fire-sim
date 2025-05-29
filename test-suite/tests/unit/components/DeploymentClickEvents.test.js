@@ -10,8 +10,8 @@ describe('DeploymentClickEvents', () => {
 
   beforeEach(() => {
     mockTextObj = {
-      width: 120,
-      height: 40,
+      width: 100,
+      height: 20,
       setOrigin: vi.fn(),
       setAlpha: vi.fn(),
       setInteractive: vi.fn(),
@@ -30,33 +30,48 @@ describe('DeploymentClickEvents', () => {
 
     mockScene = {
       add: {
+        sprite: vi.fn(() => mockSprite),
         text: vi.fn(() => mockTextObj),
         rectangle: vi.fn(() => mockRect),
-        sprite: vi.fn(() => mockSprite),
       },
     };
   });
 
   it('activates a resource and stores it as selected', () => {
-    DeploymentClickEvents.activate_resource(mockScene, 'waterHose');
+    DeploymentClickEvents.activate_resource(mockScene, 'hose');
     expect(mockScene.add.sprite).toHaveBeenCalled();
     expect(mockSprite.setInteractive).toHaveBeenCalled();
   });
 
   it('deactivates the current resource', () => {
-    DeploymentClickEvents.activate_resource(mockScene, 'waterHose');
     DeploymentClickEvents.deactivate_current_resource(mockSprite);
     expect(mockSprite.removeInteractive).toHaveBeenCalled();
   });
 
   it('sets tooltip text and displays it', () => {
     DeploymentClickEvents.show_tooltip(mockScene, 100, 200, 'hose-tooltip');
-    expect(mockScene.add.text).toHaveBeenCalled();
+    expect(mockScene.add.text).toHaveBeenCalledWith(
+      100,
+      200,
+      expect.stringContaining('FIRE HOSE'),
+      expect.anything()
+    );
   });
 
   it('updates HUD with new text', () => {
-    DeploymentClickEvents.set_text('Test Message', 100, 100, mockScene);
-    expect(mockScene.add.rectangle).toHaveBeenCalled();
-    expect(mockScene.add.text).toHaveBeenCalled();
+    DeploymentClickEvents.set_text('Test', 50, 60, mockScene);
+    expect(mockScene.add.text).toHaveBeenCalledWith(
+      50,
+      60,
+      'Test',
+      expect.objectContaining({ fontFamily: expect.any(String) })
+    );
+    expect(mockScene.add.rectangle).toHaveBeenCalledWith(
+      50,
+      60,
+      112, // 100 width + 12 padding
+      28,  // 20 height + 8 padding
+      0x333333
+    );
   });
 });
