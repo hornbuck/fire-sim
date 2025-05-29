@@ -181,16 +181,18 @@ class FireSpread {
             sourceBonus = 30;
         }
         
-        for (const neighbor of neighbors) {
-            const neighborTile = grid[neighbor.y][neighbor.x];
-        
-            if (neighborTile.burnStatus !== "unburned") continue; // Skip already burning/burnt tiles
-        
-            if (this.canIgnite(neighborTile)) {
-                const isDownwind = this.isTileDownwind({ x, y }, neighbor);
-                spreadCount += this.attemptIgnite(neighborTile, isDownwind, sourceBonus);
-            }
+    for (const neighbor of neighbors) {
+        const neighborTile = grid[neighbor.y][neighbor.x];
+
+        // Skip non-unburned or firebreak tiles
+        if (neighborTile.burnStatus !== "unburned" || neighborTile.terrain === "fire-break") continue;
+
+        if (this.canIgnite(neighborTile)) {
+            const isDownwind = this.isTileDownwind({ x, y }, neighbor);
+            spreadCount += this.attemptIgnite(neighborTile, isDownwind, sourceBonus);
         }
+    }
+
         
         return spreadCount;
     }

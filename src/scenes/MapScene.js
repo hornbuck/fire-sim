@@ -29,7 +29,7 @@ export default class MapScene extends Phaser.Scene {
         this.UI_WIDTH = 100;      // Width of UI area on right side
         
         // Fire simulation settings
-        this.FIRE_SPREAD_INTERVAL = 15000; // Fire step interval (ms)
+        this.FIRE_SPREAD_INTERVAL = 20000; // Fire step interval (ms)
         
         // Game state variables
         this.elapsedTime = 0;     // Track elapsed game time in seconds

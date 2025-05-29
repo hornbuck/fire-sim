@@ -804,7 +804,7 @@ export default class UIScene extends Phaser.Scene {
         this.fireStepContainer = this.add.container(0, 0).setDepth(11);
 
         // Add countdown text
-        this.fireStepText = this.add.text(400, 40, 'Next Fire Spread: 15s', {
+        this.fireStepText = this.add.text(400, 40, 'Next Fire Spread: 20s', {
             fontFamily: '"Press Start 2P"',
             fontSize: '10px',
             color: '#FFFFFF',
@@ -1086,7 +1086,7 @@ export default class UIScene extends Phaser.Scene {
         if (!this.fireStepText) return;
 
         // Calculate seconds remaining
-        const secondsLeft = Math.ceil(15 * (1 - percent / 100));
+        const secondsLeft = Math.ceil(20 * (1 - percent / 100));
         
         // Update color based on urgency
         let textColor = '#FFFFFF';
