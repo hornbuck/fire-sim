@@ -1,4 +1,4 @@
-// setupTests.js
+console.log('setupTests.js is running');
 
 import { vi } from 'vitest';
 

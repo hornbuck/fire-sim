@@ -1,3 +1,4 @@
+import '../../mocks/setupTests.js';
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock scene and sessionStorage

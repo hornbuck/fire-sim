@@ -1,3 +1,4 @@
+import '../../mocks/setupTests.js'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import TutorialScene from '../../../../src/scenes/TutorialScene.js';
 

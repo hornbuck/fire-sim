@@ -1,3 +1,4 @@
+import '../../mocks/setupTests.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mocks for Firestore
@@ -28,7 +29,7 @@ const mockGetDocs = vi.fn(() => Promise.resolve({
     let UIScene
 
     beforeEach(async () => {
-        const module = await import('../../../scenes/UIScene.js')
+        const module = await import('../../../../src/scenes/UIScene.js');
         UIScene = module.default
     })
 
