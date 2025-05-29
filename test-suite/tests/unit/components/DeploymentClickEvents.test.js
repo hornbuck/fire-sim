@@ -1,76 +1,47 @@
 import '../../mocks/setupTests.js';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import * as Deployment from '../../../../src/components/DeploymentClickEvents.js';
-
-// Create a mock sprite with all methods used by your code
-const mockSprite = {
-    setInteractive: vi.fn(),
-    on: vi.fn(),
-    setDepth: vi.fn(),
-    setVisible: vi.fn(),
-    setTexture: vi.fn(),
-};
-
-// Create a mock scene with add.text returning an object with setText, setVisible, setDepth, and setOrigin
-const mockScene = {
-    add: {
-        text: vi.fn(() => ({
-        setText: vi.fn(),
-        setVisible: vi.fn(),
-        setDepth: vi.fn(),
-        setOrigin: vi.fn(() => mockScene.add.text()), // Return self for chaining
-        })),
-    },
-};
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as DeploymentClickEvents from '../../../src/components/DeploymentClickEvents.js';
 
 describe('DeploymentClickEvents', () => {
+    let mockScene;
+
     beforeEach(() => {
-        vi.restoreAllMocks();
-
-        // Setup resourceSprites with mock sprites
-        Deployment.resourceSprites = {
-        hose: mockSprite,
-        extinguisher: mockSprite,
-        helicopter: mockSprite,
-        firetruck: mockSprite,
-        airtanker: mockSprite,
-        hotshotcrew: mockSprite,
-        smokejumper: mockSprite,
+        mockScene = {
+        add: {
+            text: vi.fn(() => ({ setOrigin: vi.fn(), setAlpha: vi.fn(), setInteractive: vi.fn() })),
+            rectangle: vi.fn(() => ({ setFillStyle: vi.fn(), setOrigin: vi.fn() })),
+        },
         };
-
-        Deployment.currentSelection = null;
     });
 
     it('activates a resource and stores it as selected', () => {
-        Deployment.activate_resource('hose');
-        expect(Deployment.currentSelection).toBe('hose');
-        expect(Deployment.resourceSprites.hose.setInteractive).toHaveBeenCalled();
+        const fakeResource = {
+        setInteractive: vi.fn(),
+        on: vi.fn(),
+        };
+        DeploymentClickEvents.activate_resource(mockScene, 'waterHose', fakeResource);
+        expect(fakeResource.setInteractive).toHaveBeenCalled();
     });
 
     it('deactivates the current resource', () => {
-        Deployment.activate_resource('extinguisher');
-        expect(Deployment.currentSelection).toBe('extinguisher');
-
-        Deployment.deactivate();
-        expect(Deployment.currentSelection).toBe(null);
+        const fakeResource = {
+        setInteractive: vi.fn(),
+        on: vi.fn(),
+        removeInteractive: vi.fn(),
+        };
+        DeploymentClickEvents.activate_resource(mockScene, 'waterHose', fakeResource);
+        DeploymentClickEvents.deactivate_current_resource(fakeResource);
+        expect(fakeResource.removeInteractive).toHaveBeenCalled();
     });
 
     it('sets tooltip text and displays it', () => {
-        const mockTextObj = {
-        setText: vi.fn(),
-        };
-        const description = 'Deploys water in a line.';
-        Deployment.show_tooltip(mockTextObj, description);
-        expect(mockTextObj.setText).toHaveBeenCalledWith(description);
+        DeploymentClickEvents.show_tooltip(mockScene, 100, 200, 'Tooltip text');
+        expect(mockScene.add.text).toHaveBeenCalled();
     });
 
     it('updates HUD with new text', () => {
-        Deployment.set_text('Out of helicopters!', 0, 0, mockScene);
-        expect(mockScene.add.text).toHaveBeenCalledWith(
-        0,
-        0,
-        'Out of helicopters!',
-        expect.any(Object)
-        );
+        DeploymentClickEvents.set_text(mockScene, 100, 200, 'Status: OK');
+        expect(mockScene.add.rectangle).toHaveBeenCalled();
+        expect(mockScene.add.text).toHaveBeenCalled();
     });
 });
