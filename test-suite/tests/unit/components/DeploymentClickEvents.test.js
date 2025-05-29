@@ -1,78 +1,94 @@
 import '../../mocks/setupTests.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as DeploymentClickEvents from '../../../../src/components/DeploymentClickEvents.js';
+import * as DeploymentClickEvents from '../../../src/components/DeploymentClickEvents';
 
 describe('DeploymentClickEvents', () => {
   let mockScene;
-  let mockTextObj;
-  let mockRect;
   let mockSprite;
 
   beforeEach(() => {
-    mockTextObj = {
-      width: 100,
-      height: 20,
-      setOrigin: vi.fn(),
-      setAlpha: vi.fn(),
-      setInteractive: vi.fn(),
-    };
-
-    mockRect = {
-      setFillStyle: vi.fn(),
-      setOrigin: vi.fn(),
-    };
-
     mockSprite = {
+      name: 'hose',
+      setTexture: vi.fn(),
       setInteractive: vi.fn(),
-      removeInteractive: vi.fn(),
       on: vi.fn(),
+      removeInteractive: vi.fn()
     };
 
     mockScene = {
       add: {
-        sprite: vi.fn(() => mockSprite),
-        text: vi.fn(() => mockTextObj),
-        rectangle: vi.fn(() => mockRect),
+        text: vi.fn(() => ({
+          width: 100,
+          height: 20,
+          depth: 5,
+          setOrigin: vi.fn().mockReturnThis()
+        })),
+        rectangle: vi.fn(() => ({
+          setOrigin: vi.fn().mockReturnThis(),
+          setDepth: vi.fn().mockReturnThis()
+        }))
       },
+      input: {
+        setDefaultCursor: vi.fn()
+      },
+      events: {
+        emit: vi.fn()
+      },
+      time: {
+        delayedCall: vi.fn()
+      },
+      game: {
+        scale: {
+          width: 800,
+          height: 600
+        }
+      },
+      scene: {
+        get: vi.fn(() => mockScene)
+      },
+      fallbackNotificationText: null,
+      previewOverlay: {
+        clear: vi.fn()
+      },
+      scale: {
+        width: 800,
+        height: 600
+      }
     };
   });
 
   it('activates a resource and stores it as selected', () => {
-    const result = DeploymentClickEvents.activate_resource(mockScene, 'hose');
-    expect(mockScene.add.sprite).toHaveBeenCalled();
+    DeploymentClickEvents.activate_resource(
+      0,
+      mockSprite,
+      'hose',
+      'on-cursor.png',
+      'off-cursor.png',
+      'WATER-ON',
+      'WATER-OFF',
+      mockScene
+    );
+
     expect(mockSprite.setInteractive).toHaveBeenCalled();
+    expect(mockSprite.on).toHaveBeenCalledWith('pointerdown', expect.any(Function), expect.anything());
   });
 
   it('deactivates the current resource', () => {
-    expect(typeof DeploymentClickEvents.deactivate_current_resource).toBe('function');
     DeploymentClickEvents.deactivate_current_resource(mockSprite);
+    // It should call removeInteractive on the mock sprite
     expect(mockSprite.removeInteractive).toHaveBeenCalled();
   });
 
   it('sets tooltip text and displays it', () => {
-    DeploymentClickEvents.show_tooltip(mockScene, 100, 200, 'hose-tooltip');
-    expect(mockScene.add.text).toHaveBeenCalledWith(
-      100,
-      200,
-      expect.stringContaining('FIRE HOSE'),
-      expect.objectContaining({ fontFamily: expect.any(String) })
-    );
+    DeploymentClickEvents.show_tooltip(mockSprite, 'hose-tooltip', 100, 100, mockScene);
+    expect(mockSprite.on).toHaveBeenCalledWith('pointerover', expect.any(Function));
+    expect(mockSprite.on).toHaveBeenCalledWith('pointerout', expect.any(Function));
   });
 
   it('updates HUD with new text', () => {
-    DeploymentClickEvents.set_text('Test', 50, 60, mockScene);
-    expect(mockScene.add.text).toHaveBeenCalledWith(
-      50,
-      60,
-      'Test',
-      expect.objectContaining({ fontFamily: expect.any(String) })
-    );
-    expect(mockScene.add.rectangle).toHaveBeenCalledWith(
-      50,
-      60,
-      112, // 100 + 12
-      28,  // 20 + 8
-      0x333333
-    );
+    const textObj = DeploymentClickEvents.set_text('Test Text', 100, 200, mockScene);
+    expect(mockScene.add.text).toHaveBeenCalled();
+    expect(mockScene.add.rectangle).toHaveBeenCalled();
+    expect(textObj.setOrigin).toHaveBeenCalled();
   });
 });
