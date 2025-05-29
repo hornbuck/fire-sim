@@ -1,4 +1,4 @@
-import FireSpread from '../../src/components/FireSpread.js'
+import FireSpread from '../../../components/FireSpread.js'
 
 describe('FireSpread', () => {
   let map, weather, spread

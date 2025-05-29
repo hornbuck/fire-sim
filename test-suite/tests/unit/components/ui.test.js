@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { set_text, show_tooltip } from '../../src/components/ui.js'
+import { set_text, show_tooltip } from '../../../components/ui.js'
 
 describe('ui.js utilities', () => {
     it('updates a text object with new content', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import * as Deployment from '../../src/components/DeploymentClickEvents.js'
+import * as Deployment from '../../../components/DeploymentClickEvents.js'
 
 // Mock shared state
 let selected = null

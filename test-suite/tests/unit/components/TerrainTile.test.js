@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { noise } from 'noisejs'
-import TerrainTile from '../../src/components/TerrainTile.js'
+import TerrainTile from '../../../components/TerrainTile.js'
 
 describe('TerrainTile logic', () => {
     it('returns valid terrain type for Perlin values', () => {

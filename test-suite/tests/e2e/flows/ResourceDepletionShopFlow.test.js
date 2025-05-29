@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as assetValues from '../../src/components/assetValues.js'
+import * as assetValues from '../../../components/assetValues.js'
 import { bank } from '../../src/components/ui.js'
 
 describe('ResourceDepletionShopFlow', () => {

@@ -1,6 +1,8 @@
+// test-suite/tests/integration/scenes/FirebaseSync.test.js
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock Firestore methods
+// Mocks for Firestore functions
 const mockSetDoc = vi.fn()
 const mockAddDoc = vi.fn()
 const mockGetDocs = vi.fn(() => Promise.resolve({
@@ -12,6 +14,7 @@ const mockGetDocs = vi.fn(() => Promise.resolve({
     const mockCollection = vi.fn(() => ({}))
     const mockDoc = vi.fn(() => ({}))
 
+    // Mock the Firestore module
     vi.mock('firebase/firestore', async () => {
     const mod = await vi.importActual('firebase/firestore')
     return {
@@ -22,11 +25,12 @@ const mockGetDocs = vi.fn(() => Promise.resolve({
         setDoc: mockSetDoc,
         doc: mockDoc
     }
-    })
+})
 
-    describe('FirebaseSync', () => {
+describe('FirebaseSync', () => {
     beforeEach(() => {
         mockSetDoc.mockClear()
+        mockAddDoc.mockClear()
         mockGetDocs.mockClear()
     })
 

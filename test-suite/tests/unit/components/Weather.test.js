@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import Weather from '../../src/components/Weather.js'
+import Weather from '../../../components/Weather.js'
 
 describe('Weather system', () => {
     let weather
