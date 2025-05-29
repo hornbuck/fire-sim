@@ -1,5 +1,8 @@
 // tests/SignupFlow.test.js
-vi.mock('firebase/auth', async () => await import('../mocks/firebase-auth.js'))
+vi.mock('firebase/auth', async () => {
+    return await import('../../mocks/firebase-auth.js');
+});
+
 import '../../mocks/setupTests.js';
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { auth } from '../../mocks/firebaseMock.js';
