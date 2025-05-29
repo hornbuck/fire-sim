@@ -1,5 +1,13 @@
+// test/mocks/firebase-auth.js
+export const signInWithEmailAndPassword = vi.fn(() =>
+  Promise.resolve({ user: { uid: 'abc123' } })
+)
 
-export const auth = {
-  createUserWithEmailAndPassword: jest.fn(() => Promise.resolve({ user: { updateProfile: jest.fn() } })),
-  signInWithEmailAndPassword: jest.fn(() => Promise.resolve({ user: {} })),
-};
+export const createUserWithEmailAndPassword = vi.fn(() =>
+  Promise.resolve({ user: { updateProfile: vi.fn() } })
+)
+
+export const updateProfile = vi.fn()
+
+// If needed: export mock auth object
+export const auth = {}
