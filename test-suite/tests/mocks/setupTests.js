@@ -104,3 +104,31 @@ global.Phaser = {
         },
     },
 };
+
+const mockRectangle = {
+    setOrigin: vi.fn().mockReturnThis(),
+    setInteractive: vi.fn().mockReturnThis(),
+    setScrollFactor: vi.fn().mockReturnThis(),
+    setDepth: vi.fn().mockReturnThis(),
+    on: vi.fn().mockReturnThis(),
+    };
+
+    if (!global.Phaser.Scene.prototype.add) {
+    global.Phaser.Scene.prototype.add = {};
+}
+
+global.Phaser.Scene.prototype.add.rectangle = vi.fn(() => mockRectangle);
+
+if (typeof global.document === 'undefined') {
+    global.document = {
+        createElement: vi.fn(() => ({
+        getContext: vi.fn(),
+        style: {},
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        })),
+        body: {
+        appendChild: vi.fn(),
+        },
+    };
+}
