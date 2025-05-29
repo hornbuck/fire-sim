@@ -6,10 +6,11 @@ describe('DeploymentClickEvents', () => {
   let mockScene;
   let mockTextObj;
   let mockRect;
+  let mockSprite;
 
   beforeEach(() => {
     mockTextObj = {
-      width: 100,
+      width: 120,
       height: 40,
       setOrigin: vi.fn(),
       setAlpha: vi.fn(),
@@ -21,35 +22,31 @@ describe('DeploymentClickEvents', () => {
       setOrigin: vi.fn(),
     };
 
+    mockSprite = {
+      setInteractive: vi.fn(),
+      removeInteractive: vi.fn(),
+      on: vi.fn(),
+    };
+
     mockScene = {
       add: {
         text: vi.fn(() => mockTextObj),
         rectangle: vi.fn(() => mockRect),
-        sprite: vi.fn(() => mockTextObj),
+        sprite: vi.fn(() => mockSprite),
       },
     };
   });
 
   it('activates a resource and stores it as selected', () => {
-    const fakeResource = {
-      setInteractive: vi.fn(),
-      on: vi.fn(),
-    };
-
-    DeploymentClickEvents.activate_resource(mockScene, 'waterHose', fakeResource);
-    expect(fakeResource.setInteractive).toHaveBeenCalled();
+    DeploymentClickEvents.activate_resource(mockScene, 'waterHose');
+    expect(mockScene.add.sprite).toHaveBeenCalled();
+    expect(mockSprite.setInteractive).toHaveBeenCalled();
   });
 
   it('deactivates the current resource', () => {
-    const fakeResource = {
-      setInteractive: vi.fn(),
-      on: vi.fn(),
-      removeInteractive: vi.fn(),
-    };
-
-    DeploymentClickEvents.activate_resource(mockScene, 'waterHose', fakeResource);
-    DeploymentClickEvents.deactivate_current_resource(fakeResource);
-    expect(fakeResource.removeInteractive).toHaveBeenCalled();
+    DeploymentClickEvents.activate_resource(mockScene, 'waterHose');
+    DeploymentClickEvents.deactivate_current_resource(mockSprite);
+    expect(mockSprite.removeInteractive).toHaveBeenCalled();
   });
 
   it('sets tooltip text and displays it', () => {
