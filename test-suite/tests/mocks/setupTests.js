@@ -17,13 +17,12 @@ global.sessionStorage = {
 };
 
 // Mock window.location.reload
-global.window = Object.create(window);
-Object.defineProperty(window, 'location', {
-    value: {
-        reload: vi.fn(),
-    },
-    writable: true,
-});
+global.window = {
+    location: {
+        reload: vi.fn()
+    }
+};
+
 
 // Expanded Phaser mock
 global.Phaser = {
