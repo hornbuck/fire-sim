@@ -1,16 +1,47 @@
-
-import FireSpread from '../../src/components/FireSpread.js';
+import FireSpread from '../../src/components/FireSpread.js'
 
 describe('FireSpread', () => {
-  it('should simulate fire spread correctly', () => {
-    const dummyMap = {
-      grid: [[{ burnStatus: 'burning' }, { burnStatus: 'unburned', flammability: 1 }]],
-      height: 1,
-      width: 2
-    };
-    const dummyWeather = { updateOverTime: jest.fn() };
-    const spread = new FireSpread(dummyMap, dummyWeather);
-    const result = spread.simulateFireStep();
-    expect(typeof result).toBe('number');
-  });
-});
+  let map, weather, spread
+
+  beforeEach(() => {
+      map = {
+        width: 3,
+        height: 1,
+        grid: [
+          [
+            { burnStatus: 'burning', flammability: 1 },   // fire source
+            { burnStatus: 'unburned', flammability: 1 },  // should catch
+            { burnStatus: 'unburned', flammability: 0 }   // should not catch
+          ]
+        ]
+      }
+
+      weather = {
+        getSpreadModifier: () => 1,
+        updateOverTime: vi.fn()
+      }
+
+      spread = new FireSpread(map, weather)
+    })
+
+    it('returns number of new tiles set to burning', () => {
+      const count = spread.simulateFireStep()
+      expect(typeof count).toBe('number')
+      expect(count).toBeGreaterThanOrEqual(0)
+    })
+
+    it('sets adjacent flammable unburned tiles to burning', () => {
+      spread.simulateFireStep()
+      expect(map.grid[0][1].burnStatus).toBe('burning')
+    })
+
+    it('does not burn tiles with 0 flammability', () => {
+      spread.simulateFireStep()
+      expect(map.grid[0][2].burnStatus).toBe('unburned')
+    })
+
+    it('calls weather update function', () => {
+      spread.simulateFireStep()
+      expect(weather.updateOverTime).toHaveBeenCalled()
+    })
+})
