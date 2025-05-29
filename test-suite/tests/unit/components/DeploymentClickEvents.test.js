@@ -54,7 +54,7 @@ describe('DeploymentClickEvents', () => {
       100,
       200,
       expect.stringContaining('FIRE HOSE'),
-      expect.anything()
+      expect.objectContaining({ fontFamily: expect.any(String) })
     );
   });
 
@@ -69,8 +69,8 @@ describe('DeploymentClickEvents', () => {
     expect(mockScene.add.rectangle).toHaveBeenCalledWith(
       50,
       60,
-      112, // 100 width + 12 padding
-      28,  // 20 height + 8 padding
+      112, // 100 + 12
+      28,  // 20 + 8
       0x333333
     );
   });
