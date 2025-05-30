@@ -219,7 +219,14 @@ export default class UIScene extends Phaser.Scene {
         this.bottomBarContainer.add(bottomBarBg);
 
         this.createZoomControls();
-        this.createNavigationCompass();
+        
+        // Only create navigation compass for mobile users
+        if (this.sys.game.device.os.desktop){
+            console.log("desktop")
+        }
+        else {
+            this.createNavigationCompass();
+        }
 
         // HUD elements
         createHUD(this); 
@@ -229,8 +236,8 @@ export default class UIScene extends Phaser.Scene {
 
         // Position currency elements
         // Update the positions of coins, bank, and open_shop
-        coins.setPosition(this.scale.width - 450, 0).setDepth(10);
-        bank.setPosition(this.scale.width - 435, 0).setDepth(10);
+        coins.setPosition(window.innerWidth - 450, 0).setDepth(10);
+        bank.setPosition(window.innerWidth - 435, 0).setDepth(10);
         open_shop.setPosition(this.scale.width - 360, 0).setDepth(10);
 
         // Ensure proper depth for visibility
@@ -295,8 +302,12 @@ export default class UIScene extends Phaser.Scene {
         smokejumperText.x = this.scale.width - 50;
         smokejumperTextBg.x = this.scale.width - 50;
 
+        coins.x = this.scale.width - 170;
+        bank.x = this.scale.width - 155;
+        open_shop.x = this.scale.width - 260;
+
         this.pauseText.x = this.scale.width / 2;
-        //this.uiContainer.scaleX = this.scale.width; --> BUG: makes assets disappear
+        //this.uiContainer.scaleX = this.scale.width / 1.5; //--> BUG: moves wrong objects
 
         // Update resource counts
         if (this.hoseText) {
@@ -1048,12 +1059,12 @@ export default class UIScene extends Phaser.Scene {
 
  
     }
-    
+
     createNavigationCompass() {
-        const navX = 90; // Center position
-        const navY = 0;  // Within bottom bar
-        const buttonSize = 30;
-        const buttonSpacing = 35;
+        const navX = 120; // Center position
+        const navY = -250;  // Within bottom bar
+        const buttonSize = 70;
+        const buttonSpacing = 75;
         
         // Compass directions
         const directions = [

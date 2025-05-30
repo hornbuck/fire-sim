@@ -26,7 +26,7 @@ export default class IntroScene extends Phaser.Scene {
         const gameHeight = this.cameras.main.height;
 
         // Display logo and scale it to fit the screen
-        const logo = this.add.image(centerX, centerY, 'logo').setOrigin(0.5);
+        logo = this.add.image(centerX, centerY, 'logo').setOrigin(0.5);
         
         // Scale the image to fit the width, maintaining aspect ratio
         const scaleX = gameWidth / logo.width;
