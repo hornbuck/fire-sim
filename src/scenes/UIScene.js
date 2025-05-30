@@ -234,15 +234,6 @@ export default class UIScene extends Phaser.Scene {
         // HUD elements
         createHUD(this); 
 
-        // Add UI elements to bottom bar (higher depth)
-        this.bottomBarContainer.add([coins, bank]);
-
-        // Position currency elements
-        // Update the positions of coins, bank, and open_shop
-        coins.setPosition(window.innerWidth - 450, 0).setDepth(10);
-        bank.setPosition(window.innerWidth - 435, 0).setDepth(10);
-        open_shop.setPosition(this.scale.width - 360, 0).setDepth(10);
-
         // === Style coins + bank as a single rounded container ===
         const bankContainerBg = this.add.graphics();
         bankContainerBg.fillStyle(0x555555, 1);
@@ -261,11 +252,6 @@ export default class UIScene extends Phaser.Scene {
             bankContainerBg.fillRoundedRect(-60, -25, 120, 50, 8);
         });
 
-        // Create container for coins + bank text
-        this.bankDisplayContainer = this.add.container(coins.x, coins.y, [bankContainerBg, coins, bank])
-            .setScrollFactor(0);
-
-        this.bottomBarContainer.add(this.bankDisplayContainer);
 
         // === Style open_shop like a drawn button ===
         const shopButtonBg = this.add.graphics();
@@ -284,6 +270,22 @@ export default class UIScene extends Phaser.Scene {
             shopButtonBg.fillStyle(0x555555, 1);
             shopButtonBg.fillRoundedRect(-25, -25, 50, 50, 8);
         });
+
+        this.bankDisplayContainer = this.add.container(this.scale.width - 170, 0, [bankContainerBg, coins, bank])
+            .setScrollFactor(0);
+
+        this.bottomBarContainer.add(this.bankDisplayContainer);
+        
+        this.shopButtonContainer = this.add.container(this.scale.width - 260, 0, [shopButtonBg, open_shop])
+            .setScrollFactor(0);
+
+        this.bottomBarContainer.add(this.shopButtonContainer);
+
+        // Create container for coins + bank text
+        this.bankDisplayContainer = this.add.container(coins.x, coins.y, [bankContainerBg, coins, bank])
+            .setScrollFactor(0);
+
+        this.bottomBarContainer.add(this.bankDisplayContainer);
 
         // Create a container for open_shop button
         this.shopButtonContainer = this.add.container(open_shop.x, open_shop.y, [shopButtonBg, open_shop])
