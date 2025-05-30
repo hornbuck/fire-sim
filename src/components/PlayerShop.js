@@ -374,6 +374,7 @@ function getItemCounter(asset) {
         case 'firetruck': return { value: firetruck_counter, setValue: (v) => { firetruck_counter = v; } };
         case 'airtanker': return { value: airtanker_counter, setValue: (v) => { airtanker_counter = v; } };
         case 'hotshotcrew': return { value: hotshotcrew_counter, setValue: (v) => { hotshotcrew_counter = v; } };
+        case 'hotshot-crew': return { value: hotshotcrew_counter, setValue: (v) => { hotshotcrew_counter = v; } };
         case 'smokejumper': return { value: smokejumper_counter, setValue: (v) => { smokejumper_counter = v; } };
         default: return { value: 0, setValue: () => {} };
     }
@@ -388,6 +389,7 @@ function updatePlayerInventory(asset, value) {
         case 'firetruck': setFiretruck(value); break;
         case 'airtanker': setAirtanker(value); break;
         case 'hotshotcrew': setHotshotCrew(value); break;
+        case 'hotshot-crew': setHotshotCrew(value); break;
         case 'smokejumper': setSmokejumpers(value); break;
     }
 }
