@@ -879,7 +879,7 @@ export default class UIScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setScrollFactor(0);
 
-  
+
         this.weatherPanel.add([weatherBg, this.riskText, this.windText, this.windGaugeBg, this.windGaugeFill, this.windArrow, this.windLabel]);
         this.topBarContainer.add(this.weatherPanel);
 
@@ -1083,19 +1083,6 @@ export default class UIScene extends Phaser.Scene {
 
     // Now add both to the container
     this.uiToggleButtonContainer.add([toggleBg, this.uiToggleButton]);
-    
-    this.zoomText = this.add.text(
-        baseX - 30,
-        40,
-        'Zoom: 100%',
-        {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '12px',
-            fontStyle: 'normal',
-            color: '#FFFFFF'
-        })
-        .setOrigin(0, 0.5)
-        .setScrollFactor(0);
 
     // Create an info (i) button with rounded background
     const infoBg = this.add.graphics();
