@@ -254,8 +254,8 @@ export function preloadHUD(scene) {
     console.log("preloadHUD called");
 
     // Load Player Assets
-    scene.load.image('coins', 'assets/coins.png');
-    scene.load.image('open-shop', 'assets/UI/open-shop.png');
+    scene.load.image('coins', 'assets/UI/piggy-bank-solid.png');
+    scene.load.image('open-shop', 'assets/UI/basket-shopping-solid.png');
     scene.load.image('shop', 'assets/UI/shop.png');
     scene.load.image('add-to-cart', 'assets/UI/add-to-cart.png');
     scene.load.image('remove-from-cart', 'assets/UI/remove-from-cart.png');
