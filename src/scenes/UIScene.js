@@ -79,8 +79,11 @@ export default class UIScene extends Phaser.Scene {
         this.load.image('left', 'assets/UI/left.png')
         this.load.image('weather_panel', 'assets/UI/weather_panel.png')
         this.load.image('Title', 'assets/UI/Title.png')
-        this.load.image('toggle_ui_off', 'assets/UI/toggle_ui_off.png')
-        this.load.image('toggle_ui_on', 'assets/UI/toggle_ui_on.png')
+        this.load.image('toggle_ui_off', 'assets/UI/eye-slash-solid.png')
+        this.load.image('toggle_ui_on', 'assets/UI/eye-solid.png')
+        this.load.image('icon_shop', 'assets/UI/icon_shop.png');
+        this.load.image('icon_bank', 'assets/UI/icon_bank.png');
+        this.load.image('icon_field_guide', 'assets/UI/icon_field_guide.png');
     }
 
     generateFuelText(current, max) {
@@ -232,7 +235,34 @@ export default class UIScene extends Phaser.Scene {
         createHUD(this); 
 
         // Add UI elements to bottom bar (higher depth)
-        this.bottomBarContainer.add([coins, bank, open_shop]);
+        // SHOP button
+        const shopButton = this.add.image(700, this.scale.height - 30, 'icon_shop')
+            .setDisplaySize(40, 40)
+            .setInteractive()
+            .on('pointerover', () => shopButton.setTint(0xBBBBBB))
+            .on('pointerout', () => shopButton.clearTint())
+            .on('pointerdown', () => {
+                open_shop.emit('pointerdown');
+            });
+
+        // BANK icon (display only)
+        const bankIcon = this.add.image(620, this.scale.height - 30, 'icon_bank')
+            .setDisplaySize(40, 40);
+
+        // FIELD GUIDE button
+        const fieldGuideButton = this.add.image(100, this.scale.height - 30, 'icon_field_guide')
+            .setDisplaySize(40, 40)
+            .setInteractive()
+            .on('pointerover', () => fieldGuideButton.setTint(0xBBBBBB))
+            .on('pointerout', () => fieldGuideButton.clearTint())
+            .on('pointerdown', () => {
+                console.log('Field Guide clicked');
+                // Later: open your Field Guide scene or panel here!
+            });
+
+        // Add to bottom bar
+        this.bottomBarContainer.add([bankIcon, shopButton, fieldGuideButton]);
+
 
         // Position currency elements
         // Update the positions of coins, bank, and open_shop
