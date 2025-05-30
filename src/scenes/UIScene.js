@@ -235,13 +235,36 @@ export default class UIScene extends Phaser.Scene {
         createHUD(this); 
 
         // Add UI elements to bottom bar (higher depth)
-        this.bottomBarContainer.add([coins, bank, open_shop]);
+        this.bottomBarContainer.add([coins, bank]);
 
         // Position currency elements
         // Update the positions of coins, bank, and open_shop
         coins.setPosition(window.innerWidth - 450, 0).setDepth(10);
         bank.setPosition(window.innerWidth - 435, 0).setDepth(10);
         open_shop.setPosition(this.scale.width - 360, 0).setDepth(10);
+
+        // === Style open_shop like a drawn button ===
+        const shopButtonBg = this.add.graphics();
+        shopButtonBg.fillStyle(0x555555, 1);
+        shopButtonBg.fillRoundedRect(-25, -25, 50, 50, 8);
+        shopButtonBg.setInteractive(new Phaser.Geom.Rectangle(-25, -25, 50, 50), Phaser.Geom.Rectangle.Contains);
+
+        // Add hover effect
+        shopButtonBg.on('pointerover', () => {
+            shopButtonBg.clear();
+            shopButtonBg.fillStyle(0x777777, 1);
+            shopButtonBg.fillRoundedRect(-25, -25, 50, 50, 8);
+        });
+        shopButtonBg.on('pointerout', () => {
+            shopButtonBg.clear();
+            shopButtonBg.fillStyle(0x555555, 1);
+            shopButtonBg.fillRoundedRect(-25, -25, 50, 50, 8);
+        });
+
+        // Create a container for open_shop button
+        this.shopButtonContainer = this.add.container(open_shop.x, open_shop.y, [shopButtonBg, open_shop])
+            .setScrollFactor(0);
+        this.bottomBarContainer.add(this.shopButtonContainer);
 
         // Ensure proper depth for visibility
         coins.setDepth(1);
