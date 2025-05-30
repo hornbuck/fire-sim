@@ -250,12 +250,6 @@ class FireSpread {
       return 0;
     }
 
-    // **Special‑case grass**: always catch
-    if (neighborTile.terrain === 'grass') {
-      neighborTile.burnStatus = 'burning';
-      return 1;
-    }
-
     // 1) base + weather
     let ignitionChance = this.calculateIgnitionChance(neighborTile);
 

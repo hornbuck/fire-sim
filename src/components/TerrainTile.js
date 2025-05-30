@@ -1,8 +1,8 @@
 export default class TerrainTile {
     // Static constants for terrain attributes
-    static FLAM_GRASS = 0.8;
+    static FLAM_GRASS = 0.65;
     static FUEL_GRASS = 2;
-    static FLAM_SHRUB = 2.5;
+    static FLAM_SHRUB = 0.85;
     static FUEL_SHRUB = 4;
     static FLAM_TREE = 0.3;
     static FUEL_TREE = 6;
