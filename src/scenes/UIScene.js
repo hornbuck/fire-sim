@@ -275,21 +275,11 @@ export default class UIScene extends Phaser.Scene {
             .setScrollFactor(0);
 
         this.bottomBarContainer.add(this.bankDisplayContainer);
-        
+
+        // Create a container for open_shop button
         this.shopButtonContainer = this.add.container(this.scale.width - 260, 0, [shopButtonBg, open_shop])
             .setScrollFactor(0);
 
-        this.bottomBarContainer.add(this.shopButtonContainer);
-
-        // Create container for coins + bank text
-        this.bankDisplayContainer = this.add.container(coins.x, coins.y, [bankContainerBg, coins, bank])
-            .setScrollFactor(0);
-
-        this.bottomBarContainer.add(this.bankDisplayContainer);
-
-        // Create a container for open_shop button
-        this.shopButtonContainer = this.add.container(open_shop.x, open_shop.y, [shopButtonBg, open_shop])
-            .setScrollFactor(0);
         this.bottomBarContainer.add(this.shopButtonContainer);
 
         // Ensure proper depth for visibility
@@ -354,9 +344,16 @@ export default class UIScene extends Phaser.Scene {
         smokejumperText.x = this.scale.width - 50;
         smokejumperTextBg.x = this.scale.width - 50;
 
-        coins.x = this.scale.width - 170;
-        bank.x = this.scale.width - 155;
-        open_shop.x = this.scale.width - 260;
+        // Keep the bank and shop icons in the center
+        const bankOffsetFromCenter = 20;
+        const shopOffsetFromCenter = -75;
+
+        // Center of the screen:
+        const centerX = this.scale.width / 2;
+
+        // Place them relative to center:
+        this.bankDisplayContainer.x = centerX + bankOffsetFromCenter;
+        this.shopButtonContainer.x = centerX + shopOffsetFromCenter;
 
         this.pauseText.x = this.scale.width / 2;
         //this.uiContainer.scaleX = this.scale.width / 1.5; //--> BUG: moves wrong objects
