@@ -18,6 +18,8 @@ export default class TutorialScene extends Phaser.Scene {
 
         this.load.image('dialog', 'assets/tutorial/dialog.png');
         this.load.image('firefighter', 'assets/tutorial/firefighter.png');
+
+        this.load.text('text', 'assets/myTextFile.txt');
     }
 
     create() {
@@ -91,7 +93,7 @@ export default class TutorialScene extends Phaser.Scene {
         .setY(centerY + 50);
   
         // Load dialog text for display
-        fetch('../src/utils/tutorialDialog.txt')
+        fetch('tutorialDialog.txt')
         .then(response => response.text())
         .then(text => {
 
