@@ -270,6 +270,11 @@ export default class UIScene extends Phaser.Scene {
             shopButtonBg.fillStyle(0x555555, 1);
             shopButtonBg.fillRoundedRect(-25, -25, 50, 50, 8);
         });
+        shopButtonBg.on('pointerdown', () => {
+            console.log("Shop clicked");
+            this.events.emit('shopOpened');
+        });
+
 
         this.bankDisplayContainer = this.add.container(this.scale.width - 170, 0, [bankContainerBg, coins, bank])
             .setScrollFactor(0);
@@ -351,9 +356,13 @@ export default class UIScene extends Phaser.Scene {
         // Center of the screen:
         const centerX = this.scale.width / 2;
 
-        // Place them relative to center:
         this.bankDisplayContainer.x = centerX + bankOffsetFromCenter;
+        this.bankDisplayContainer.y = 0;
+
         this.shopButtonContainer.x = centerX + shopOffsetFromCenter;
+        this.shopButtonContainer.y = 0;
+
+
 
         this.pauseText.x = this.scale.width / 2;
         //this.uiContainer.scaleX = this.scale.width / 1.5; //--> BUG: moves wrong objects
