@@ -11,6 +11,7 @@ class FireSpread {
     constructor(map, weather) {
         this.map = map;       // The map object
         this.weather = weather; // Weather object
+        this.burningTiles = [];
     }
 
     /**
@@ -23,6 +24,7 @@ class FireSpread {
      * @returns {void} This method does not return any value. It updates the grid by spreading fire to adjacent tiles.
      */
     simulateFireStep() {
+        // gather all currently burning tiles
         const burningTiles = [];
         for (let y = 0; y < this.map.height; y++) {
             for (let x = 0; x < this.map.width; x++) {
@@ -32,6 +34,9 @@ class FireSpread {
                 }
             }
         }
+
+        // make it accesible 
+        this.burningTiles = burningTiles;
 
         // no active files -> return 0
         if (burningTiles.length === 0) {

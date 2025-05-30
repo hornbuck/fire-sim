@@ -832,6 +832,15 @@ updateDeploymentPreview(pointer) {
                     tile.fireS.extinguishFire();
                     tile.fireS = null;
                 }
+
+                const stillBurning = this.fireSpread.burningTiles.length > 0;
+
+                if (!stillBurning) {
+                    this.isFireSimRunning = false;
+                    this.events.emit('gameWon');
+                    this.events.emit('fireSimToggled', false);
+                    this.sendScoreToDB();
+                }
             }
         }
     }

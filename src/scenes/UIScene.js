@@ -101,6 +101,21 @@ export default class UIScene extends Phaser.Scene {
         // Create UI elements
         this.createUIElements(); // (this still sets up logo, buttons, etc.)
 
+        // --- Win Text (Initially Hidden) ---
+        this.winText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 60, "YOU WIN!", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '24px',
+            fill: '#00FF00',
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            padding: { x: 20, y: 10 },
+            align: "center"
+        })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1000)
+        .setVisible(false);
+        this.uiContainer.add(this.winText);
+
         // Pop-up notifies user that game is paused
         this.pauseText = this.add.text(
             this.scale.width / 2,
@@ -116,7 +131,7 @@ export default class UIScene extends Phaser.Scene {
             }
         ).setOrigin(0.5)
         .setScrollFactor(0)
-        .setDepth(1000)
+        .setDepth(999)
         .setVisible(false);
         this.uiContainer.add(this.pauseText);
 
@@ -440,21 +455,6 @@ export default class UIScene extends Phaser.Scene {
             padding: { x: 8, y: 4 }
         }).setScrollFactor(0);
         this.topBarContainer.add(this.scoreText);
-
-        // --- Win Text (Initially Hidden) ---
-        this.winText = this.add.text(this.scale.width / 2, this.scale.height / 2, "YOU WIN!", {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '24px',
-            fill: '#00FF00',
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            padding: { x: 20, y: 10 },
-            align: "center"
-        })
-        .setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1000)
-        .setVisible(false);
-        this.uiContainer.add(this.winText);
 
         // --- Direction-choice prompt (hidden by default) ---
         this.directionPromptContainer = this.add.container(
