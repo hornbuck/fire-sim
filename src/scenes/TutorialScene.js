@@ -91,7 +91,7 @@ export default class TutorialScene extends Phaser.Scene {
         .setY(centerY + 50);
   
         // Load dialog text for display
-        fetch('src/utils/tutorialDialog.txt')
+        fetch('../src/utils/tutorialDialog.txt')
         .then(response => response.text())
         .then(text => {
 
