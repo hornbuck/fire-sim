@@ -287,6 +287,15 @@ export default class UIScene extends Phaser.Scene {
 
         this.bottomBarContainer.add(this.shopButtonContainer);
 
+        // === Bank Container ===
+        coins.setPosition(-35, 0).setScale(0.5);
+        bank.setPosition(30, 0);
+
+        // === Shop Container ===
+        open_shop.setPosition(0, 0).setDisplaySize(32, 32);
+
+
+
         // Ensure proper depth for visibility
         coins.setDepth(1);
         bank.setDepth(1);
