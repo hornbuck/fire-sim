@@ -243,6 +243,30 @@ export default class UIScene extends Phaser.Scene {
         bank.setPosition(window.innerWidth - 435, 0).setDepth(10);
         open_shop.setPosition(this.scale.width - 360, 0).setDepth(10);
 
+        // === Style coins + bank as a single rounded container ===
+        const bankContainerBg = this.add.graphics();
+        bankContainerBg.fillStyle(0x555555, 1);
+        bankContainerBg.fillRoundedRect(-60, -25, 120, 50, 8);  // Wider to fit both
+        bankContainerBg.setInteractive(new Phaser.Geom.Rectangle(-60, -25, 120, 50), Phaser.Geom.Rectangle.Contains);
+
+        // Optional: hover effect
+        bankContainerBg.on('pointerover', () => {
+            bankContainerBg.clear();
+            bankContainerBg.fillStyle(0x777777, 1);
+            bankContainerBg.fillRoundedRect(-60, -25, 120, 50, 8);
+        });
+        bankContainerBg.on('pointerout', () => {
+            bankContainerBg.clear();
+            bankContainerBg.fillStyle(0x555555, 1);
+            bankContainerBg.fillRoundedRect(-60, -25, 120, 50, 8);
+        });
+
+        // Create container for coins + bank text
+        this.bankDisplayContainer = this.add.container(coins.x, coins.y, [bankContainerBg, coins, bank])
+            .setScrollFactor(0);
+
+        this.bottomBarContainer.add(this.bankDisplayContainer);
+
         // === Style open_shop like a drawn button ===
         const shopButtonBg = this.add.graphics();
         shopButtonBg.fillStyle(0x555555, 1);
