@@ -602,6 +602,8 @@ if (activated_resource === "hotshot-crew"   ||
     }
     
     updateFireSpread() {
+        
+        this.fireSpread.simulateFireStep();
 
         // if still fires, just make sure any newly burning tiles get their flame sprite:
         this.map.grid.forEach(row =>
