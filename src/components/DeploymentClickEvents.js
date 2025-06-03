@@ -282,25 +282,76 @@ export function show_tooltip(resource, resourceName, x, y, scene) {
 
 // Helper function to get tooltip content based on resource name
 function getTooltipContent(resourceName) {
-    switch(resourceName.replace('-tooltip', '')) {
+    switch (resourceName.replace('-tooltip', '')) {
         case 'hose':
-            return "FIRE HOSE\n\nBasic firefighting tool.\nReduces fuel by 3.\nSingle tile coverage.";
+            return [
+                "FIRE HOSE",
+                "",
+                "🔥 Power: Reduces fuel by 3",
+                "",                  
+                "Single tile coverage."
+            ].join("\n");
+
         case 'extinguisher':
-            return "FIRE EXTINGUISHER\n\nQuick deployment.\nReduces fuel by 2.\nSingle tile coverage.";
+            return [
+                "FIRE EXTINGUISHER",
+                "",
+                "🔥 Power: Reduces fuel by 2",
+                "",                  
+                "Single tile coverage."
+            ].join("\n");
+
         case 'helicopter':
-            return "HELICOPTER\n\nAerial water drops.\nFully extinguishes.\nAffects 5 tiles in cross pattern.";
+            return [
+                "HELICOPTER",
+                "",
+                "🔥 Power: Fully extinguishes",
+                "",                  
+                "Affects 5 tiles in cross pattern."
+            ].join("\n");
+
         case 'firetruck':
-            return "FIRE TRUCK\n\nStrong water pressure.\nReduces fuel by 4.\nSingle tile coverage.";
+            return [
+                "FIRE TRUCK",
+                "",
+                "🔥 Power: Reduces fuel by 4",
+                "",                  
+                "Single tile coverage."
+            ].join("\n");
+
         case 'airtanker':
-            return "AIR TANKER\n\nLarge retardant drop.\nFully extinguishes.\nAffects 5 tiles in a line.";
+            return [
+                "AIR TANKER",
+                "",
+                "🔥 Power: Fully extinguishes",
+                "",                  
+                "Affects 5 tiles in a line."
+            ].join("\n");
+
         case 'hotshot-crew':
-            return "HOTSHOT CREW\n\nCreates firebreaks.\nWorks on UNBURNED tiles only.\nProtects line of 5 tiles.";
+            return [
+                "HOTSHOT CREW",
+                "",
+                "🔨 Power: Creates firebreaks",
+                "",                  
+                "Works on UNBURNED tiles only.",
+                "Protects a line of 5 tiles."
+            ].join("\n");
+
         case 'smokejumper':
-            return "SMOKEJUMPERS\n\nParachute into remote areas.\nImmediately extinguishes.\nSingle tile coverage.";
+            return [
+                "SMOKEJUMPERS",
+                "",
+                "🔥 Power: Immediately extinguishes",
+                "",         
+                "Single tile coverage."
+            ].join("\n");
+
         default:
             return "Resource information unavailable";
     }
 }
+
 
 // Notification to player that they are out of specified asset
 export function show_notification (scene, target, message = null) {
