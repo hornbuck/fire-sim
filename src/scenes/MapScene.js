@@ -6,6 +6,7 @@ import { bank } from "../components/ui.js";
 import { setCoins, getCoins, initDirectionHandler, activated_resource, use_resource, mode } from "../components/DeploymentClickEvents.js";
 import { auth, db } from '../firebaseConfig.js';
 import { collection, collectionGroup, doc, getDocs,getDoc, limit, orderBy, query, setDoc } from 'firebase/firestore';
+import { resetAssetValues } from "../components/assetValues.js"
 
 
 
@@ -335,6 +336,13 @@ export default class MapScene extends Phaser.Scene {
             pixelHeight: this.mapPixelHeight
         });
 
+        // Hide win text on restart if visible
+        const ui = this.scene.get('UIScene');
+        if (ui?.winText?.visible) {
+            ui.winText.setVisible(false);
+        }
+
+        resetAssetValues();
         
         // Set player coins in bank to 0
         if (this.scene.isActive('UIScene')) {  
@@ -594,17 +602,6 @@ if (activated_resource === "hotshot-crew"   ||
     }
     
     updateFireSpread() {
-        // returns how many tiles WERE burning
-        const activeFires = this.fireSpread.simulateFireStep();
-
-        if (activeFires === 0) {
-            console.log("You win!");
-            this.isFireSimRunning = false;
-            this.events.emit('gameWon');
-            this.events.emit('fireSimToggled', false);
-            this.sendScoreToDB();
-            return;
-        }
 
         // if still fires, just make sure any newly burning tiles get their flame sprite:
         this.map.grid.forEach(row =>
@@ -833,7 +830,9 @@ updateDeploymentPreview(pointer) {
                     tile.fireS = null;
                 }
 
-                const stillBurning = this.fireSpread.burningTiles.length > 0;
+                const stillBurning = this.map.grid.some(row =>
+                    row.some(t => t.burnStatus === 'burning')
+                );
 
                 if (!stillBurning) {
                     this.isFireSimRunning = false;

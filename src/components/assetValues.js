@@ -79,3 +79,16 @@ export function getSmokejumpers() {
 export function setSmokejumpers(value) {
     smokejumper += value;
 }
+
+/**
+ * Re‐initialize all asset‐count variables back to their original defaults.
+ */
+export function resetAssetValues() {
+  hose = 10;
+  extinguisher = 5;
+  helicopter = 3;
+  firetruck = 3;
+  airtanker = 2;
+  hotshotcrew = 2;
+  smokejumper = 5;
+}
