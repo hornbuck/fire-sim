@@ -4,6 +4,8 @@ import { hose, extinguisher, helicopter, firetruck, airtanker, hotshotcrew, smok
 export let firefighter = { x: null, y: null };
 export let dialog = { x: null, y: null };
 export let dialogText = { x: null, y: null };
+export let background = { x: null, y: null };
+export var buttonR = { x: null, y: null };
 let d_count = 0;
 
 export default class TutorialScene extends Phaser.Scene {
@@ -58,8 +60,8 @@ export default class TutorialScene extends Phaser.Scene {
         const gameHeight = this.cameras.main.height;
 
         // Add background
-        const background = this.add.rectangle(centerX, centerY, gameWidth, gameHeight, 0x2d3436).setAlpha(0.9);
-
+        background = this.add.rectangle(centerX, centerY, gameWidth, gameHeight, 0x2d3436).setAlpha(0.9).setScale(4);
+        
         // Add back button
         const backButton = createDrawnButton(this, {
             x: 0 + 35,
@@ -84,81 +86,49 @@ export default class TutorialScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setScale(4)
         .setX(this.cameras.main.width / 1.6)
-        .setY(this.cameras.main.height / 1.6);
+        .setY(this.cameras.main.height / 1.4);
 
         dialog = this.add.sprite(centerX, centerY, 'dialog')
         .setOrigin(0.5)
-        .setScale(5)
-        .setX(centerX)
-        .setY(centerY + 50);
+        .setScale(4)
+        .setX(centerX + 70)
+        .setY(centerY + 110);    
+        
+        dialog.setInteractive({ pixelPerfect: true });
   
         // Load dialog text for display
         fetch('tutorialDialog.txt')
         .then(response => response.text())
         .then(text => {
 
-            let marker = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, '0x9ff86f', 0)
-                    .setX(centerX)
-                    .setY(centerY)
-                    .setStrokeStyle(5, 0xffffff, 0)
-                    .setOrigin(0.5)
-                    .setAlpha(0.5);
-
             dialogText = this.add.text(centerX, centerY, text.split("\n")[0], {
                 fontFamily: '"Press Start 2P"',
-                fontSize: '20px',
+                fontSize: '14px',
                 color: '#000000',
                 wordWrap: { width: 300, useAdvancedWrap: true },
                 align: 'center'
                 
-            }).setOrigin(0.5).setX(centerX).setY(centerY + 50);
+            }).setOrigin(0.5).setX(centerX + 70).setY(centerY + 110);
 
             d_count = 1;
             let toggle = false;
-            marker.alwaysEnabled = false
             
             // Roll through all dialog to aid the player in how to play the game
-            this.input.on('pointerdown', (pointer) => {
-                if (marker.getBounds().contains(pointer.x, pointer.y)) {   // only the game area is clickable
-                    console.log(`D_COUNT: ${d_count}`);
-                    dialogText.setText(text.split("\n")[d_count]);
-                    if (toggle === false) d_count += 1;
+            dialog.on('pointerdown', function() {
+                dialogText.setText(text.split("\n")[d_count]);
+                if (toggle === false) d_count += 1;
 
-                    // Reset location of talking firefighter when the game begins
-                    if (d_count >= 17) {
+                // Reset location of talking firefighter when the game begins
+                if (d_count >= 20) {
 
-                        background.setAlpha(0);
-                        firefighter.x = centerX - 230;
-                        firefighter.y = centerY + 120;
-                        firefighter.flipX = true;
-                        firefighter.setScale(2);
-
-                        dialog.x = centerX - 180;
-                        dialog.y = centerY + 50;
-                        dialog.flipX = true;
-                        dialog.setScale(3);
-
-                        dialogText.setFontSize('14px');
-
-                        dialogText.setStyle({
-                            wordWrap: { width: 200, useAdvancedWrap: true }
-                        });
-            
-                        dialogText.x = centerX - 170;
-                        dialogText.y = centerY + 55;
+                    background.setAlpha(0);
                     
-                    }
+                }
 
-                    // Pause the game when the player runs out of an asset
-                    if (d_count < 27) {
-                        if (hose === 0 || extinguisher === 0 || helicopter === 0 || firetruck === 0 || airtanker === 0 || hotshotcrew === 0 || smokejumper === 0) {
-                            this.scene.pause('MapScene');
-                            dialog.setVisible(true);
-                            dialogText.setVisible(true);
-                            if (toggle === true) d_count += 1;
-                            toggle = false;
-                        }
-                    }
+                if (d_count > 62) {
+                    firefighter.setAlpha(0);
+                    dialog.setAlpha(0);
+                    dialogText.setAlpha(0);
                 }
             });
         })
@@ -166,9 +136,17 @@ export default class TutorialScene extends Phaser.Scene {
     
     // Dynamically updates positions of UI elements
     update() {
-        if (d_count < 17) {
-            firefighter.x = this.scale.width / 1.6;
-            firefighter.y = this.scale.height - 225;
+
+        background.x = this.cameras.main.width;
+        background.y = this.cameras.main.height;
+
+        // Return to the main menu to start a real game
+        if (d_count > 62) {
+            this.scene.stop('TutorialScene');
+            this.scene.stop('MapScene');
+            this.scene.stop('UIScene');
+            window.location.reload();
         }
+
     }
 }
