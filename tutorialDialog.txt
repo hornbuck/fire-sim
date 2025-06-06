@@ -27,7 +27,7 @@ For example, a tree has 6 points of fuel in total.
 This means that although the fire will burn slowly, the fire is hot.
 You will need to deploy strong assets in order to successfully combat the fire.
 Click the green Start button at the top left of the screen, then click here again.
-The vertical bar to the right is where you find your deployable assets.
+The vertical bar is where you deploy your assets.
 Each asset has a different strength.
 Let's try the fire extinguisher first.
 Select the fire extinguisher square, then deploy it by selecting a burning tile.
