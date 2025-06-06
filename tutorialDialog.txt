@@ -1,3 +1,4 @@
+Click my speech bubble!
 Welcome to the crew, Rookie! We need your help.
 I'm Joseph, the Fire Chief at this station.
 So, I bring bad news. There is a HUGE wildfire in Oregon.
@@ -8,38 +9,54 @@ and resulted in over $600 million in damages.
 Apparently, this new fire was caused last night by a lightning strike.
 It's burning hot today. 95 degrees, low humidity,
 no rain in sight, and unpredictable wind speeds.
-Based on the Incident Command System, it is a Type 1 fire.
-This is a very severe fire that will require a lot of resources,
-so we need the highest level of coordination and resources we can get.
+The terrain is flat and there is very low moisture content.
+Referencing the Incident Command System... 
+this is a Type 1 fire, so we need the highest level
+of coordination and resources we can get.
+This is a very severe fire that will require many resources to fight.
 There is another fire up north I have to manage though,
 so I'm putting you in charge of stopping this devastating wildfire. 
 But first, I need to show you how everything works!
+Let's get you used to your surroundings.
 Use the WASD keys or touchpad to move around the map.
-Let's find a tree to click on.
+Find a tree to click on. Then click here again.
 Check out the grey box in the top left corner!
 Each tile has a certain level of fuel. 
 This affects how quickly and intensely it burns.
 For example, a tree has 6 points of fuel in total. 
 This means that although the fire will burn slowly, the fire is hot.
 You will need to deploy strong assets in order to successfully combat the fire.
+Click the green Start button at the top left of the screen, then click here again.
+The vertical bar is where you deploy your assets.
 Each asset has a different strength.
-Let's try the firetruck first.
-The vertical bar on the right lists the available assets.
-Click the green Start button at the top of the screen.
-Select the firefighter square, then deploy it by selecting a burning tile.
-Fantastic! Click the firefighter square again to deactivate it.
-Let's talk fuel. This is what feeds the fire and keeps it burning.
-When the fuel runs out, the terrain becomes burnt.
+Let's try the fire extinguisher first.
+Select the fire extinguisher square, then deploy it by selecting a burning tile.
+If the fire didn't go out, this is because the fire extinguisher
+only eliminates two fuel points.
+Now, click the green Stop button at the top left of your screen to pause.
+If you're on a phone, hold down the asset button to learn what it does!
+If you're on a computer, just hover your mouse over it.
+Keep in mind that some tiles are more flammable than others.
 Flammability is how fast the terrain is likely to catch fire.
-Your job is to save as many houses and terrain tiles as possible.
-Let's deploy some more assets. This fire is growing fast.
-Try to deploy 3 helicopters.
-Oh! Looks like there is a cooldown. Use fire extinguishers while you wait.
-Alternate between different resources to fight as many flames as you can.
-Uh oh! You ran out! Click the shop icon in the bottom right corner.
-Here, you can purchase more assets! Click any of the green plus signs.
-This controls the number of assets you want to buy.
-Believe it or not, you actually earned some coins already!
-Every time you put out a fire, you earn coins.
-When you're ready, click Purchase.
-Let's go fight this fire!
+The yellow shrubs have the least moisture content, so...
+they burn faster than all the other tiles.
+Trees burn the slowest, but burn very hot and intensely.
+Oh! I almost forgot!
+Sometimes, you can deploy multiple assets at the same time.
+Due to staffing shortages, it's a little unpredictable how
+many assets you can deploy at once.
+A good rule of thumb is if you see a clock, then
+you must deploy a different asset.
+You'll want to alternate assets often because the fire spreads
+every 20 seconds.
+I think that's everything... oh WAIT!
+NOPE! I almost forgot! You earn coins every time
+you successfully extinguish a blaze.
+So when you run out of assets, you can order more!
+There is a shop icon at the bottom of your screen.
+And if you ever forget which asset is best... 
+there is a field guide at the bottom of your screen too.
+Don't forget to take advantage of that green Stop button
+if you need some time to explore and strategize.
+Especially with those hotshots. They're the BEST!
+Alright, let's go fight this fire and save some houses!
