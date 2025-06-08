@@ -28,6 +28,7 @@ const config = {
         mode: Phaser.Scale.EXPAND,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
+
     dom: {
         createContainer: true,
     },

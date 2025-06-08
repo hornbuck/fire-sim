@@ -1,3 +1,5 @@
+let contactButton;
+
 export default class MenuScene extends Phaser.Scene {
     constructor() {
         super({ key: 'MenuScene' });
@@ -105,6 +107,28 @@ export default class MenuScene extends Phaser.Scene {
             }
         );
 
+        // Contact button
+        contactButton = this.createButton(
+            centerX * 1.80, 
+            centerY * 1.85, 
+            170, 
+            50, 
+            'Contact', 
+            0x84c9eb,
+            () => {
+                const url = 'https://linktr.ee/wildfirecommand';
+                const s = window.open(url, "_blank");
+                if (s && s.focus)
+                {
+                    s.focus();
+                }
+                else if (!s)  // opens on mobile (window.open is not compatible with Safari on iOS)
+                {
+                    window.location.href = url;
+                }
+            }
+        );
+
         // Add subtle animations for visual interest
         this.tweens.add({
             targets: tutorialButton,
@@ -123,6 +147,15 @@ export default class MenuScene extends Phaser.Scene {
             repeat: -1,
             ease: 'Sine.easeInOut',
             delay: 200 // Offset animation from tutorial button
+        });
+
+        this.tweens.add({
+            targets: contactButton,
+            x: contactButton.x - 7,
+            duration: 1500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
         });
     }
 
@@ -150,7 +183,15 @@ export default class MenuScene extends Phaser.Scene {
         background.setInteractive({ useHandCursor: true })
             .on('pointerover', () => {
                 // Determine the correct hover color based on the original color
-                const hoverColor = color === 0x228B22 ? 0x2E8B57 : 0xA52A2A;
+                var hoverColor = color === 0x228B22 ? 0x2E8B57 : 0xA52A2A;
+
+                if (color === 0x228B22) { 
+                    hoverColor = 0x2E8B57;
+                } else if (color === 0x84c9eb) {
+                    hoverColor = 0xa3d0e6;
+                } else {
+                    hoverColor = 0xA52A2A;
+                }
                 
                 // Hover effect - use the appropriate hover color and scale up slightly
                 background.setFillStyle(hoverColor);
@@ -171,7 +212,7 @@ export default class MenuScene extends Phaser.Scene {
                     duration: 100
                 });
             })
-            .on('pointerdown', () => {
+            .on('pointerup', () => {
                 // Press effect
                 this.tweens.add({
                     targets: buttonContainer,
