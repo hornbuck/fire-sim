@@ -1,4 +1,4 @@
-# **Wildfire Command - Alpha v0.1.2**
+# **Wildfire Command - Alpha v1.0**
 
 ---
 
